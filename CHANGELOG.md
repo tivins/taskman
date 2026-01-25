@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.0] — 2025-01-25
+
+### Ajouté
+
+- Phase 2 — Base de données :
+  - Couche DB (`src/db.hpp`, `src/db.cpp`) : `Database::open`, `Database::exec`, `init_schema`
+  - Chemin base : `TASKMAN_DB_NAME` (env), défaut `project_tasks.db` ; open/create
+  - `taskman init` : exécute les 4 `CREATE TABLE IF NOT EXISTS` (phases, milestones, tasks, task_deps)
+  - Helpers : gestion erreurs SQLite → stderr + code de sortie 1
+
 ## [0.1.0] — 2025-01-25
 
 ### Ajouté

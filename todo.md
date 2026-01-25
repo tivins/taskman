@@ -13,9 +13,9 @@
 
 ## 2. Base de données
 
-- [ ] Couche DB : init connexion, chemin `TASKMAN_DB_NAME`, open/create
-- [ ] `taskman init` : exécuter les 4 `CREATE TABLE IF NOT EXISTS` (phases, milestones, tasks, task_deps)
-- [ ] Helpers : exécution requêtes, gestion erreurs SQLite → code sortie 1 + stderr
+- [x] Couche DB : init connexion, chemin `TASKMAN_DB_NAME`, open/create
+- [x] `taskman init` : exécuter les 4 `CREATE TABLE IF NOT EXISTS` (phases, milestones, tasks, task_deps)
+- [x] Helpers : exécution requêtes, gestion erreurs SQLite → code sortie 1 + stderr
 
 ## 3. Phases
 

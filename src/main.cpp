@@ -4,6 +4,7 @@
  * Dispatch argc/argv vers sous-commandes.
  */
 
+#include "db.hpp"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -28,8 +29,6 @@ void print_usage(const char* prog) {
 } // namespace
 
 int main(int argc, char* argv[]) {
-    [[maybe_unused]] const char* db_path = get_db_path(); // utilisé par la couche DB (phase 2)
-
     if (argc < 2) {
         print_usage(argv[0]);
         return 1;
@@ -38,8 +37,9 @@ int main(int argc, char* argv[]) {
     const char* cmd = argv[1];
     // Dispatch vers sous-commandes (implémentées en phases suivantes)
     if (std::strcmp(cmd, "init") == 0) {
-        // taskman init
-        std::cout << "init: not implemented yet\n";
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        if (!taskman::init_schema(db)) return 1;
         return 0;
     }
     if (std::strcmp(cmd, "phase:add") == 0) {

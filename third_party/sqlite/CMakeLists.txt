@@ -9,3 +9,5 @@ FetchContent_Declare(
 )
 set(BUILD_SHELL OFF CACHE BOOL "Skip sqlite3 shell" FORCE)
 FetchContent_MakeAvailable(sqlite_amalgamation)
+# Rendre le répertoire des en-têtes SQLite disponible au parent (SQLite3 n’expose pas toujours les includes)
+set(SQLITE_AMALGAMATION_SOURCE_DIR ${sqlite_amalgamation_SOURCE_DIR} PARENT_SCOPE)

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(taskman VERSION 0.1.0 LANGUAGES CXX C)
+project(taskman VERSION 0.2.0 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -43,10 +43,11 @@ add_subdirectory(third_party/sqlite)
 # -----------------------------------------------------------------------------
 # Exécutable taskman
 # -----------------------------------------------------------------------------
-add_executable(taskman src/main.cpp)
+add_executable(taskman src/main.cpp src/db.cpp)
 if(MSVC)
   target_compile_definitions(taskman PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
+target_include_directories(taskman PRIVATE ${SQLITE_AMALGAMATION_SOURCE_DIR})
 target_link_libraries(taskman PRIVATE
   nlohmann_json::nlohmann_json
   cxxopts::cxxopts
