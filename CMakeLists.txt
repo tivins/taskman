@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(taskman VERSION 0.8.0 LANGUAGES CXX C)
+project(taskman VERSION 0.9.0 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -69,6 +69,7 @@ target_link_libraries(taskman PRIVATE
 enable_testing()
 add_executable(tests
   tests/test_db.cpp
+  tests/test_integration.cpp
   tests/test_milestone.cpp
   tests/test_phase.cpp
   tests/test_task.cpp
@@ -92,4 +93,5 @@ target_link_libraries(tests PRIVATE
 if(MSVC)
   target_compile_definitions(tests PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
+add_dependencies(tests taskman)
 add_test(NAME UnitTests COMMAND tests)

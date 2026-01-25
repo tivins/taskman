@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.0] — 2025-01-25
+
+### Added
+
+- Phase 8 — Qualité et déploiement:
+  - **Tests d'intégration** (`tests/test_integration.cpp`) : appels `taskman` en subprocess, fixtures DB temporaires ; init puis phase:list (vide), init + phase:add + phase:list, init + phase:add + task:add + task:get, commande inconnue → exit 1 ; SKIP si exécutable introuvable ; `add_dependencies(tests taskman)` pour ordre de build
+  - **GitHub Actions** (`.github/workflows/build.yml`) : workflow build Release pour Windows (MSVC), Linux (GCC, Clang), macOS (Clang) ; artefacts binaires `taskman-linux-gcc`, `taskman-linux-clang`, `taskman-macos-clang`, `taskman-windows-msvc` ; déclenché sur push/PR vers main ou master
+
 ## [0.8.0] — 2025-01-25
 
 ### Added

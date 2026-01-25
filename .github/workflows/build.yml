@@ -1,0 +1,78 @@
+# Build Release et artefacts binaires — Windows (MSVC), Linux (GCC), macOS (Clang)
+name: Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            cc: gcc
+            artifact_path: build/taskman
+            artifact_name: taskman-linux-gcc
+          - os: ubuntu-latest
+            cc: clang
+            artifact_path: build/taskman
+            artifact_name: taskman-linux-clang
+          - os: macos-latest
+            cc: clang
+            artifact_path: build/taskman
+            artifact_name: taskman-macos-clang
+          - os: windows-latest
+            cc: msvc
+            artifact_path: build/Release/taskman.exe
+            artifact_name: taskman-windows-msvc
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (Linux GCC)
+        if: matrix.os == 'ubuntu-latest' && matrix.cc == 'gcc'
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y build-essential
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++
+
+      - name: Configure (Linux Clang)
+        if: matrix.os == 'ubuntu-latest' && matrix.cc == 'clang'
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y clang
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
+
+      - name: Configure (macOS Clang)
+        if: matrix.os == 'macos-latest'
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+      - name: Configure (Windows MSVC)
+        if: matrix.os == 'windows-latest'
+        run: cmake -B build -S . -G "Visual Studio 17 2022" -A x64
+
+      - name: Build (Linux, macOS)
+        if: matrix.os != 'windows-latest'
+        run: cmake --build build --target taskman tests
+
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        run: cmake --build build --config Release --target taskman tests
+
+      - name: Test (Linux, macOS)
+        if: matrix.os != 'windows-latest'
+        run: cd build && ctest -V
+
+      - name: Test (Windows)
+        if: matrix.os == 'windows-latest'
+        run: cd build; ctest -C Release -V
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
