@@ -2,14 +2,14 @@
 
 ## 1. Setup projet
 
-- [ ] Créer structure : `src/`, `third_party/` (ou `external/`)
-- [ ] CMakeLists.txt : C++17, type `executable` unique
-- [ ] Intégrer SQLite : amalgamation (sqlite3.c, sqlite3.h) dans `third_party/sqlite/`
-- [ ] Intégrer nlohmann/json (json.hpp) : FetchContent ou copie dans `third_party/`
-- [ ] Intégrer cxxopts : FetchContent ou copie dans `third_party/`
-- [ ] Intégrer lib UUID v4 : header-only (ex. [stduuid](https://github.com/mariusbancila/stduuid)) ou source vendorable
-- [ ] Lire `TASKMAN_DB_NAME` (env) ; défaut `project_tasks.db`
-- [ ] Point d’entrée `main.cpp` : dispatch `argc/argv` vers sous-commandes
+- [x] Créer structure : `src/`, `third_party/` (ou `external/`)
+- [x] CMakeLists.txt : C++17, type `executable` unique
+- [x] Intégrer SQLite : amalgamation (sqlite3.c, sqlite3.h) dans `third_party/sqlite/` (FetchContent: azadkuh/sqlite-amalgamation)
+- [x] Intégrer nlohmann/json (json.hpp) : FetchContent ou copie dans `third_party/`
+- [x] Intégrer cxxopts : FetchContent ou copie dans `third_party/`
+- [x] Intégrer lib UUID v4 : header-only (ex. [stduuid](https://github.com/mariusbancila/stduuid)) ou source vendorable
+- [x] Lire `TASKMAN_DB_NAME` (env) ; défaut `project_tasks.db`
+- [x] Point d’entrée `main.cpp` : dispatch `argc/argv` vers sous-commandes
 
 ## 2. Base de données
 
