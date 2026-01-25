@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.10.0] - 2026-01-25
+
+- **taskman web** [--host \<addr\>] [--port \<n\>] : démarre un serveur HTTP (défaut http://127.0.0.1:8080). La page d’accueil charge une interface qui consulte les tâches via l’API JSON (GET /tasks, GET /task/\<id\>).
+
 ## [0.9.6] - 2026-01-25
 
 - **Cursor agent / "disk I/O error"**: set `TASKMAN_JOURNAL_MEMORY=1` when running taskman from Cursor’s agent (or ensure `CURSOR_AGENT` is set) to avoid SQLite "disk I/O error" in sandboxed environments. See [BUILD.md](BUILD.md).

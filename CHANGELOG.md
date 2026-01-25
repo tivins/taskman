@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.10.0] - 2026-01-25
+
+### Added
+
+- **taskman web** [--host \<addr\>] [--port \<n\>]: serveur HTTP pour consultation de la base (défaut 127.0.0.1:8080).
+- **GET /** : page HTML minimale avec inclusion de `style.css` et `main.js` (type=module).
+- **GET /style.css**, **GET /main.js** : feuille de style et script embarqués.
+- **GET /task/:id** : API JSON d’une tâche (404 si absente).
+- **GET /tasks?limit=20&page=1** : API JSON listant les tâches avec pagination (limit 1–100, page ≥ 1) et filtres optionnels `phase`, `status`, `role`.
+- Dépendance **cpp-httplib** (FetchContent, v0.14.3) ; options HTTPLIB_USE_*_IF_AVAILABLE=OFF pour éviter OpenSSL/ZLIB/Brotli/zstd.
+
 ## [0.9.6] - 2026-01-25
 
 ### Added

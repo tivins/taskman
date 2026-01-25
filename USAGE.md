@@ -283,25 +283,46 @@ Error messages are written to standard error (`stderr`).
 
 ## 7. Command summary
 
-| Command           | Description                          |
-|-------------------|--------------------------------------|
-| `init`            | Create / initialize tables           |
-| `phase:add`       | Add a phase                          |
-| `phase:edit`      | Edit a phase                         |
-| `phase:list`      | List phases (JSON)                   |
-| `milestone:add`   | Add a milestone                      |
-| `milestone:edit`  | Edit a milestone                     |
-| `milestone:list`  | List milestones (option `--phase`)   |
-| `task:add`        | Add a task (auto UUID)               |
-| `task:get`        | Show a task                          |
-| `task:list`       | List tasks (filters, `--format`)     |
-| `task:edit`       | Edit a task                          |
-| `task:dep:add`    | Add a task dependency                |
-| `task:dep:remove` | Remove a dependency                  |
+| Command           | Description                                  |
+|-------------------|----------------------------------------------|
+| `init`            | Create / initialize tables                   |
+| `phase:add`       | Add a phase                                  |
+| `phase:edit`      | Edit a phase                                 |
+| `phase:list`      | List phases (JSON)                           |
+| `milestone:add`   | Add a milestone                              |
+| `milestone:edit`  | Edit a milestone                             |
+| `milestone:list`  | List milestones (option `--phase`)          |
+| `task:add`        | Add a task (auto UUID)                       |
+| `task:get`        | Show a task                                  |
+| `task:list`       | List tasks (filters, `--format`)             |
+| `task:edit`       | Edit a task                                  |
+| `task:dep:add`    | Add a task dependency                        |
+| `task:dep:remove` | Remove a dependency                          |
+| `web`             | HTTP server for web UI (--host, --port)      |
 
 ---
 
-## 8. Example workflow
+## 8. Web server (`taskman web`)
+
+Lance un serveur HTTP pour consulter la base depuis un navigateur.
+
+```bash
+taskman web                    # défaut: 127.0.0.1:8080
+taskman web --host 0.0.0.0 --port 3000
+```
+
+| Option    | Description           | Défaut      |
+|-----------|-----------------------|-------------|
+| `--host`  | Adresse d’écoute       | `127.0.0.1` |
+| `--port`  | Port (1–65535)        | `8080`      |
+
+- **GET /** : page HTML avec inclusion de `style.css` et `main.js` (type=module). Le JS appelle l’API (fetch) pour afficher les tâches.
+- **GET /task/:id** : une tâche en JSON (404 si inconnue).
+- **GET /tasks?limit=20&page=1** : liste paginée en JSON. Filtres optionnels : `phase`, `status`, `role`.
+
+---
+
+## 9. Example workflow
 
 ```bash
 # 1. Initialize the database

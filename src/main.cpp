@@ -9,6 +9,7 @@
 #include "milestone.hpp"
 #include "phase.hpp"
 #include "task.hpp"
+#include "web.hpp"
 #include "version.h"
 #include <cstdlib>
 #include <cstring>
@@ -42,6 +43,7 @@ static const CmdInfo COMMANDS[] = {
     {"task:list",       "List tasks (option --phase, --status, --role)"},
     {"task:dep:add",    "Add a dependency"},
     {"task:dep:remove", "Remove a dependency"},
+    {"web",             "HTTP server for web UI (--host, --port)"},
 };
 
 static const std::size_t NUM_COMMANDS = sizeof(COMMANDS) / sizeof(COMMANDS[0]);
@@ -167,6 +169,11 @@ int main(int argc, char* argv[]) {
         taskman::Database db;
         if (!db.open(get_db_path())) return 1;
         return taskman::cmd_task_dep_remove(argc - 1, argv + 1, db);
+    }
+    if (std::strcmp(cmd, "web") == 0) {
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        return taskman::cmd_web(argc - 1, argv + 1, db);
     }
 
     std::cerr << "Unknown command: " << cmd << "\n";

@@ -26,6 +26,8 @@ Executable
 - `build/taskman` (Linux, macOS)
 - `build/taskman.exe` (Windows)
 
+Pour l’interface web : `taskman web` (défaut http://127.0.0.1:8080, voir USAGE.md).
+
 ### Multi-config
 
 ```shell

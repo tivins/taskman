@@ -45,6 +45,20 @@ set(UUID_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(UUID_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(stduuid)
 
+# cpp-httplib (HTTP server, header-only by default)
+FetchContent_Declare(
+  httplib
+  GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
+  GIT_TAG        v0.14.3
+)
+set(HTTPLIB_USE_OPENSSL_IF_AVAILABLE OFF CACHE BOOL "")
+set(HTTPLIB_USE_ZLIB_IF_AVAILABLE OFF CACHE BOOL "")
+set(HTTPLIB_USE_BROTLI_IF_AVAILABLE OFF CACHE BOOL "")
+set(HTTPLIB_USE_ZSTD_IF_AVAILABLE OFF CACHE BOOL "")
+set(HTTPLIB_INSTALL OFF CACHE BOOL "")
+set(HTTPLIB_TEST OFF CACHE BOOL "")
+FetchContent_MakeAvailable(httplib)
+
 # Catch2 (tests unitaires)
 FetchContent_Declare(
   Catch2
@@ -59,7 +73,7 @@ add_subdirectory(third_party/sqlite)
 # -----------------------------------------------------------------------------
 # Exécutable taskman
 # -----------------------------------------------------------------------------
-add_executable(taskman src/main.cpp src/db.cpp src/formats.cpp src/milestone.cpp src/phase.cpp src/task.cpp)
+add_executable(taskman src/main.cpp src/db.cpp src/formats.cpp src/milestone.cpp src/phase.cpp src/task.cpp src/web.cpp)
 if(MSVC)
   target_compile_definitions(taskman PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
@@ -69,6 +83,7 @@ target_link_libraries(taskman PRIVATE
   cxxopts::cxxopts
   stduuid
   SQLite3
+  httplib::httplib
 )
 
 # -----------------------------------------------------------------------------
