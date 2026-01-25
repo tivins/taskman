@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.11.1] - 2026-01-25
+
+- **Vue liste (web)** : à côté du Statut, affichage de « (blocked) » si la tâche dépend d’une tâche non-`done` (utilisation de `/task_deps` et `/task/:id`).
+
 ## [0.11.0] - 2026-01-25
 
 - **API web** : GET /milestone/:id, GET /milestones (limit, page), GET /phase/:id, GET /phases (limit, page), GET /task_deps (limit, page, ?task_id=), GET /task/:id/deps.

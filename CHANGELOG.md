@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.11.1] - 2026-01-25
+
+### Added
+
+- **Vue liste (web)** : à côté du Statut, affichage de « (blocked) » lorsque la tâche dépend d’une tâche non-`done`, en s’appuyant sur `/task_deps` et `/task/:id` pour les statuts des `depends_on`.
+
 ## [0.11.0] - 2026-01-25
 
 ### Added

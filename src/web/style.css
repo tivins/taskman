@@ -40,6 +40,11 @@ li a:hover { text-decoration: underline; }
 .task-detail { max-width: 40em; margin-top: 1em; }
 .error { color: #c00; }
 .monospace { font-family: monospace; }
+.blocked { color: var(--blocked); margin-left: 0.5em; }
+.done { color: var(--done); margin-left: 0.5em; }
+.in-progress { color: var(--in-progress); margin-left: 0.5em; }
+.to-do { color: var(--to-do); margin-left: 0.5em; }
+.reached { color: var(--reached); margin-left: 0.5em; }
 
 /* Tableau des tâches */
 .tasks-table {

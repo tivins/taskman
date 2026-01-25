@@ -3,16 +3,45 @@ const app = document.getElementById('app');
 async function loadTasks(limit = 20, page = 1) {
     app.innerHTML = '';
     try {
-        const r = await fetch(`/tasks?limit=${limit}&page=${page}`);
-        if (!r.ok) {
-            app.innerHTML = `<p class="error">Error ${r.status}</p>`;
+        const [tasksRes, depsRes] = await Promise.all([
+            fetch(`/tasks?limit=${limit}&page=${page}`),
+            fetch(`/task_deps?limit=500`)
+        ]);
+        if (!tasksRes.ok) {
+            app.innerHTML = `<p class="error">Error ${tasksRes.status}</p>`;
             return;
         }
-        const data = await r.json();
+        const data = await tasksRes.json();
         if (!Array.isArray(data) || data.length === 0) {
             app.innerHTML = '<p>No task.</p>';
             return;
         }
+
+        const idToStatus = new Map(data.map((t) => [t.id, t.status]));
+        const taskIds = new Set(idToStatus.keys());
+        let deps = [];
+        try {
+            const depsJson = depsRes.ok ? await depsRes.json() : [];
+            deps = Array.isArray(depsJson) ? depsJson : [];
+        } catch (_) {}
+        const depsForOurTasks = deps.filter((d) => taskIds.has(d.task_id));
+        const missingDepIds = [...new Set(depsForOurTasks.map((d) => d.depends_on).filter((id) => !idToStatus.has(id)))];
+
+        await Promise.all(missingDepIds.map(async (id) => {
+            try {
+                const r = await fetch(`/task/${id}`);
+                if (r.ok) {
+                    const j = await r.json();
+                    idToStatus.set(id, j.status);
+                }
+            } catch (_) {}
+        }));
+
+        const isBlocked = (t) => {
+            const taskDeps = depsForOurTasks.filter((d) => d.task_id === t.id);
+            return taskDeps.some((d) => (idToStatus.get(d.depends_on) || '') !== 'done');
+        };
+
         const table = document.createElement('table');
         table.className = 'tasks-table';
         const thead = document.createElement('thead');
@@ -31,7 +60,10 @@ async function loadTasks(limit = 20, page = 1) {
                 el('td', { class: 'monospace' }, escapeHtml(String(t.id ?? '').substring(0, 8))),
                 el('td', {}, el('a', { href: '#' }, escapeHtml(t.title || t.id || 'untitled'))),
                 el('td', {}, escapeHtml(t.role || '')),
-                el('td', {}, escapeHtml(t.status || '')),
+                el('td', {}, 
+                  el('span', { class: t.status === 'done' ? 'done' : t.status === 'in_progress' ? 'in-progress' : t.status === 'to_do' ? 'to-do' : '' }, t.status), 
+                  el('span', { class: isBlocked(t) ? 'blocked' : '' }, isBlocked(t) ? '(blocked)' : '')
+                ),
                 el('td', {}, escapeHtml(t.milestone_id || '')),
                 el('td', {}, escapeHtml(t.phase_id || ''))
             );
