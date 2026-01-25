@@ -23,21 +23,38 @@ const char* get_db_path() {
 
 const char* const TASKMAN_VERSION = "0.9.3";
 
-void print_usage(const char* prog) {
-    std::cerr << "Usage: " << prog << " <command> [options]\n"
-              << "Options: -v, --version  Show version\n"
-              << "Commands: init, phase:add, phase:edit, phase:list,\n"
-              << "          milestone:add, milestone:edit, milestone:list,\n"
-              << "          task:add, task:edit, task:get, task:list,\n"
-              << "          task:dep:add, task:dep:remove\n"
-              << "Env: TASKMAN_DB_NAME (default: project_tasks.db)\n";
+void print_usage() {
+    std::cerr << "\nTaskman " << TASKMAN_VERSION << "\n"
+              << "https://github.com/tivins/taskman\n\n"
+              << "Usage: taskman <command> [options]\n\n"
+              << "Options:\n"
+              << "  -h, --help      Show this help\n"
+              << "  -v, --version   Show version\n"
+              << "Commands:\n"
+              << "  init            Create / initialize tables\n"
+              << "  phase:add       Add a phase\n"
+              << "  phase:edit      Edit a phase\n"
+              << "  phase:list      List phases (JSON)\n"
+              << "  milestone:add   Add a milestone\n"
+              << "  milestone:edit  Edit a milestone\n"
+              << "  milestone:list  List milestones (option --phase)\n"
+              << "  task:add        Add a task (auto UUID)\n"
+              << "  task:edit       Edit a task\n"
+              << "  task:get        Get a task (JSON)\n"
+              << "  task:list       List tasks (option --phase, --status, --role)\n"
+              << "  task:dep:add    Add a dependency\n"
+              << "  task:dep:remove Remove a dependency\n"
+              << "\n"
+              << "Environment variable:\n"
+              << "  TASKMAN_DB_NAME (default: project_tasks.db)\n\n"
+              ;
 }
 
 } // namespace
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        print_usage(argv[0]);
+        print_usage();
         return 1;
     }
 
@@ -46,6 +63,12 @@ int main(int argc, char* argv[]) {
         std::cout << "taskman " << TASKMAN_VERSION << "\n";
         return 0;
     }
+
+    if (std::strcmp(cmd, "-h") == 0 || std::strcmp(cmd, "--help") == 0) {
+        print_usage();
+        return 0;
+    }
+
     // Dispatch vers sous-commandes (implémentées en phases suivantes)
     if (std::strcmp(cmd, "init") == 0) {
         taskman::Database db;
@@ -115,6 +138,6 @@ int main(int argc, char* argv[]) {
     }
 
     std::cerr << "Unknown command: " << cmd << "\n";
-    print_usage(argv[0]);
+    print_usage();
     return 1;
 }
