@@ -6,6 +6,11 @@
 
 - **scripts/create_demo.py**: Python script that creates a populated demo database (phases, milestones, tasks, dependencies, sample statuses) by invoking the taskman CLI. Arguments: taskman executable path (required), DB path (optional, default `./demo.db`). Overwrites the DB if it exists; removes `-journal`, `-wal`, `-shm` sidecars. Demo scenario: e‑commerce site MVP (Design, Development, Acceptance, Delivery).
 
+### Changed
+
+- **print_usage()**: command list is now built from a `CmdInfo[]` table and printed in a loop; adding a command only requires one new table entry.
+- **Version**: `TASKMAN_VERSION` is generated at configure time from the `VERSION` file via `version.h`; `project(taskman VERSION …)` and `version.h` both use `VERSION` as the single source of truth.
+
 ## [0.9.3] - 2026-01-25
 
 ### Added

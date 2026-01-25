@@ -9,10 +9,12 @@
 #include "milestone.hpp"
 #include "phase.hpp"
 #include "task.hpp"
+#include "version.h"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <sstream>
 
 namespace {
 
@@ -21,33 +23,54 @@ const char* get_db_path() {
     return (env && env[0] != '\0') ? env : "project_tasks.db";
 }
 
-const char* const TASKMAN_VERSION = "0.9.3";
+struct CmdInfo {
+    const char* name;
+    const char* summary;
+};
 
-void print_usage() {
-    std::cerr << "\nTaskman " << TASKMAN_VERSION << "\n"
+static const CmdInfo COMMANDS[] = {
+    {"init",            "Create / initialize tables"},
+    {"phase:add",       "Add a phase"},
+    {"phase:edit",      "Edit a phase"},
+    {"phase:list",      "List phases (JSON)"},
+    {"milestone:add",   "Add a milestone"},
+    {"milestone:edit",  "Edit a milestone"},
+    {"milestone:list",  "List milestones (option --phase)"},
+    {"task:add",        "Add a task (auto UUID)"},
+    {"task:edit",       "Edit a task"},
+    {"task:get",        "Get a task (JSON)"},
+    {"task:list",       "List tasks (option --phase, --status, --role)"},
+    {"task:dep:add",    "Add a dependency"},
+    {"task:dep:remove", "Remove a dependency"},
+};
+
+static const std::size_t NUM_COMMANDS = sizeof(COMMANDS) / sizeof(COMMANDS[0]);
+
+std::string get_usage_string() {
+    std::stringstream ss;
+    ss << "\nTaskman " << TASKMAN_VERSION << "\n"
               << "https://github.com/tivins/taskman\n\n"
               << "Usage: taskman <command> [options]\n\n"
               << "Options:\n"
               << "  -h, --help      Show this help\n"
               << "  -v, --version   Show version\n"
-              << "Commands:\n"
-              << "  init            Create / initialize tables\n"
-              << "  phase:add       Add a phase\n"
-              << "  phase:edit      Edit a phase\n"
-              << "  phase:list      List phases (JSON)\n"
-              << "  milestone:add   Add a milestone\n"
-              << "  milestone:edit  Edit a milestone\n"
-              << "  milestone:list  List milestones (option --phase)\n"
-              << "  task:add        Add a task (auto UUID)\n"
-              << "  task:edit       Edit a task\n"
-              << "  task:get        Get a task (JSON)\n"
-              << "  task:list       List tasks (option --phase, --status, --role)\n"
-              << "  task:dep:add    Add a dependency\n"
-              << "  task:dep:remove Remove a dependency\n"
-              << "\n"
+              << "Commands:\n";
+    for (std::size_t i = 0; i < NUM_COMMANDS; ++i) {
+        ss << "  " << COMMANDS[i].name;
+        const std::size_t len = std::strlen(COMMANDS[i].name);
+        const std::size_t pad = (len <= 16) ? (16 - len) : 0;
+        for (std::size_t k = 0; k < pad; ++k) ss << ' ';
+        ss << " " << COMMANDS[i].summary << "\n";
+    }
+    ss << "\n"
               << "Environment variable:\n"
-              << "  TASKMAN_DB_NAME (default: project_tasks.db)\n\n"
-              ;
+              << "  TASKMAN_DB_NAME (default: project_tasks.db)\n\n";
+    return ss.str();
+}
+
+
+void print_usage() {
+    std::cerr << get_usage_string() << "\n";
 }
 
 } // namespace

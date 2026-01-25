@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.14)
-project(taskman VERSION 0.9.1 LANGUAGES CXX C)
+file(READ "${CMAKE_SOURCE_DIR}/VERSION" TASKMAN_VERSION_RAW)
+string(STRIP "${TASKMAN_VERSION_RAW}" TASKMAN_VERSION)
+project(taskman VERSION ${TASKMAN_VERSION} LANGUAGES CXX C)
+
+# version.h from VERSION file (for TASKMAN_VERSION in C++)
+configure_file(
+  ${CMAKE_SOURCE_DIR}/src/version.h.in
+  ${CMAKE_BINARY_DIR}/version.h
+)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -55,7 +63,7 @@ add_executable(taskman src/main.cpp src/db.cpp src/formats.cpp src/milestone.cpp
 if(MSVC)
   target_compile_definitions(taskman PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
-target_include_directories(taskman PRIVATE ${SQLITE_AMALGAMATION_SOURCE_DIR})
+target_include_directories(taskman PRIVATE ${CMAKE_BINARY_DIR} ${SQLITE_AMALGAMATION_SOURCE_DIR})
 target_link_libraries(taskman PRIVATE
   nlohmann_json::nlohmann_json
   cxxopts::cxxopts
