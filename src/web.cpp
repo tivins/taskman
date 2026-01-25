@@ -10,6 +10,7 @@
 #include "web_assets.generated.h"
 #include <nlohmann/json.hpp>
 #include <cxxopts.hpp>
+#include <cerrno>
 #include <cstring>
 #include <iostream>
 #include <optional>
@@ -38,7 +39,7 @@ bool is_valid_role(const std::string& s) {
 }
 
 const char HTML_PAGE[] = R"x(<!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -46,7 +47,10 @@ const char HTML_PAGE[] = R"x(<!DOCTYPE html>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app"></div>
+  <div class="box">
+    <h1>taskman</h1>
+    <div id="app"></div>
+  </div>
   <script src="main.js" type="module"></script>
 </body>
 </html>

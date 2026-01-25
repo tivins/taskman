@@ -24,8 +24,7 @@ body {
     color: var(--text);
 }
 
-
-#app { 
+.box {
     margin: 1em auto; 
     max-width: 1024px;   
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
@@ -33,6 +32,7 @@ body {
     padding: 1em;
     background: var(--card);
 }
+
 ul { list-style: none; padding: 0; }
 li { padding: 0.25em 0; border-bottom: 1px solid var(--border); }
 li a { color: var(--primary); text-decoration: none; }
