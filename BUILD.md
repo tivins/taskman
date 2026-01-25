@@ -1,6 +1,6 @@
 # Taskman
 
-## Compilation
+## Build
 
 ### single-config
 
@@ -8,20 +8,20 @@
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
 ```
 
-#### Compiler et lancer les tests
+#### Build and run tests
 
 ```shell
 cmake --build build --target tests
 cd build && ctest -V && cd ..
 ```
 
-#### Compiler et exécuter taskman
+#### Build and run taskman
 
 ```shell
 cmake --build build --target taskman
 ```
 
-Exécutable
+Executable
 
 - `build/taskman` (Linux, macOS)
 - `build/taskman.exe` (Windows)
@@ -32,30 +32,30 @@ Exécutable
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
 ```
 
-#### Compiler et lancer les tests
+#### Build and run tests
 
 ```shell
 cmake --build build --config Release --target tests
 cd build && ctest -C Release -V && cd ..
 ```
 
-#### Compiler et exécuter taskman
+#### Build and run taskman
 
 ```shell
 cmake --build build --config Release --target taskman
 ```
 
-Exécutable
+Executable
 
 - `build/Release/taskman` (Linux, macOS)
 - `build/Release/taskman.exe` (Windows)
 
-## Dépannage
+## Troubleshooting
 
-### « disk I/O error » et fichier `-journal`
+### "disk I/O error" and `-journal` file
 
-Si un `project_tasks.db-journal` (ou `*.db-journal`) est présent, une précédente exécution a été interrompue avant la fermeture propre de la base. À l’ouverture, SQLite tente une récupération ; si une erreur « disk I/O error » apparaît (antivirus, sandbox, système de fichiers), :
+If a `project_tasks.db-journal` (or `*.db-journal`) file is present, a previous run was interrupted before the database was cleanly closed. On open, SQLite attempts recovery; if a "disk I/O error" occurs (antivirus, sandbox, filesystem):
 
-1. Arrêter tout processus `taskman` utilisant cette base.
-2. Supprimer le fichier `.db` et le `.db-journal` concernés.
-3. Relancer `taskman init` pour recréer une base vide.
+1. Stop any `taskman` process using this database.
+2. Delete the `.db` and `.db-journal` files in question.
+3. Run `taskman init` again to recreate an empty database.
