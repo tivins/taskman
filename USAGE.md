@@ -10,9 +10,11 @@ For build and run instructions, see [BUILD.md](BUILD.md).
 
 ### Environment variable
 
-| Variable         | Description                       | Default            |
-|------------------|-----------------------------------|--------------------|
-| `TASKMAN_DB_NAME`| Path to the SQLite database file  | `project_tasks.db` |
+| Variable                | Description                                                                 | Default            |
+|-------------------------|-----------------------------------------------------------------------------|--------------------|
+| `TASKMAN_DB_NAME`       | Path to the SQLite database file                                            | `project_tasks.db` |
+| `TASKMAN_JOURNAL_MEMORY`| Set to `1` to use an in-memory journal (avoids "disk I/O error" in sandboxes, e.g. Cursor agent) | not set            |
+| `CURSOR_AGENT`          | When set by Cursor, taskman uses an in-memory journal automatically         | —                  |
 
 Examples (bash):
 
@@ -36,7 +38,7 @@ Creates the `phases`, `milestones`, `tasks`, and `task_deps` tables (if they do 
 taskman init
 ```
 
-If errors occur (e.g. corrupted database or orphan `.db-journal`), see the "disk I/O error" section in [BUILD.md](BUILD.md).
+If errors occur (e.g. corrupted database or orphan `.db-journal`), see [BUILD.md](BUILD.md). When using taskman from **Cursor’s agent**, `TASKMAN_JOURNAL_MEMORY=1` often fixes "disk I/O error" (see BUILD.md).
 
 ---
 

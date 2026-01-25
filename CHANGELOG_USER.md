@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.9.6] - 2026-01-25
+
+- **Cursor agent / "disk I/O error"**: set `TASKMAN_JOURNAL_MEMORY=1` when running taskman from Cursor’s agent (or ensure `CURSOR_AGENT` is set) to avoid SQLite "disk I/O error" in sandboxed environments. See [BUILD.md](BUILD.md).
+
 ## [0.9.5] - 2026-01-25
 
 - **taskman \<command\> --help** (or **-h**): detailed help for each command (options, required/optional args). The main help (`taskman -h`) indicates: *Use 'taskman \<command\> --help' for command-specific options.*

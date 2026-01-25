@@ -148,6 +148,32 @@ TEST_CASE("integration — init, phase:add, task:add, task:get", "[integration]"
     REQUIRE(j2["phase_id"] == "p1");
 }
 
+TEST_CASE("integration — TASKMAN_JOURNAL_MEMORY=1 (init, phase:add, phase:list)", "[integration]") {
+    std::string exe = get_taskman_path();
+    if (exe.empty())
+        SKIP("taskman executable not found (build taskman first, or set TASKMAN_EXE)");
+#ifdef _WIN32
+    _putenv_s("TASKMAN_JOURNAL_MEMORY", "1");
+#else
+    setenv("TASKMAN_JOURNAL_MEMORY", "1", 1);
+#endif
+    std::string db = (fs::temp_directory_path() / "taskman_int_5.db").string();
+    fs::remove(db);
+
+    int code;
+    std::string out;
+    std::tie(code, out) = run_taskman(exe, db, {"init"});
+    REQUIRE(code == 0);
+
+    std::tie(code, out) = run_taskman(exe, db, {"phase:add", "--id", "p1", "--name", "PhaseMem"});
+    REQUIRE(code == 0);
+
+    std::tie(code, out) = run_taskman(exe, db, {"phase:list"});
+    REQUIRE(code == 0);
+    REQUIRE(out.find("PhaseMem") != std::string::npos);
+    REQUIRE(out.find("p1") != std::string::npos);
+}
+
 TEST_CASE("integration — commande inconnue → exit 1", "[integration]") {
     std::string exe = get_taskman_path();
     if (exe.empty())

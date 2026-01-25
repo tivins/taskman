@@ -64,8 +64,10 @@ std::string get_usage_string() {
     }
     ss << "\n"
               << "Use 'taskman <command> --help' for command-specific options.\n\n"
-              << "Environment variable:\n"
-              << "  TASKMAN_DB_NAME (default: project_tasks.db)\n\n";
+              << "Environment variables:\n"
+              << "  TASKMAN_DB_NAME       (default: project_tasks.db)\n"
+              << "  TASKMAN_JOURNAL_MEMORY=1  use in-memory journal (avoids disk I/O in sandboxes, e.g. Cursor agent)\n"
+              << "  CURSOR_AGENT          when set, same as TASKMAN_JOURNAL_MEMORY=1\n\n";
     return ss.str();
 }
 
