@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.9.3] - 2026-01-25
+
+### Added
+
+- `-v`, `--version`: print version and exit 0
+
 ## [0.9.2] - 2026-01-25
 
 ### Added

@@ -9,5 +9,5 @@ CLI to manage project phases, milestones, and tasks in a SQLite database. JSON o
 
 **Developers** 
 
-* [Build](BUILD.md) 
+* [Build](BUILD.md) (build and run instructions)
 * [Changelog](CHANGELOG.md)

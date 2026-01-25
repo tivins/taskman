@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.9.3] - 2026-01-25
+
+- **Options**: `-v`, `--version` — show version and exit.
+
 ## [0.9.2] - 2026-01-25
 
 - This user changelog; README reorganized so Users and Developers find their docs quickly.

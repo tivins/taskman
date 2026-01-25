@@ -21,8 +21,11 @@ const char* get_db_path() {
     return (env && env[0] != '\0') ? env : "project_tasks.db";
 }
 
+const char* const TASKMAN_VERSION = "0.9.3";
+
 void print_usage(const char* prog) {
     std::cerr << "Usage: " << prog << " <command> [options]\n"
+              << "Options: -v, --version  Show version\n"
               << "Commands: init, phase:add, phase:edit, phase:list,\n"
               << "          milestone:add, milestone:edit, milestone:list,\n"
               << "          task:add, task:edit, task:get, task:list,\n"
@@ -39,6 +42,10 @@ int main(int argc, char* argv[]) {
     }
 
     const char* cmd = argv[1];
+    if (std::strcmp(cmd, "-v") == 0 || std::strcmp(cmd, "--version") == 0) {
+        std::cout << "taskman " << TASKMAN_VERSION << "\n";
+        return 0;
+    }
     // Dispatch vers sous-commandes (implémentées en phases suivantes)
     if (std::strcmp(cmd, "init") == 0) {
         taskman::Database db;
