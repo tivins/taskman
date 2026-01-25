@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0] — 2025-01-25
+
+### Ajouté
+
+- Tests unitaires (Catch2) :
+  - Couche DB : `Database::open`, `close`, `exec`, `run`, `query`, `init_schema` (sans connexion, paramètres, NULL, SELECT)
+  - Commandes phase : `cmd_phase_add`, `cmd_phase_edit`, `cmd_phase_list` (succès, validation --id/--name/--status/--sort-order, formatage JSON dont `sort_order` en nombre)
+
 ## [0.3.0] — 2025-01-25
 
 ### Ajouté

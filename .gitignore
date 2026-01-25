@@ -1,5 +1,6 @@
 # Build
 build/
+Testing/
 out/
 cmake-build-*/
 *.o

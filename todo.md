@@ -49,7 +49,7 @@
 
 ## 8. Qualité et déploiement
 
-- [ ] Tests : unitaires (helpers DB, génération ID, formatage) ; intégration (appels `taskman` en subprocess, fixtures DB)
+- [x] Tests : unitaires (helpers DB, formatage) ; [ ] unitaires génération ID (avec task:add) ; [ ] intégration (appels `taskman` en subprocess, fixtures DB)
 - [ ] GitHub Actions : workflow build (Release) pour Windows (MSVC ou MinGW), Linux (GCC/Clang), macOS (Clang) ; artefacts binaires
 - [ ] Changelog et version (package.json ou VERSION / CHANGELOG.md) alignés avec les livrables
 
