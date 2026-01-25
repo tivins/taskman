@@ -6,6 +6,67 @@ Exposer taskman comme **serveur MCP** en ajoutant un mode `taskman mcp` : le bin
 
 ---
 
+## TODO liste (implémentation)
+
+### Infra et squelette
+
+- [ ] **CMake** — Ajouter `src/mcp.cpp` à `add_executable(taskman ...)`.
+- [ ] **`src/mcp.hpp`** — Déclarer `int run_mcp_server();` (évent. `struct McpTool` ou config outils).
+- [ ] **`src/mcp.cpp`** — Boucle stdio : `while (getline(cin, line))`, parse `nlohmann::json::parse(line)`.
+- [ ] **`src/mcp.cpp`** — Détecter `method` / `id`, ignorer les lignes vides ou non-JSON (ou erreur -32700).
+- [ ] **`src/mcp.cpp`** — Envoyer réponses : `cout << response.dump() << "\n"; cout.flush();`.
+- [ ] **`src/mcp.cpp`** — Erreurs de parse → JSON-RPC `-32700` (Parse error). Requête invalide → `-32600` (Invalid Request).
+- [ ] **`main.cpp`** — Branche `if (strcmp(cmd, "mcp") == 0) return run_mcp_server();`.
+- [ ] **`main.cpp`** — Ajouter `{ "mcp", "MCP server (stdio): read JSON-RPC on stdin, write on stdout" }` dans `COMMANDS` et usage.
+
+### Lifecycle
+
+- [ ] **`initialize`** — Répondre `protocolVersion`, `capabilities: { tools: { listChanged: false } }`, `serverInfo: { name: "taskman", version }`. Réutiliser `TASKMAN_VERSION`. Réponse avec `id` reçu.
+- [ ] **`initialize`** — Si `protocolVersion` non supportée (ex. pas `2025-11-25`) → erreur `-32602` "Unsupported protocol version".
+- [ ] **`notifications/initialized`** — Accepter sans répondre (notification), marquer phase « opération ».
+
+### Méthodes
+
+- [ ] **`tools/list`** — Réponse `{ "tools": [ ... ] }` à partir d’une table statique (nom, description, inputSchema) pour les 13 outils.
+- [ ] **`tools/call`** — Extraire `params.name` et `params.arguments` ; si `name` inconnu → `-32602` "Unknown tool: <name>". Si `arguments` absent ou non-objet → `-32602` "Invalid arguments".
+- [ ] **`tools/call`** — Pour un `name` connu : construire `argv` (positionals + `--key` `value`), ouvrir DB (`get_db_path()`), capturer cout/cerr, appeler la `cmd_*`, former `CallToolResult` : `content: [{ type: "text", text }]`, `isError: (exit_code != 0)`.
+- [ ] **`ping`** — Répondre `result: {}`.
+- [ ] **Méthode inconnue** — Réponse erreur JSON-RPC `-32601` "Method not found".
+
+### Table des 13 outils (nom, description, inputSchema, positionals, options)
+
+- [ ] `taskman_init` — inputSchema `{}`, pas d’argv.
+- [ ] `taskman_phase_add` — id, name (requis), status, sort-order. argv : `--id`, `--name`, etc.
+- [ ] `taskman_phase_edit` — positionnel `id`, options name, status, sort-order.
+- [ ] `taskman_phase_list` — inputSchema `{}`, argv `[]`.
+- [ ] `taskman_milestone_add` — id, phase (requis), name, criterion, reached.
+- [ ] `taskman_milestone_edit` — positionnel `id`, options name, criterion, reached, phase.
+- [ ] `taskman_milestone_list` — option `phase`.
+- [ ] `taskman_task_add` — title, phase (requis), description, role, milestone, format.
+- [ ] `taskman_task_get` — positionnel `id`, option `format`.
+- [ ] `taskman_task_list` — phase, status, role, format.
+- [ ] `taskman_task_edit` — positionnel `id`, options title, description, status, role, milestone.
+- [ ] `taskman_task_dep_add` — positionnels `task-id`, `dep-id`.
+- [ ] `taskman_task_dep_remove` — positionnels `task-id`, `dep-id`.
+
+### Conversion `arguments` → `argv` et capture
+
+- [ ] **Construction argv** — Pour chaque outil : d’abord positionnels (ordre fixe), puis paires `"--<key>"`, `value` pour les options présentes dans `arguments`. Ignorer clés inconnues. Valeur : string ; si number → `to_string`. `reached` : 0/1 → `"0"`/`"1"`.
+- [ ] **`argv` vers `cmd_*`** — `std::vector<std::string> argv_strs` ; `std::vector<char*> argv_ptrs` pointant sur `s.data()` (ou `&s[0]`) ; passer `argv_ptrs.size()`, `argv_ptrs.data()` à la `cmd_*`. Ne pas ajouter de chaîne vide.
+- [ ] **Capture cout/cerr** — Rdbuf de `cout`/`cerr` sauvegardé, remplacé par `ostringstream` ; appel `cmd_*` ; restauration ; en cas d’exception, restaurer les rdbuf (RAII ou try/finally).
+- [ ] **Dispatch name → cmd_*** — Table ou `if/else` : `taskman_init` → ouvrir DB puis `init_schema(db)` (pas de `cmd_init`), `taskman_phase_list` → `cmd_phase_list`, etc. Pour `taskman_init` : pas d’argv ; succès → `content.text` = `"Database initialized."` ou vide ; échec → stderr capturé, `isError: true`.
+- [ ] **`argc`/`argv` pour cmd_*** — Pour `cmd_phase_list` (aucun arg) : `argc=0` et `argv=nullptr` ou `argc=1` avec `argv[0]` factice selon robustesse. Pour les autres : `argv` construit à partir de `arguments`.
+
+### Intégration et tests
+
+- [ ] **Tests manuels** — `echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{...}}' | taskman mcp` → réponse `InitializeResult`.
+- [ ] **Tests manuels** — `tools/list` → 13 outils.
+- [ ] **Tests manuels** — `tools/call` pour `taskman_init`, `taskman_phase_list`, `taskman_phase_add`, `taskman_task_add`, `taskman_task_list`, `taskman_task_get`, `taskman_task_edit`, `taskman_task_dep_add`, `taskman_task_dep_remove`, `taskman_milestone_*`.
+- [ ] **Tests manuels** — `tools/call` avec task/phase inexistante → `isError: true` et message d’erreur dans `content`.
+- [ ] **Documentation** — Section « MCP » dans README ou USAGE : `taskman mcp`, config Cursor (commande, args, env `TASKMAN_DB_NAME`, `TASKMAN_JOURNAL_MEMORY`).
+
+---
+
 ## 1. Références
 
 - [MCP Specification (2025-11-25)](https://modelcontextprotocol.io/specification/2025-11-25)
