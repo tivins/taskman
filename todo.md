@@ -19,9 +19,9 @@
 
 ## 3. Phases
 
-- [ ] `phase:add` : --id, --name, [--status], [--sort-order] → INSERT
-- [ ] `phase:edit` : <id> + champs optionnels → UPDATE partiel
-- [ ] `phase:list` : SELECT * ORDER BY sort_order ; sortie JSON (structure à définir : tableau d’objets)
+- [x] `phase:add` : --id, --name, [--status], [--sort-order] → INSERT
+- [x] `phase:edit` : <id> + champs optionnels → UPDATE partiel
+- [x] `phase:list` : SELECT * ORDER BY sort_order ; sortie JSON (structure à définir : tableau d’objets)
 
 ## 4. Milestones
 

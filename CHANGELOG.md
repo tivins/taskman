@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0] — 2025-01-25
+
+### Ajouté
+
+- Phase 3 — Phases :
+  - `phase:add` : --id, --name, [--status to_do|in_progress|done], [--sort-order] → INSERT
+  - `phase:edit` : <id> [--name] [--status] [--sort-order] → UPDATE partiel
+  - `phase:list` : SELECT * FROM phases ORDER BY sort_order → JSON (tableau d’objets id, name, status, sort_order)
+  - Couche DB : `Database::run()` (requêtes paramétrées), `Database::query()` (SELECT → lignes)
+
 ## [0.2.0] — 2025-01-25
 
 ### Ajouté

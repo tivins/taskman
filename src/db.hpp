@@ -7,6 +7,11 @@
 #ifndef TASKMAN_DB_HPP
 #define TASKMAN_DB_HPP
 
+#include <map>
+#include <optional>
+#include <string>
+#include <vector>
+
 struct sqlite3;
 
 namespace taskman {
@@ -29,6 +34,14 @@ public:
     /** Exécute une requête SQL (DDL/DML).
      * En échec : message sur stderr, retour false. */
     bool exec(const char* sql);
+
+    /** Exécute une requête paramétrée (?, ?, …). params[i] = nullopt → bind NULL.
+     * En échec : message sur stderr, retour false. */
+    bool run(const char* sql, const std::vector<std::optional<std::string>>& params);
+
+    /** SELECT : retourne les lignes en map nom_colonne → valeur (nullopt = SQL NULL).
+     * En échec : message sur stderr, retour vector vide. */
+    std::vector<std::map<std::string, std::optional<std::string>>> query(const char* sql);
 
     /** Vrai si une connexion est ouverte. */
     bool is_open() const { return db_ != nullptr; }

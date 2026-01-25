@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(taskman VERSION 0.2.0 LANGUAGES CXX C)
+project(taskman VERSION 0.3.0 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -43,7 +43,7 @@ add_subdirectory(third_party/sqlite)
 # -----------------------------------------------------------------------------
 # Exécutable taskman
 # -----------------------------------------------------------------------------
-add_executable(taskman src/main.cpp src/db.cpp)
+add_executable(taskman src/main.cpp src/db.cpp src/phase.cpp)
 if(MSVC)
   target_compile_definitions(taskman PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()

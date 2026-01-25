@@ -5,6 +5,7 @@
  */
 
 #include "db.hpp"
+#include "phase.hpp"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -43,16 +44,19 @@ int main(int argc, char* argv[]) {
         return 0;
     }
     if (std::strcmp(cmd, "phase:add") == 0) {
-        std::cout << "phase:add: not implemented yet\n";
-        return 0;
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        return taskman::cmd_phase_add(argc - 1, argv + 1, db);
     }
     if (std::strcmp(cmd, "phase:edit") == 0) {
-        std::cout << "phase:edit: not implemented yet\n";
-        return 0;
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        return taskman::cmd_phase_edit(argc - 1, argv + 1, db);
     }
     if (std::strcmp(cmd, "phase:list") == 0) {
-        std::cout << "phase:list: not implemented yet\n";
-        return 0;
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        return taskman::cmd_phase_list(argc - 1, argv + 1, db);
     }
     if (std::strcmp(cmd, "milestone:add") == 0) {
         std::cout << "milestone:add: not implemented yet\n";
