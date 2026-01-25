@@ -102,3 +102,26 @@ taskman task:edit t1 --status in_progress
 taskman task:edit t1 --status done
 taskman milestone:edit m1 --reached 1
 ```
+
+## Implémentation
+
+### Contraintes
+
+* OS : Windows/Linux/macOS
+* déploiement : binaire distribué (Release sur Github)
+* autonomie : binaire sans runtime
+* langage : C++
+
+### Organisation
+
+* code : `/src` ; build : CMake
+
+### Dépendances (intégrées, pas de runtime externe)
+
+* **SQLite** : [amalgamation](https://sqlite.org/amalgamation.html) (sqlite3.c + sqlite3.h) — 1 fichier C à compiler. Wrapper C++ header-only (ex. [sqlitepp](https://github.com/nicb1/sqlitepp) ou [sqlite-hpp](https://github.com/elelel/sqlite-hpp)).
+* **JSON** : [nlohmann/json](https://github.com/nlohmann/json) (json.hpp, header-only).
+* **CLI** : parsing manuel `argc/argv` ou lib légère (ex. [cxxopts](https://github.com/jarro2783/cxxopts), header-only).
+
+### IDs des tâches
+
+* `task:add` : génération d’un id unique (UUID, slug du titre, ou compteur). À préciser à l’implémentation.
