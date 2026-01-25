@@ -1,4 +1,15 @@
-﻿# Changelog
+# Changelog
+
+## [0.9.2] - 2026-01-25
+
+### Added
+
+- CHANGELOG_USER.md: user-facing changelog (commands, options, features; no implementation details)
+
+### Changed
+
+- README.md: shortened description; links grouped by audience (Users: USAGE, CHANGELOG_USER; Developers: BUILD, CHANGELOG)
+- USAGE.md: "See also" section points to CHANGELOG_USER for users, BUILD/CHANGELOG for developers
 
 ## [0.9.1] - 2026-01-25
 

@@ -327,4 +327,4 @@ taskman milestone:edit M1 --reached 1
 
 ---
 
-See also: [README.md](README.md), [BUILD.md](BUILD.md), [CHANGELOG.md](CHANGELOG.md).
+See also: [README](README.md). Users: [User changelog](CHANGELOG_USER.md). Developers: [BUILD](BUILD.md), [CHANGELOG](CHANGELOG.md).
