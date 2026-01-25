@@ -6,6 +6,7 @@
 #include "web.hpp"
 #include "db.hpp"
 #include "formats.hpp"
+#include "web_assets.generated.h"
 #include <nlohmann/json.hpp>
 #include <cxxopts.hpp>
 #include <cstring>
@@ -48,77 +49,6 @@ const char HTML_PAGE[] = R"x(<!DOCTYPE html>
   <script src="main.js" type="module"></script>
 </body>
 </html>
-)x";
-
-const char STYLE_CSS[] = R"x(/* taskman web */
-body { margin: 1em; font-family: system-ui, sans-serif; }
-#app { margin-top: 1em; }
-ul { list-style: none; padding: 0; }
-li { padding: 0.25em 0; border-bottom: 1px solid #eee; }
-li a { color: #06c; text-decoration: none; }
-li a:hover { text-decoration: underline; }
-.task-detail { max-width: 40em; margin-top: 1em; }
-.error { color: #c00; }
-)x";
-
-const char MAIN_JS[] = R"x(
-const app = document.getElementById('app');
-
-async function loadTasks(limit = 20, page = 1) {
-  app.innerHTML = '';
-  try {
-    const r = await fetch(`/tasks?limit=${limit}&page=${page}`);
-    if (!r.ok) { app.innerHTML = `<p class="error">Erreur ${r.status}</p>`; return; }
-    const data = await r.json();
-    if (!Array.isArray(data) || data.length === 0) {
-      app.innerHTML = '<p>Aucune tâche.</p>';
-      return;
-    }
-    const ul = document.createElement('ul');
-    for (const t of data) {
-      const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.href = '#'; a.textContent = (t.title || t.id || 'sans titre');
-      a.dataset.id = t.id;
-      a.addEventListener('click', (e) => { e.preventDefault(); loadTask(t.id); });
-      li.appendChild(a);
-      ul.appendChild(li);
-    }
-    app.appendChild(ul);
-  } catch (e) {
-    app.innerHTML = `<p class="error">${e.message}</p>`;
-  }
-}
-
-async function loadTask(id) {
-  app.innerHTML = '';
-  try {
-    const r = await fetch(`/task/${id}`);
-    if (!r.ok) {
-      app.innerHTML = r.status === 404 ? '<p class="error">Tâche introuvable.</p>' : `<p class="error">Erreur ${r.status}</p>`;
-      return;
-    }
-    const t = await r.json();
-    const div = document.createElement('div');
-    div.className = 'task-detail';
-    div.innerHTML = `<p><strong>${escapeHtml(t.title || '')}</strong></p>
-<p>${escapeHtml(t.description || '')}</p>
-<p>Statut: ${escapeHtml(t.status || '')} | Rôle: ${escapeHtml(t.role || '')}</p>
-<p><a href="#" id="back">← Liste des tâches</a></p>`;
-    div.querySelector('#back').addEventListener('click', (e) => { e.preventDefault(); loadTasks(); });
-    app.appendChild(div);
-  } catch (e) {
-    app.innerHTML = `<p class="error">${e.message}</p>`;
-  }
-}
-
-function escapeHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-loadTasks();
 )x";
 
 } // namespace

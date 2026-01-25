@@ -1,0 +1,9 @@
+/* taskman web */
+body { margin: 1em; font-family: system-ui, sans-serif; }
+#app { margin-top: 1em; }
+ul { list-style: none; padding: 0; }
+li { padding: 0.25em 0; border-bottom: 1px solid #eee; }
+li a { color: #06c; text-decoration: none; }
+li a:hover { text-decoration: underline; }
+.task-detail { max-width: 40em; margin-top: 1em; }
+.error { color: #c00; }
