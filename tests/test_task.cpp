@@ -319,3 +319,36 @@ TEST_CASE("cmd_task_dep_remove — idempotent (dépendance absente)", "[task]") 
     int r = run_task_dep_remove(db, id1, id2);
     REQUIRE(r == 0);
 }
+
+TEST_CASE("cmd_task_add — --format text", "[task]") {
+    Database db;
+    setup_db(db);
+    std::string out = run_task_add_capture(db, {"task:add", "--title", "Ma tâche", "--phase", "p1",
+        "--description", "Desc", "--role", "developer", "--format", "text"});
+    REQUIRE(out.find("title: Ma tâche") != std::string::npos);
+    REQUIRE(out.find("description: Desc") != std::string::npos);
+    REQUIRE(out.find("status: to_do") != std::string::npos);
+    REQUIRE(out.find("role: developer") != std::string::npos);
+    REQUIRE(out.find("id:") != std::string::npos);
+}
+
+TEST_CASE("cmd_task_get — --format text", "[task]") {
+    Database db;
+    setup_db(db);
+    std::string out = run_task_add_capture(db, {"task:add", "--title", "T1", "--phase", "p1"});
+    std::string id = nlohmann::json::parse(out)["id"].get<std::string>();
+    std::string get_out = run_task_get_capture(db, {"task:get", id, "--format", "text"});
+    REQUIRE(get_out.find("title: T1") != std::string::npos);
+    REQUIRE(get_out.find("status: to_do") != std::string::npos);
+}
+
+TEST_CASE("cmd_task_list — --format text", "[task]") {
+    Database db;
+    setup_db(db);
+    run_task_add(db, {"task:add", "--title", "A", "--phase", "p1"});
+    run_task_add(db, {"task:add", "--title", "B", "--phase", "p1"});
+    std::string out = run_task_list(db, {"--format", "text"});
+    REQUIRE(out.find("title: A") != std::string::npos);
+    REQUIRE(out.find("title: B") != std::string::npos);
+    REQUIRE(out.find("---") != std::string::npos);
+}

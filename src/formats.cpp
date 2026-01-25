@@ -1,0 +1,94 @@
+/**
+ * Implémentation des formats de sortie : JSON (phase, milestone, task) et text (task).
+ */
+
+#include "formats.hpp"
+#include <iostream>
+
+namespace {
+
+bool parse_int(const std::string& s, int& out) {
+    try {
+        size_t pos = 0;
+        out = std::stoi(s, &pos);
+        return pos == s.size();
+    } catch (...) {
+        return false;
+    }
+}
+
+void set_or_null(nlohmann::json& obj, const std::string& key,
+                 const std::optional<std::string>& v) {
+    if (!v.has_value()) {
+        obj[key] = nullptr;
+        return;
+    }
+    obj[key] = *v;
+}
+
+void set_or_null_int(nlohmann::json& obj, const std::string& key,
+                     const std::optional<std::string>& v) {
+    if (!v.has_value()) {
+        obj[key] = nullptr;
+        return;
+    }
+    int n = 0;
+    if (parse_int(*v, n)) {
+        obj[key] = n;
+    } else {
+        obj[key] = *v;
+    }
+}
+
+} // namespace
+
+namespace taskman {
+
+void phase_to_json(nlohmann::json& out, const Row& row) {
+    auto get = [&row](const char* k) { return row.count(k) ? row.at(k) : std::nullopt; };
+    set_or_null(out, "id", get("id"));
+    set_or_null(out, "name", get("name"));
+    set_or_null(out, "status", get("status"));
+    set_or_null_int(out, "sort_order", get("sort_order"));
+}
+
+void milestone_to_json(nlohmann::json& out, const Row& row) {
+    auto get = [&row](const char* k) { return row.count(k) ? row.at(k) : std::nullopt; };
+    set_or_null(out, "id", get("id"));
+    set_or_null(out, "phase_id", get("phase_id"));
+    set_or_null(out, "name", get("name"));
+    set_or_null(out, "criterion", get("criterion"));
+    set_or_null_int(out, "reached", get("reached"));
+}
+
+void task_to_json(nlohmann::json& out, const Row& row) {
+    auto get = [&row](const char* k) { return row.count(k) ? row.at(k) : std::nullopt; };
+    set_or_null(out, "id", get("id"));
+    set_or_null(out, "phase_id", get("phase_id"));
+    set_or_null(out, "milestone_id", get("milestone_id"));
+    set_or_null(out, "title", get("title"));
+    set_or_null(out, "description", get("description"));
+    set_or_null(out, "status", get("status"));
+    set_or_null_int(out, "sort_order", get("sort_order"));
+    set_or_null(out, "role", get("role"));
+}
+
+void print_task_text(const Row& row) {
+    auto get = [&row](const char* k) -> std::string {
+        auto it = row.find(k);
+        if (it == row.end() || !it->second.has_value()) return "";
+        return *it->second;
+    };
+    // Spec : titre, description, status, role sur lignes distinctes ; puis id, phase_id, …
+    std::cout << "title: " << get("title") << "\n";
+    std::cout << "description: " << get("description") << "\n";
+    std::cout << "status: " << get("status") << "\n";
+    std::cout << "role: " << get("role") << "\n";
+    std::cout << "id: " << get("id") << "\n";
+    std::cout << "phase_id: " << get("phase_id") << "\n";
+    std::cout << "milestone_id: " << get("milestone_id") << "\n";
+    std::string so = get("sort_order");
+    if (!so.empty()) std::cout << "sort_order: " << so << "\n";
+}
+
+} // namespace taskman

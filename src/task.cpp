@@ -4,6 +4,7 @@
 
 #include "task.hpp"
 #include "db.hpp"
+#include "formats.hpp"
 #include <cxxopts.hpp>
 #include <nlohmann/json.hpp>
 #include <uuid.h>
@@ -34,64 +35,12 @@ bool is_valid_role(const std::string& s) {
     return false;
 }
 
-bool parse_int(const std::string& s, int& out) {
-    try {
-        size_t pos = 0;
-        out = std::stoi(s, &pos);
-        return pos == s.size();
-    } catch (...) {
-        return false;
-    }
-}
-
 std::string generate_uuid_v4() {
     std::random_device rd;
     std::mt19937 rng(rd());
     uuids::uuid_random_generator gen(rng);
     uuids::uuid u = gen();
     return uuids::to_string(u);
-}
-
-void task_row_to_json(nlohmann::json& obj, const std::string& key,
-                     const std::optional<std::string>& v) {
-    if (!v.has_value()) {
-        obj[key] = nullptr;
-        return;
-    }
-    const std::string& s = *v;
-    if (key == "sort_order" && !s.empty()) {
-        int n = 0;
-        if (parse_int(s, n)) {
-            obj[key] = n;
-            return;
-        }
-    }
-    obj[key] = s;
-}
-
-void print_task_json(const std::map<std::string, std::optional<std::string>>& row) {
-    nlohmann::json obj;
-    for (const auto& kv : row) {
-        task_row_to_json(obj, kv.first, kv.second);
-    }
-    std::cout << obj.dump() << "\n";
-}
-
-void print_task_text(const std::map<std::string, std::optional<std::string>>& row) {
-    auto get = [&row](const char* k) -> std::string {
-        auto it = row.find(k);
-        if (it == row.end() || !it->second.has_value()) return "";
-        return *it->second;
-    };
-    std::cout << "id: " << get("id") << "\n";
-    std::cout << "phase_id: " << get("phase_id") << "\n";
-    std::cout << "milestone_id: " << get("milestone_id") << "\n";
-    std::cout << "title: " << get("title") << "\n";
-    std::cout << "description: " << get("description") << "\n";
-    std::cout << "status: " << get("status") << "\n";
-    std::cout << "role: " << get("role") << "\n";
-    std::string so = get("sort_order");
-    if (!so.empty()) std::cout << "sort_order: " << so << "\n";
 }
 
 } // namespace
@@ -172,7 +121,9 @@ int cmd_task_add(int argc, char* argv[], Database& db) {
     if (format == "text") {
         print_task_text(rows[0]);
     } else {
-        print_task_json(rows[0]);
+        nlohmann::json obj;
+        task_to_json(obj, rows[0]);
+        std::cout << obj.dump() << "\n";
     }
     return 0;
 }
@@ -218,7 +169,9 @@ int cmd_task_get(int argc, char* argv[], Database& db) {
     if (format == "text") {
         print_task_text(rows[0]);
     } else {
-        print_task_json(rows[0]);
+        nlohmann::json obj;
+        task_to_json(obj, rows[0]);
+        std::cout << obj.dump() << "\n";
     }
     return 0;
 }
@@ -294,9 +247,7 @@ int cmd_task_list(int argc, char* argv[], Database& db) {
         nlohmann::json arr = nlohmann::json::array();
         for (const auto& row : rows) {
             nlohmann::json obj;
-            for (const auto& kv : row) {
-                task_row_to_json(obj, kv.first, kv.second);
-            }
+            task_to_json(obj, row);
             arr.push_back(obj);
         }
         std::cout << arr.dump() << "\n";

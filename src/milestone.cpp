@@ -4,6 +4,7 @@
 
 #include "milestone.hpp"
 #include "db.hpp"
+#include "formats.hpp"
 #include <cxxopts.hpp>
 #include <nlohmann/json.hpp>
 #include <iostream>
@@ -25,23 +26,6 @@ bool parse_int(const std::string& s, int& out) {
 
 bool is_valid_reached(const std::string& s) {
     return s == "0" || s == "1";
-}
-
-void row_to_json(nlohmann::json& obj, const std::string& key,
-                 const std::optional<std::string>& v) {
-    if (!v.has_value()) {
-        obj[key] = nullptr;
-        return;
-    }
-    const std::string& s = *v;
-    if (key == "reached") {
-        int n = 0;
-        if (parse_int(s, n)) {
-            obj[key] = n;
-            return;
-        }
-    }
-    obj[key] = s;
 }
 
 } // namespace
@@ -199,9 +183,7 @@ int cmd_milestone_list(int argc, char* argv[], Database& db) {
     nlohmann::json arr = nlohmann::json::array();
     for (const auto& row : rows) {
         nlohmann::json obj;
-        for (const auto& kv : row) {
-            row_to_json(obj, kv.first, kv.second);
-        }
+        milestone_to_json(obj, row);
         arr.push_back(obj);
     }
     std::cout << arr.dump() << "\n";

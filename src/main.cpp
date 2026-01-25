@@ -2,6 +2,7 @@
  * taskman — point d'entrée
  * Lit TASKMAN_DB_NAME (env), défaut project_tasks.db.
  * Dispatch argc/argv vers sous-commandes.
+ * Codes de sortie : 0 = succès, 1 = erreur (parsing, DB, validation des args).
  */
 
 #include "db.hpp"

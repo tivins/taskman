@@ -43,9 +43,9 @@
 
 ## 7. Formats de sortie
 
-- [ ] JSON : nlohmann/json ; structures pour phase, milestone, task (avec champs optionnels omis ou null selon spec)
-- [ ] Text : format lisible (ex. titre, description, status, role sur lignes distinctes) pour task:add, task:get, task:list
-- [ ] Codes de sortie : 0 succès, 1 erreur (conventions pour parsing, DB, validation des args)
+- [x] JSON : nlohmann/json ; structures pour phase, milestone, task (avec champs optionnels omis ou null selon spec)
+- [x] Text : format lisible (ex. titre, description, status, role sur lignes distinctes) pour task:add, task:get, task:list
+- [x] Codes de sortie : 0 succès, 1 erreur (conventions pour parsing, DB, validation des args)
 
 ## 8. Qualité et déploiement
 

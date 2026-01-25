@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.8.0] — 2025-01-25
+
+### Ajouté
+
+- Phase 7 — Formats de sortie :
+  - **JSON** : module `formats` (phase_to_json, milestone_to_json, task_to_json) ; structures cohérentes pour phase, milestone, task ; champs optionnels absents → `null` ; `sort_order` et `reached` en nombre entier
+  - **Text** : `print_task_text` pour task:add, task:get, task:list ; ordre : titre, description, status, role, puis id, phase_id, milestone_id, sort_order
+  - **Codes de sortie** : 0 succès, 1 erreur (parsing, DB, validation des args), documentés dans main.cpp
+- Tests : cmd_task_add --format text, cmd_task_get --format text, cmd_task_list --format text
+
 ## [0.7.0] — 2025-01-25
 
 ### Ajouté

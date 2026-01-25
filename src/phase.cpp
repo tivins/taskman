@@ -4,6 +4,7 @@
 
 #include "phase.hpp"
 #include "db.hpp"
+#include "formats.hpp"
 #include <cxxopts.hpp>
 #include <nlohmann/json.hpp>
 #include <cstdlib>
@@ -31,23 +32,6 @@ bool parse_int(const std::string& s, int& out) {
     } catch (...) {
         return false;
     }
-}
-
-void row_to_json(nlohmann::json& obj, const std::string& key,
-                 const std::optional<std::string>& v) {
-    if (!v.has_value()) {
-        obj[key] = nullptr;
-        return;
-    }
-    const std::string& s = *v;
-    if (key == "sort_order" && !s.empty()) {
-        int n = 0;
-        if (parse_int(s, n)) {
-            obj[key] = n;
-            return;
-        }
-    }
-    obj[key] = s;
 }
 
 } // namespace
@@ -190,9 +174,7 @@ int cmd_phase_list(int argc, char* argv[], Database& db) {
     nlohmann::json arr = nlohmann::json::array();
     for (const auto& row : rows) {
         nlohmann::json obj;
-        for (const auto& kv : row) {
-            row_to_json(obj, kv.first, kv.second);
-        }
+        phase_to_json(obj, row);
         arr.push_back(obj);
     }
     std::cout << arr.dump() << "\n";
