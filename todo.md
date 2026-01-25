@@ -31,10 +31,10 @@
 
 ## 5. Tasks
 
-- [ ] `task:add` : --title, --phase, [--description], [--role], [--milestone] ; génération ID (UUID v4) ; INSERT ; sortie = tâche créée (comme `task:get`)
-- [ ] `task:get` : <id> ; [--format json|text] ; JSON par défaut
-- [ ] `task:list` : [--phase], [--status], [--role] ; [--format json|text]
-- [ ] `task:edit` : <id> + champs optionnels → UPDATE partiel
+- [x] `task:add` : --title, --phase, [--description], [--role], [--milestone] ; génération ID (UUID v4) ; INSERT ; sortie = tâche créée (comme `task:get`)
+- [x] `task:get` : <id> ; [--format json|text] ; JSON par défaut
+- [x] `task:list` : [--phase], [--status], [--role] ; [--format json|text]
+- [x] `task:edit` : <id> + champs optionnels → UPDATE partiel
 
 ## 6. Dépendances entre tâches
 
@@ -49,7 +49,7 @@
 
 ## 8. Qualité et déploiement
 
-- [x] Tests : unitaires (helpers DB, formatage, milestone:add/edit/list) ; [ ] unitaires génération ID (avec task:add) ; [ ] intégration (appels `taskman` en subprocess, fixtures DB)
+- [x] Tests : unitaires (helpers DB, formatage, milestone:add/edit/list) ; [x] unitaires génération ID (avec task:add) ; [ ] intégration (appels `taskman` en subprocess, fixtures DB)
 - [ ] GitHub Actions : workflow build (Release) pour Windows (MSVC ou MinGW), Linux (GCC/Clang), macOS (Clang) ; artefacts binaires
 - [ ] Changelog et version (package.json ou VERSION / CHANGELOG.md) alignés avec les livrables
 

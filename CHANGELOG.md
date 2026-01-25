@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.0] — 2025-01-25
+
+### Ajouté
+
+- Phase 5 — Tasks :
+  - `task:add` : --title, --phase, [--description], [--role], [--milestone], [--format json|text] ; ID UUID v4 ; INSERT ; sortie = tâche créée (JSON ou text)
+  - `task:get` : <id> [--format json|text] ; JSON par défaut
+  - `task:list` : [--phase], [--status], [--role], [--format json|text] ; SELECT filtré ; sortie JSON ou text
+  - `task:edit` : <id> [--title] [--description] [--status] [--role] [--milestone] → UPDATE partiel
+- Sorties JSON et text pour task (champs id, phase_id, milestone_id, title, description, status, sort_order, role)
+- Validation --role, --status (to_do, in_progress, done ; project-manager, project-designer, software-architect, developer, summary-writer, documentation-writer)
+- Tests unitaires : `test_task.cpp` (task:add avec UUID v4, task:get, task:list, task:edit, validations)
+
 ## [0.5.0] — 2025-01-25
 
 ### Ajouté

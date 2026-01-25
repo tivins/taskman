@@ -7,6 +7,7 @@
 #include "db.hpp"
 #include "milestone.hpp"
 #include "phase.hpp"
+#include "task.hpp"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -75,20 +76,24 @@ int main(int argc, char* argv[]) {
         return taskman::cmd_milestone_list(argc - 1, argv + 1, db);
     }
     if (std::strcmp(cmd, "task:add") == 0) {
-        std::cout << "task:add: not implemented yet\n";
-        return 0;
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        return taskman::cmd_task_add(argc - 1, argv + 1, db);
     }
     if (std::strcmp(cmd, "task:edit") == 0) {
-        std::cout << "task:edit: not implemented yet\n";
-        return 0;
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        return taskman::cmd_task_edit(argc - 1, argv + 1, db);
     }
     if (std::strcmp(cmd, "task:get") == 0) {
-        std::cout << "task:get: not implemented yet\n";
-        return 0;
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        return taskman::cmd_task_get(argc - 1, argv + 1, db);
     }
     if (std::strcmp(cmd, "task:list") == 0) {
-        std::cout << "task:list: not implemented yet\n";
-        return 0;
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        return taskman::cmd_task_list(argc - 1, argv + 1, db);
     }
     if (std::strcmp(cmd, "task:dep:add") == 0) {
         std::cout << "task:dep:add: not implemented yet\n";

@@ -1,4 +1,4 @@
-# Project manager | tasks manager
+# Taskman
 
 ## But
 
