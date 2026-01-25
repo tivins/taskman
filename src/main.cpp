@@ -96,12 +96,14 @@ int main(int argc, char* argv[]) {
         return taskman::cmd_task_list(argc - 1, argv + 1, db);
     }
     if (std::strcmp(cmd, "task:dep:add") == 0) {
-        std::cout << "task:dep:add: not implemented yet\n";
-        return 0;
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        return taskman::cmd_task_dep_add(argc - 1, argv + 1, db);
     }
     if (std::strcmp(cmd, "task:dep:remove") == 0) {
-        std::cout << "task:dep:remove: not implemented yet\n";
-        return 0;
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        return taskman::cmd_task_dep_remove(argc - 1, argv + 1, db);
     }
 
     std::cerr << "Unknown command: " << cmd << "\n";

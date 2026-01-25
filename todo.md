@@ -38,8 +38,8 @@
 
 ## 6. Dépendances entre tâches
 
-- [ ] `task:dep:add` : <task-id> <dep-id> → INSERT dans task_deps ; vérifier existence des tâches
-- [ ] `task:dep:remove` : <task-id> <dep-id> → DELETE
+- [x] `task:dep:add` : <task-id> <dep-id> → INSERT dans task_deps ; vérifier existence des tâches
+- [x] `task:dep:remove` : <task-id> <dep-id> → DELETE
 
 ## 7. Formats de sortie
 

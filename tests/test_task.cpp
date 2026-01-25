@@ -78,6 +78,22 @@ static int run_task_edit(Database& db, std::vector<std::string> args) {
     return cmd_task_edit(static_cast<int>(ptrs.size() - 1), ptrs.data(), db);
 }
 
+static int run_task_dep_add(Database& db, std::string task_id, std::string dep_id) {
+    std::vector<std::string> args = {"task:dep:add", std::move(task_id), std::move(dep_id)};
+    std::vector<char*> ptrs;
+    for (auto& s : args) ptrs.push_back(s.data());
+    ptrs.push_back(nullptr);
+    return cmd_task_dep_add(static_cast<int>(ptrs.size() - 1), ptrs.data(), db);
+}
+
+static int run_task_dep_remove(Database& db, std::string task_id, std::string dep_id) {
+    std::vector<std::string> args = {"task:dep:remove", std::move(task_id), std::move(dep_id)};
+    std::vector<char*> ptrs;
+    for (auto& s : args) ptrs.push_back(s.data());
+    ptrs.push_back(nullptr);
+    return cmd_task_dep_remove(static_cast<int>(ptrs.size() - 1), ptrs.data(), db);
+}
+
 static bool looks_like_uuid(const std::string& s) {
     // format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (36 chars, 4 hyphens)
     if (s.size() != 36) return false;
@@ -211,4 +227,95 @@ TEST_CASE("cmd_task_edit — --status invalide", "[task]") {
     std::string id = nlohmann::json::parse(out)["id"].get<std::string>();
     int r = run_task_edit(db, {"task:edit", id, "--status", "invalid"});
     REQUIRE(r == 1);
+}
+
+TEST_CASE("cmd_task_dep_add — succès", "[task]") {
+    Database db;
+    setup_db(db);
+    std::string out1 = run_task_add_capture(db, {"task:add", "--title", "T1", "--phase", "p1"});
+    std::string out2 = run_task_add_capture(db, {"task:add", "--title", "T2", "--phase", "p1"});
+    std::string id1 = nlohmann::json::parse(out1)["id"].get<std::string>();
+    std::string id2 = nlohmann::json::parse(out2)["id"].get<std::string>();
+    int r = run_task_dep_add(db, id1, id2);
+    REQUIRE(r == 0);
+    auto rows = db.query("SELECT task_id, depends_on FROM task_deps WHERE task_id = ? AND depends_on = ?", {id1, id2});
+    REQUIRE(rows.size() == 1u);
+    REQUIRE(rows[0]["task_id"].value() == id1);
+    REQUIRE(rows[0]["depends_on"].value() == id2);
+}
+
+TEST_CASE("cmd_task_dep_add — tâche (task-id) inexistante", "[task]") {
+    Database db;
+    setup_db(db);
+    std::string out = run_task_add_capture(db, {"task:add", "--title", "T", "--phase", "p1"});
+    std::string id = nlohmann::json::parse(out)["id"].get<std::string>();
+    std::stringstream sink;
+    std::streambuf* prev = std::cerr.rdbuf(sink.rdbuf());
+    int r = run_task_dep_add(db, "00000000-0000-0000-0000-000000000001", id);
+    std::cerr.rdbuf(prev);
+    REQUIRE(r == 1);
+}
+
+TEST_CASE("cmd_task_dep_add — tâche (dep-id) inexistante", "[task]") {
+    Database db;
+    setup_db(db);
+    std::string out = run_task_add_capture(db, {"task:add", "--title", "T", "--phase", "p1"});
+    std::string id = nlohmann::json::parse(out)["id"].get<std::string>();
+    std::stringstream sink;
+    std::streambuf* prev = std::cerr.rdbuf(sink.rdbuf());
+    int r = run_task_dep_add(db, id, "00000000-0000-0000-0000-000000000002");
+    std::cerr.rdbuf(prev);
+    REQUIRE(r == 1);
+}
+
+TEST_CASE("cmd_task_dep_add — auto-dépendance rejetée", "[task]") {
+    Database db;
+    setup_db(db);
+    std::string out = run_task_add_capture(db, {"task:add", "--title", "T", "--phase", "p1"});
+    std::string id = nlohmann::json::parse(out)["id"].get<std::string>();
+    std::stringstream sink;
+    std::streambuf* prev = std::cerr.rdbuf(sink.rdbuf());
+    int r = run_task_dep_add(db, id, id);
+    std::cerr.rdbuf(prev);
+    REQUIRE(r == 1);
+}
+
+TEST_CASE("cmd_task_dep_add — doublon rejeté", "[task]") {
+    Database db;
+    setup_db(db);
+    std::string out1 = run_task_add_capture(db, {"task:add", "--title", "T1", "--phase", "p1"});
+    std::string out2 = run_task_add_capture(db, {"task:add", "--title", "T2", "--phase", "p1"});
+    std::string id1 = nlohmann::json::parse(out1)["id"].get<std::string>();
+    std::string id2 = nlohmann::json::parse(out2)["id"].get<std::string>();
+    REQUIRE(run_task_dep_add(db, id1, id2) == 0);
+    std::stringstream sink;
+    std::streambuf* prev = std::cerr.rdbuf(sink.rdbuf());
+    int r = run_task_dep_add(db, id1, id2);
+    std::cerr.rdbuf(prev);
+    REQUIRE(r == 1);
+}
+
+TEST_CASE("cmd_task_dep_remove — succès", "[task]") {
+    Database db;
+    setup_db(db);
+    std::string out1 = run_task_add_capture(db, {"task:add", "--title", "T1", "--phase", "p1"});
+    std::string out2 = run_task_add_capture(db, {"task:add", "--title", "T2", "--phase", "p1"});
+    std::string id1 = nlohmann::json::parse(out1)["id"].get<std::string>();
+    std::string id2 = nlohmann::json::parse(out2)["id"].get<std::string>();
+    REQUIRE(run_task_dep_add(db, id1, id2) == 0);
+    int r = run_task_dep_remove(db, id1, id2);
+    REQUIRE(r == 0);
+    auto rows = db.query("SELECT 1 FROM task_deps WHERE task_id = ? AND depends_on = ?", {id1, id2});
+    REQUIRE(rows.empty());
+}
+
+TEST_CASE("cmd_task_dep_remove — idempotent (dépendance absente)", "[task]") {
+    Database db;
+    setup_db(db);
+    std::string out1 = run_task_add_capture(db, {"task:add", "--title", "T1", "--phase", "p1"});
+    std::string out2 = run_task_add_capture(db, {"task:add", "--title", "T2", "--phase", "p1"});
+    std::string id1 = nlohmann::json::parse(out1)["id"].get<std::string>();
+    std::string id2 = nlohmann::json::parse(out2)["id"].get<std::string>();
+    int r = run_task_dep_remove(db, id1, id2);
+    REQUIRE(r == 0);
 }

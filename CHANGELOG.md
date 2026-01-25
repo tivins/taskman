@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.0] — 2025-01-25
+
+### Ajouté
+
+- Phase 6 — Dépendances entre tâches :
+  - `task:dep:add` : \<task-id\> \<dep-id\> → INSERT dans task_deps ; vérification existence des deux tâches ; rejet auto-dépendance et doublon
+  - `task:dep:remove` : \<task-id\> \<dep-id\> → DELETE
+- Tests unitaires : task:dep:add (succès, tâche inexistante, auto-dépendance, doublon), task:dep:remove (succès, idempotent)
+
 ## [0.6.0] — 2025-01-25
 
 ### Ajouté

@@ -390,4 +390,93 @@ int cmd_task_edit(int argc, char* argv[], Database& db) {
     return 0;
 }
 
+int cmd_task_dep_add(int argc, char* argv[], Database& db) {
+    cxxopts::Options opts("taskman task:dep:add", "Add a task dependency: task-id depends on dep-id");
+    opts.add_options()
+        ("task-id", "Task ID (the task that depends on another)", cxxopts::value<std::string>())
+        ("dep-id", "Dependency task ID (must be completed first)", cxxopts::value<std::string>());
+    opts.parse_positional({"task-id", "dep-id"});
+
+    cxxopts::ParseResult result;
+    try {
+        result = opts.parse(argc, argv);
+    } catch (const cxxopts::exceptions::exception& e) {
+        std::cerr << "taskman: " << e.what() << "\n";
+        return 1;
+    }
+
+    std::string task_id, dep_id;
+    try {
+        task_id = result["task-id"].as<std::string>();
+        dep_id = result["dep-id"].as<std::string>();
+    } catch (const cxxopts::exceptions::exception&) {
+        std::cerr << "taskman: task:dep:add requires <task-id> and <dep-id>\n";
+        return 1;
+    }
+    if (task_id.empty() || dep_id.empty()) {
+        std::cerr << "taskman: task:dep:add requires <task-id> and <dep-id>\n";
+        return 1;
+    }
+    if (task_id == dep_id) {
+        std::cerr << "taskman: a task cannot depend on itself\n";
+        return 1;
+    }
+
+    auto rows_task = db.query("SELECT 1 FROM tasks WHERE id = ?", {task_id});
+    if (rows_task.empty()) {
+        std::cerr << "taskman: task not found: " << task_id << "\n";
+        return 1;
+    }
+    auto rows_dep = db.query("SELECT 1 FROM tasks WHERE id = ?", {dep_id});
+    if (rows_dep.empty()) {
+        std::cerr << "taskman: task not found: " << dep_id << "\n";
+        return 1;
+    }
+    auto rows_exist = db.query("SELECT 1 FROM task_deps WHERE task_id = ? AND depends_on = ?",
+                               {task_id, dep_id});
+    if (!rows_exist.empty()) {
+        std::cerr << "taskman: dependency already exists\n";
+        return 1;
+    }
+
+    if (!db.run("INSERT INTO task_deps (task_id, depends_on) VALUES (?, ?)", {task_id, dep_id})) {
+        return 1;
+    }
+    return 0;
+}
+
+int cmd_task_dep_remove(int argc, char* argv[], Database& db) {
+    cxxopts::Options opts("taskman task:dep:remove", "Remove a task dependency");
+    opts.add_options()
+        ("task-id", "Task ID", cxxopts::value<std::string>())
+        ("dep-id", "Dependency task ID to remove", cxxopts::value<std::string>());
+    opts.parse_positional({"task-id", "dep-id"});
+
+    cxxopts::ParseResult result;
+    try {
+        result = opts.parse(argc, argv);
+    } catch (const cxxopts::exceptions::exception& e) {
+        std::cerr << "taskman: " << e.what() << "\n";
+        return 1;
+    }
+
+    std::string task_id, dep_id;
+    try {
+        task_id = result["task-id"].as<std::string>();
+        dep_id = result["dep-id"].as<std::string>();
+    } catch (const cxxopts::exceptions::exception&) {
+        std::cerr << "taskman: task:dep:remove requires <task-id> and <dep-id>\n";
+        return 1;
+    }
+    if (task_id.empty() || dep_id.empty()) {
+        std::cerr << "taskman: task:dep:remove requires <task-id> and <dep-id>\n";
+        return 1;
+    }
+
+    if (!db.run("DELETE FROM task_deps WHERE task_id = ? AND depends_on = ?", {task_id, dep_id})) {
+        return 1;
+    }
+    return 0;
+}
+
 } // namespace taskman

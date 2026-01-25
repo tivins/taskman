@@ -22,6 +22,12 @@ int cmd_task_list(int argc, char* argv[], Database& db);
 /** task:edit <id> [--title ...] [--description ...] [--status ...] [--role ...] [--milestone <id>] → UPDATE partiel */
 int cmd_task_edit(int argc, char* argv[], Database& db);
 
+/** task:dep:add <task-id> <dep-id> → INSERT dans task_deps ; vérifie existence des tâches. */
+int cmd_task_dep_add(int argc, char* argv[], Database& db);
+
+/** task:dep:remove <task-id> <dep-id> → DELETE. */
+int cmd_task_dep_remove(int argc, char* argv[], Database& db);
+
 } // namespace taskman
 
 #endif /* TASKMAN_TASK_HPP */
