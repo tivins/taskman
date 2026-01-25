@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.9.5] - 2026-01-25
+
+- **taskman \<command\> --help** (or **-h**): detailed help for each command (options, required/optional args). The main help (`taskman -h`) indicates: *Use 'taskman \<command\> --help' for command-specific options.*
+
 ## [0.9.3] - 2026-01-25
 
 - **Options**: `-v`, `--version` — show version and exit.

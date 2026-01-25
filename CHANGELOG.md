@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.9.5] - 2026-01-25
+
+### Added
+
+- **taskman \<command\> --help** (or **-h**): detailed per-command help. Commands using cxxopts (phase:add/edit, milestone:add/edit/list, task:add/get/list/edit, task:dep:add/remove) show options via `opts.help()`. `init` and `phase:list` have dedicated help strings. The main help (`taskman -h`) now includes: *Use 'taskman \<command\> --help' for command-specific options.*
+
 ## [0.9.4] - 2026-01-25
 
 ### Added

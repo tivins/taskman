@@ -63,6 +63,7 @@ std::string get_usage_string() {
         ss << " " << COMMANDS[i].summary << "\n";
     }
     ss << "\n"
+              << "Use 'taskman <command> --help' for command-specific options.\n\n"
               << "Environment variable:\n"
               << "  TASKMAN_DB_NAME (default: project_tasks.db)\n\n";
     return ss.str();
@@ -94,6 +95,12 @@ int main(int argc, char* argv[]) {
 
     // Dispatch vers sous-commandes (implémentées en phases suivantes)
     if (std::strcmp(cmd, "init") == 0) {
+        if (argc >= 3 && (std::strcmp(argv[2], "--help") == 0 || std::strcmp(argv[2], "-h") == 0)) {
+            std::cout << "taskman init\n\n"
+                         "Create and initialize the database tables (phases, milestones, tasks, task_deps).\n"
+                         "Run once when starting a new project.\n\n";
+            return 0;
+        }
         taskman::Database db;
         if (!db.open(get_db_path())) return 1;
         if (!taskman::init_schema(db)) return 1;

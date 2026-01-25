@@ -8,6 +8,7 @@
 #include <cxxopts.hpp>
 #include <nlohmann/json.hpp>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -46,6 +47,12 @@ int cmd_phase_add(int argc, char* argv[], Database& db) {
         ("status", "Status: to_do, in_progress, done", cxxopts::value<std::string>()->default_value("to_do"))
         ("sort-order", "Sort order (integer)", cxxopts::value<std::string>());
 
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << opts.help() << '\n';
+            return 0;
+        }
+    }
     cxxopts::ParseResult result;
     try {
         result = opts.parse(argc, argv);
@@ -105,6 +112,12 @@ int cmd_phase_edit(int argc, char* argv[], Database& db) {
         ("sort-order", "Sort order (integer)", cxxopts::value<std::string>());
     opts.parse_positional({"id"});
 
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << opts.help() << '\n';
+            return 0;
+        }
+    }
     cxxopts::ParseResult result;
     try {
         result = opts.parse(argc, argv);
@@ -168,8 +181,13 @@ int cmd_phase_edit(int argc, char* argv[], Database& db) {
 }
 
 int cmd_phase_list(int argc, char* argv[], Database& db) {
-    (void)argc;
-    (void)argv;
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << "taskman phase:list\n\n"
+                         "List all phases as a JSON array, ordered by sort_order.\nNo options.\n\n";
+            return 0;
+        }
+    }
     auto rows = db.query("SELECT id, name, status, sort_order FROM phases ORDER BY sort_order");
     nlohmann::json arr = nlohmann::json::array();
     for (const auto& row : rows) {

@@ -7,6 +7,7 @@
 #include "formats.hpp"
 #include <cxxopts.hpp>
 #include <nlohmann/json.hpp>
+#include <cstring>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -41,6 +42,12 @@ int cmd_milestone_add(int argc, char* argv[], Database& db) {
         ("criterion", "Criterion", cxxopts::value<std::string>())
         ("reached", "Reached: 0 or 1", cxxopts::value<std::string>()->default_value("0"));
 
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << opts.help() << '\n';
+            return 0;
+        }
+    }
     cxxopts::ParseResult result;
     try {
         result = opts.parse(argc, argv);
@@ -96,6 +103,12 @@ int cmd_milestone_edit(int argc, char* argv[], Database& db) {
         ("phase", "Phase ID", cxxopts::value<std::string>());
     opts.parse_positional({"id"});
 
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << opts.help() << '\n';
+            return 0;
+        }
+    }
     cxxopts::ParseResult result;
     try {
         result = opts.parse(argc, argv);
@@ -161,6 +174,12 @@ int cmd_milestone_list(int argc, char* argv[], Database& db) {
     opts.add_options()
         ("phase", "Filter by phase ID", cxxopts::value<std::string>());
 
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << opts.help() << '\n';
+            return 0;
+        }
+    }
     cxxopts::ParseResult result;
     try {
         result = opts.parse(argc, argv);

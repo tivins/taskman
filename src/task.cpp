@@ -9,6 +9,7 @@
 #include <nlohmann/json.hpp>
 #include <uuid.h>
 #include <random>
+#include <cstring>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -57,6 +58,12 @@ int cmd_task_add(int argc, char* argv[], Database& db) {
         ("milestone", "Milestone ID", cxxopts::value<std::string>())
         ("format", "Output: json or text", cxxopts::value<std::string>()->default_value("json"));
 
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << opts.help() << '\n';
+            return 0;
+        }
+    }
     cxxopts::ParseResult result;
     try {
         result = opts.parse(argc, argv);
@@ -135,6 +142,12 @@ int cmd_task_get(int argc, char* argv[], Database& db) {
         ("format", "Output: json or text", cxxopts::value<std::string>()->default_value("json"));
     opts.parse_positional({"id"});
 
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << opts.help() << '\n';
+            return 0;
+        }
+    }
     cxxopts::ParseResult result;
     try {
         result = opts.parse(argc, argv);
@@ -184,6 +197,12 @@ int cmd_task_list(int argc, char* argv[], Database& db) {
         ("role", "Filter by role", cxxopts::value<std::string>())
         ("format", "Output: json or text", cxxopts::value<std::string>()->default_value("json"));
 
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << opts.help() << '\n';
+            return 0;
+        }
+    }
     cxxopts::ParseResult result;
     try {
         result = opts.parse(argc, argv);
@@ -271,6 +290,12 @@ int cmd_task_edit(int argc, char* argv[], Database& db) {
         ("milestone", "Milestone ID", cxxopts::value<std::string>());
     opts.parse_positional({"id"});
 
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << opts.help() << '\n';
+            return 0;
+        }
+    }
     cxxopts::ParseResult result;
     try {
         result = opts.parse(argc, argv);
@@ -348,6 +373,12 @@ int cmd_task_dep_add(int argc, char* argv[], Database& db) {
         ("dep-id", "Dependency task ID (must be completed first)", cxxopts::value<std::string>());
     opts.parse_positional({"task-id", "dep-id"});
 
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << opts.help() << '\n';
+            return 0;
+        }
+    }
     cxxopts::ParseResult result;
     try {
         result = opts.parse(argc, argv);
@@ -403,6 +434,12 @@ int cmd_task_dep_remove(int argc, char* argv[], Database& db) {
         ("dep-id", "Dependency task ID to remove", cxxopts::value<std::string>());
     opts.parse_positional({"task-id", "dep-id"});
 
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << opts.help() << '\n';
+            return 0;
+        }
+    }
     cxxopts::ParseResult result;
     try {
         result = opts.parse(argc, argv);
