@@ -1,0 +1,58 @@
+# Todo — taskman
+
+## 1. Setup projet
+
+- [ ] Créer structure : `src/`, `third_party/` (ou `external/`)
+- [ ] CMakeLists.txt : C++17, type `executable` unique
+- [ ] Intégrer SQLite : amalgamation (sqlite3.c, sqlite3.h) dans `third_party/sqlite/`
+- [ ] Intégrer nlohmann/json (json.hpp) : FetchContent ou copie dans `third_party/`
+- [ ] Intégrer cxxopts : FetchContent ou copie dans `third_party/`
+- [ ] Intégrer lib UUID v4 : header-only (ex. [stduuid](https://github.com/mariusbancila/stduuid)) ou source vendorable
+- [ ] Lire `TASKMAN_DB_NAME` (env) ; défaut `project_tasks.db`
+- [ ] Point d’entrée `main.cpp` : dispatch `argc/argv` vers sous-commandes
+
+## 2. Base de données
+
+- [ ] Couche DB : init connexion, chemin `TASKMAN_DB_NAME`, open/create
+- [ ] `taskman init` : exécuter les 4 `CREATE TABLE IF NOT EXISTS` (phases, milestones, tasks, task_deps)
+- [ ] Helpers : exécution requêtes, gestion erreurs SQLite → code sortie 1 + stderr
+
+## 3. Phases
+
+- [ ] `phase:add` : --id, --name, [--status], [--sort-order] → INSERT
+- [ ] `phase:edit` : <id> + champs optionnels → UPDATE partiel
+- [ ] `phase:list` : SELECT * ORDER BY sort_order ; sortie JSON (structure à définir : tableau d’objets)
+
+## 4. Milestones
+
+- [ ] `milestone:add` : --id, --phase, [--name], [--criterion], [--reached] → INSERT
+- [ ] `milestone:edit` : <id> + champs optionnels (dont --phase) → UPDATE
+- [ ] `milestone:list` : [--phase <id>] → SELECT (filtré si --phase) ; sortie JSON
+
+## 5. Tasks
+
+- [ ] `task:add` : --title, --phase, [--description], [--role], [--milestone] ; génération ID (UUID v4) ; INSERT ; sortie = tâche créée (comme `task:get`)
+- [ ] `task:get` : <id> ; [--format json|text] ; JSON par défaut
+- [ ] `task:list` : [--phase], [--status], [--role] ; [--format json|text]
+- [ ] `task:edit` : <id> + champs optionnels → UPDATE partiel
+
+## 6. Dépendances entre tâches
+
+- [ ] `task:dep:add` : <task-id> <dep-id> → INSERT dans task_deps ; vérifier existence des tâches
+- [ ] `task:dep:remove` : <task-id> <dep-id> → DELETE
+
+## 7. Formats de sortie
+
+- [ ] JSON : nlohmann/json ; structures pour phase, milestone, task (avec champs optionnels omis ou null selon spec)
+- [ ] Text : format lisible (ex. titre, description, status, role sur lignes distinctes) pour task:add, task:get, task:list
+- [ ] Codes de sortie : 0 succès, 1 erreur (conventions pour parsing, DB, validation des args)
+
+## 8. Qualité et déploiement
+
+- [ ] Tests : unitaires (helpers DB, génération ID, formatage) ; intégration (appels `taskman` en subprocess, fixtures DB)
+- [ ] GitHub Actions : workflow build (Release) pour Windows (MSVC ou MinGW), Linux (GCC/Clang), macOS (Clang) ; artefacts binaires
+- [ ] Changelog et version (package.json ou VERSION / CHANGELOG.md) alignés avec les livrables
+
+---
+
+*Référence : `specs.md`*

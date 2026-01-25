@@ -114,14 +114,15 @@ taskman milestone:edit m1 --reached 1
 
 ### Organisation
 
-* code : `/src` ; build : CMake
+* code : `/src` ; build : CMake ; CI : GitHub Actions (build Release Win/Linux/macOS, artefacts binaires).
 
 ### Dépendances (intégrées, pas de runtime externe)
 
-* **SQLite** : [amalgamation](https://sqlite.org/amalgamation.html) (sqlite3.c + sqlite3.h) — 1 fichier C à compiler. Wrapper C++ header-only (ex. [sqlitepp](https://github.com/nicb1/sqlitepp) ou [sqlite-hpp](https://github.com/elelel/sqlite-hpp)).
+* **SQLite** : [amalgamation](https://sqlite.org/amalgamation.html) (sqlite3.c + sqlite3.h) + wrapper [sqlite-hpp](https://github.com/elelel/sqlite-hpp) (header-only).
 * **JSON** : [nlohmann/json](https://github.com/nlohmann/json) (json.hpp, header-only).
-* **CLI** : parsing manuel `argc/argv` ou lib légère (ex. [cxxopts](https://github.com/jarro2783/cxxopts), header-only).
+* **CLI** : [cxxopts](https://github.com/jarro2783/cxxopts) (header-only).
+* **UUID** : [stduuid](https://github.com/mariusbancila/stduuid) (header-only) pour UUID v4.
 
 ### IDs des tâches
 
-* `task:add` : génération d’un id unique (UUID, slug du titre, ou compteur). À préciser à l’implémentation.
+* `task:add` : id unique généré en **UUID v4**.
