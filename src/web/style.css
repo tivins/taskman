@@ -38,6 +38,13 @@ li { padding: 0.25em 0; border-bottom: 1px solid var(--border); }
 li a { color: var(--primary); text-decoration: none; }
 li a:hover { text-decoration: underline; }
 .task-detail { max-width: 40em; margin-top: 1em; }
+.task-detail h2 { margin: 0.5em 0 0.25em; font-size: 1.25rem; }
+.task-detail h3 { margin: 1em 0 0.35em; font-size: 1rem; }
+.task-description { margin: 0.5em 0; white-space: pre-wrap; }
+.task-meta { margin: 0.75em 0; border-collapse: collapse; }
+.task-meta td { padding: 0.2em 0.5em 0.2em 0; vertical-align: top; }
+.task-meta .task-meta-label { font-weight: 600; padding-right: 1em; white-space: nowrap; }
+.muted { color: var(--muted); }
 .error { color: #c00; }
 .monospace { font-family: monospace; }
 .blocked { color: var(--blocked); margin-left: 0.5em; }
@@ -45,6 +52,8 @@ li a:hover { text-decoration: underline; }
 .in-progress { color: var(--in-progress); margin-left: 0.5em; }
 .to-do { color: var(--to-do); margin-left: 0.5em; }
 .reached { color: var(--reached); margin-left: 0.5em; }
+
+
 
 /* Tableau des tâches */
 .tasks-table {
