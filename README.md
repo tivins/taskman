@@ -4,5 +4,6 @@ CLI tool to manage project phases, milestones, and tasks in a SQLite database. P
 
 Related documents:
 
+* [User guide](USAGE.md) — commands, options, formats
 * [BUILD.md](BUILD.md)
 * [CHANGELOG.md](CHANGELOG.md)

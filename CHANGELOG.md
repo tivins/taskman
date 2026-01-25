@@ -1,14 +1,20 @@
-# Changelog
+﻿# Changelog
 
-## [0.9.0] — 2025-01-25
+## [0.9.1] - 2026-01-25
 
 ### Added
 
-- Phase 8 — Qualité et déploiement:
-  - **Tests d'intégration** (`tests/test_integration.cpp`) : appels `taskman` en subprocess, fixtures DB temporaires ; init puis phase:list (vide), init + phase:add + phase:list, init + phase:add + task:add + task:get, commande inconnue → exit 1 ; SKIP si exécutable introuvable ; `add_dependencies(tests taskman)` pour ordre de build
-  - **GitHub Actions** (`.github/workflows/build.yml`) : workflow build Release pour Windows (MSVC), Linux (GCC, Clang), macOS (Clang) ; artefacts binaires `taskman-linux-gcc`, `taskman-linux-clang`, `taskman-macos-clang`, `taskman-windows-msvc` ; déclenché sur push/PR vers main ou master
+- USAGE.md : user guide
 
-## [0.8.0] — 2025-01-25
+## [0.9.0] — 2026-01-25
+
+### Added
+
+- Phase 8 — Quality and Deployment:
+  - **Integration tests** (`tests/test_integration.cpp`): runs `taskman` as a subprocess, uses temporary DB fixtures; tests include: init then phase:list (empty), init + phase:add + phase:list, init + phase:add + task:add + task:get, unknown command → exit 1; SKIP if executable not found; uses `add_dependencies(tests taskman)` to enforce build order
+  - **GitHub Actions** (`.github/workflows/build.yml`): Release build workflow for Windows (MSVC), Linux (GCC, Clang), and macOS (Clang); binary artifacts are `taskman-linux-gcc`, `taskman-linux-clang`, `taskman-macos-clang`, `taskman-windows-msvc`; triggered on push/PR to main or master
+
+## [0.8.0] — 2026-01-25
 
 ### Added
 
@@ -18,7 +24,7 @@
   - **Exit codes**: 0 success, 1 error (parsing, DB, argument validation), documented in main.cpp
 - Tests: cmd_task_add --format text, cmd_task_get --format text, cmd_task_list --format text
 
-## [0.7.0] — 2025-01-25
+## [0.7.0] — 2026-01-25
 
 ### Added
 
@@ -27,7 +33,7 @@
   - `task:dep:remove`: \<task-id\> \<dep-id\> → DELETE
 - Unit tests: task:dep:add (success, non-existent task, self-dependency, duplicate), task:dep:remove (success, idempotent)
 
-## [0.6.0] — 2025-01-25
+## [0.6.0] — 2026-01-25
 
 ### Added
 
@@ -40,7 +46,7 @@
 - Validation --role, --status (to_do, in_progress, done; project-manager, project-designer, software-architect, developer, summary-writer, documentation-writer)
 - Unit tests: `test_task.cpp` (task:add with UUID v4, task:get, task:list, task:edit, validations)
 
-## [0.5.0] — 2025-01-25
+## [0.5.0] — 2026-01-25
 
 ### Added
 
@@ -52,7 +58,7 @@
 - Unit tests: `test_milestone.cpp` (milestone:add, milestone:edit, milestone:list); `Database::query` with parameters in `test_db.cpp`
 - BUILD.md: Troubleshooting section (`.db-journal` file, "disk I/O error")
 
-## [0.4.0] — 2025-01-25
+## [0.4.0] — 2026-01-25
 
 ### Added
 
@@ -60,7 +66,7 @@
   - DB layer: `Database::open`, `close`, `exec`, `run`, `query`, `init_schema` (no connection, parameters, NULL, SELECT)
   - Phase commands: `cmd_phase_add`, `cmd_phase_edit`, `cmd_phase_list` (success, --id/--name/--status/--sort-order validation, JSON formatting including `sort_order` as number)
 
-## [0.3.0] — 2025-01-25
+## [0.3.0] — 2026-01-25
 
 ### Added
 
@@ -70,7 +76,7 @@
   - `phase:list`: SELECT * FROM phases ORDER BY sort_order → JSON (array of objects id, name, status, sort_order)
   - DB layer: `Database::run()` (parameterized queries), `Database::query()` (SELECT → rows)
 
-## [0.2.0] — 2025-01-25
+## [0.2.0] — 2026-01-25
 
 ### Added
 
@@ -80,7 +86,7 @@
   - `taskman init`: runs the 4 `CREATE TABLE IF NOT EXISTS` (phases, milestones, tasks, task_deps)
   - Helpers: SQLite error handling → stderr + exit code 1
 
-## [0.1.0] — 2025-01-25
+## [0.1.0] — 2026-01-25
 
 ### Added
 
