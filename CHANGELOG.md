@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0] — 2025-01-25
+
+### Ajouté
+
+- Phase 4 — Milestones :
+  - `milestone:add` : --id, --phase, [--name], [--criterion], [--reached 0|1] → INSERT
+  - `milestone:edit` : <id> [--name] [--criterion] [--reached 0|1] [--phase <id>] → UPDATE partiel
+  - `milestone:list` : [--phase <id>] → SELECT (filtré si --phase) ; sortie JSON (id, phase_id, name, criterion, reached)
+- Couche DB : `Database::query(sql, params)` (SELECT paramétré) ; `sqlite3_open_v2` + `PRAGMA busy_timeout=3000` ; log d’erreur si `sqlite3_close` échoue
+- Tests unitaires : `test_milestone.cpp` (milestone:add, milestone:edit, milestone:list) ; `Database::query` avec paramètres dans `test_db.cpp`
+- BUILD.md : section Dépannage (fichier `-journal`, erreur « disk I/O error »)
+
 ## [0.4.0] — 2025-01-25
 
 ### Ajouté

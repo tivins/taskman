@@ -43,6 +43,10 @@ public:
      * En échec : message sur stderr, retour vector vide. */
     std::vector<std::map<std::string, std::optional<std::string>>> query(const char* sql);
 
+    /** SELECT paramétré (?, ?, …). params[i] = nullopt → bind NULL. */
+    std::vector<std::map<std::string, std::optional<std::string>>> query(
+        const char* sql, const std::vector<std::optional<std::string>>& params);
+
     /** Vrai si une connexion est ouverte. */
     bool is_open() const { return db_ != nullptr; }
 

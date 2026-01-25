@@ -107,6 +107,19 @@ TEST_CASE("Database::query noms de colonnes et NULL", "[db]") {
     REQUIRE(!rows[0]["b"].has_value());
 }
 
+TEST_CASE("Database::query avec paramètres", "[db]") {
+    Database db;
+    REQUIRE(db.open(":memory:"));
+    REQUIRE(db.exec("CREATE TABLE t1(id TEXT, n INT)"));
+    REQUIRE(db.run("INSERT INTO t1(id, n) VALUES (?, ?)", {"a", "1"}));
+    REQUIRE(db.run("INSERT INTO t1(id, n) VALUES (?, ?)", {"b", "2"}));
+    REQUIRE(db.run("INSERT INTO t1(id, n) VALUES (?, ?)", {"c", "3"}));
+    auto rows = db.query("SELECT id, n FROM t1 WHERE id = ? ORDER BY id", {"b"});
+    REQUIRE(rows.size() == 1u);
+    REQUIRE(rows[0]["id"] == "b");
+    REQUIRE(rows[0]["n"] == "2");
+}
+
 TEST_CASE("init_schema crée les 4 tables", "[db]") {
     Database db;
     REQUIRE(db.open(":memory:"));
