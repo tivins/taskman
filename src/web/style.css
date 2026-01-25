@@ -1,6 +1,33 @@
-/* taskman web */
-body { margin: 1em; font-family: system-ui, sans-serif; }
-#app { margin-top: 1em; }
+
+:root {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --to-do: #64748b;
+    --in-progress: #0ea5e9;
+    --done: #059669;
+    --blocked: #dc2626;
+    --reached: #059669;
+}
+* { 
+    box-sizing: border-box; 
+}
+body {
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+}
+
+
+#app { 
+    margin: 1em auto; 
+    max-width: 1024px;        
+}
 ul { list-style: none; padding: 0; }
 li { padding: 0.25em 0; border-bottom: 1px solid #eee; }
 li a { color: #06c; text-decoration: none; }
@@ -9,23 +36,27 @@ li a:hover { text-decoration: underline; }
 .error { color: #c00; }
 .monospace { font-family: monospace; }
 
-/* Grille type tableau */
-.tasks-grid {
-    display: grid;
-    grid-template-columns: auto 1fr auto auto auto auto;
-    /* gap: 0 1em; */
-    max-width: 56em;
+/* Tableau des tâches */
+.tasks-table {
+    width: 100%;
+    border-collapse: collapse;
 }
-.tasks-th {
+.tasks-table thead th {
     font-weight: 600;
     padding: 0.4em 0.25em;
     border-bottom: 2px solid #333;
     background: #f6f6f6;
+    text-align: left;
 }
-.tasks-td {
+.tasks-table tbody td {
     padding: 0.35em 0.25em;
     border-bottom: 1px solid #eee;
-    align-self: center;
 }
-.tasks-td a { color: #06c; text-decoration: none; }
-.tasks-td a:hover { text-decoration: underline; }
+.tasks-table tbody tr {
+    cursor: pointer;
+}
+.tasks-table tbody tr:hover {
+    background: #e8f4fc;
+}
+.tasks-table td a { color: #06c; text-decoration: none; }
+.tasks-table td a:hover { text-decoration: underline; }

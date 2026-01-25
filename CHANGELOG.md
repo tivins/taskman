@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.11.0] - 2026-01-25
+
+### Added
+
+- **GET /milestone/:id** : API JSON d'un jalon (404 si absent).
+- **GET /milestones?limit=30&page=2** : API JSON listant les jalons avec pagination (limit 1–100, défaut 30 ; page ≥ 1).
+- **GET /phase/:id** : API JSON d'une phase (404 si absente).
+- **GET /phases?limit=30&page=2** : API JSON listant les phases avec pagination (limit 1–100, défaut 30 ; page ≥ 1).
+
 ## [0.10.0] - 2026-01-25
 
 ### Added

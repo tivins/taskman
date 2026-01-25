@@ -1,5 +1,6 @@
 /**
- * Implémentation taskman web : serveur HTTP (GET /, /style.css, /main.js, /task/:id, /tasks).
+ * Implémentation taskman web : serveur HTTP (GET /, /style.css, /main.js,
+ * /task/:id, /tasks, /milestone/:id, /milestones, /phase/:id, /phases).
  * Inclure httplib.h en premier (avant Windows.h sur Windows).
  */
 #include <httplib.h>
@@ -178,6 +179,106 @@ int cmd_web(int argc, char* argv[], Database& db) {
         for (const auto& row : rows) {
             nlohmann::json obj;
             task_to_json(obj, row);
+            arr.push_back(obj);
+        }
+        res.set_content(arr.dump(), "application/json");
+    });
+
+    svr.Get("/milestone/:id", [&db](const httplib::Request& req, httplib::Response& res) {
+        auto it = req.path_params.find("id");
+        if (it == req.path_params.end()) {
+            res.status = 400;
+            res.set_content(R"({"error":"missing id"})", "application/json");
+            return;
+        }
+        std::string id = it->second;
+        auto rows = db.query(
+            "SELECT id, phase_id, name, criterion, reached FROM milestones WHERE id = ?",
+            {id});
+        if (rows.empty()) {
+            res.status = 404;
+            res.set_content(R"({"error":"not found"})", "application/json");
+            return;
+        }
+        nlohmann::json obj;
+        milestone_to_json(obj, rows[0]);
+        res.set_content(obj.dump(), "application/json");
+    });
+
+    svr.Get("/milestones", [&db](const httplib::Request& req, httplib::Response& res) {
+        int limit = 30, page = 1;
+        if (req.has_param("limit")) {
+            try {
+                int v = std::stoi(req.get_param_value("limit"));
+                if (v >= 1 && v <= 100) limit = v;
+            } catch (...) {}
+        }
+        if (req.has_param("page")) {
+            try {
+                int v = std::stoi(req.get_param_value("page"));
+                if (v >= 1) page = v;
+            } catch (...) {}
+        }
+        int offset = (page - 1) * limit;
+
+        auto rows = db.query(
+            "SELECT id, phase_id, name, criterion, reached FROM milestones ORDER BY phase_id, id LIMIT ? OFFSET ?",
+            {std::to_string(limit), std::to_string(offset)});
+
+        nlohmann::json arr = nlohmann::json::array();
+        for (const auto& row : rows) {
+            nlohmann::json obj;
+            milestone_to_json(obj, row);
+            arr.push_back(obj);
+        }
+        res.set_content(arr.dump(), "application/json");
+    });
+
+    svr.Get("/phase/:id", [&db](const httplib::Request& req, httplib::Response& res) {
+        auto it = req.path_params.find("id");
+        if (it == req.path_params.end()) {
+            res.status = 400;
+            res.set_content(R"({"error":"missing id"})", "application/json");
+            return;
+        }
+        std::string id = it->second;
+        auto rows = db.query(
+            "SELECT id, name, status, sort_order FROM phases WHERE id = ?",
+            {id});
+        if (rows.empty()) {
+            res.status = 404;
+            res.set_content(R"({"error":"not found"})", "application/json");
+            return;
+        }
+        nlohmann::json obj;
+        phase_to_json(obj, rows[0]);
+        res.set_content(obj.dump(), "application/json");
+    });
+
+    svr.Get("/phases", [&db](const httplib::Request& req, httplib::Response& res) {
+        int limit = 30, page = 1;
+        if (req.has_param("limit")) {
+            try {
+                int v = std::stoi(req.get_param_value("limit"));
+                if (v >= 1 && v <= 100) limit = v;
+            } catch (...) {}
+        }
+        if (req.has_param("page")) {
+            try {
+                int v = std::stoi(req.get_param_value("page"));
+                if (v >= 1) page = v;
+            } catch (...) {}
+        }
+        int offset = (page - 1) * limit;
+
+        auto rows = db.query(
+            "SELECT id, name, status, sort_order FROM phases ORDER BY sort_order LIMIT ? OFFSET ?",
+            {std::to_string(limit), std::to_string(offset)});
+
+        nlohmann::json arr = nlohmann::json::array();
+        for (const auto& row : rows) {
+            nlohmann::json obj;
+            phase_to_json(obj, row);
             arr.push_back(obj);
         }
         res.set_content(arr.dump(), "application/json");

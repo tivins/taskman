@@ -13,55 +13,36 @@ async function loadTasks(limit = 20, page = 1) {
             app.innerHTML = '<p>No task.</p>';
             return;
         }
-        const grid = document.createElement('div');
-        grid.className = 'tasks-grid';
-        // En-têtes
+        const table = document.createElement('table');
+        table.className = 'tasks-table';
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
         ['id', 'title', 'role', 'status', 'milestone', 'phase'].forEach((h) => {
-            const th = document.createElement('div');
-            th.className = 'tasks-th';
+            const th = document.createElement('th');
             th.textContent = h;
-            grid.appendChild(th);
+            headerRow.appendChild(th);
         });
-        // Lignes
-        for (const t of data) {
-            const idCell = document.createElement('div');
-            idCell.className = 'tasks-td monospace';
-            idCell.textContent = escapeHtml(String(t.id ?? ''));
-            grid.appendChild(idCell);
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
 
-            const titleCell = document.createElement('div');
-            titleCell.className = 'tasks-td';
-            const a = document.createElement('a');
-            a.href = '#';
-            a.textContent = escapeHtml(t.title || t.id || 'untitled');
-            a.addEventListener('click', (e) => {
+        const tbody = document.createElement('tbody');
+        for (const t of data) {
+            const tr = el('tr', { 'data-task-id': t.id },
+                el('td', { class: 'monospace' }, escapeHtml(String(t.id ?? '').substring(0, 8))),
+                el('td', {}, el('a', { href: '#' }, escapeHtml(t.title || t.id || 'untitled'))),
+                el('td', {}, escapeHtml(t.role || '')),
+                el('td', {}, escapeHtml(t.status || '')),
+                el('td', {}, escapeHtml(t.milestone_id || '')),
+                el('td', {}, escapeHtml(t.phase_id || ''))
+            );
+            tr.addEventListener('click', (e) => {
                 e.preventDefault();
                 loadTask(t.id);
             });
-            titleCell.appendChild(a);
-            grid.appendChild(titleCell);
-
-            const roleCell = document.createElement('div');
-            roleCell.className = 'tasks-td';
-            roleCell.textContent = escapeHtml(t.role || '');
-            grid.appendChild(roleCell);
-
-            const statusCell = document.createElement('div');
-            statusCell.className = 'tasks-td';
-            statusCell.textContent = escapeHtml(t.status || '');
-            grid.appendChild(statusCell);
-
-            const milestoneCell = document.createElement('div');
-            milestoneCell.className = 'tasks-td';
-            milestoneCell.textContent = escapeHtml(t.milestone_id || '');
-            grid.appendChild(milestoneCell);
-
-            const phaseCell = document.createElement('div');
-            phaseCell.className = 'tasks-td';
-            phaseCell.textContent = escapeHtml(t.phase_id || '');
-            grid.appendChild(phaseCell);
+            tbody.appendChild(tr);
         }
-        app.appendChild(grid);
+        table.appendChild(tbody);
+        app.appendChild(table);
     } catch (e) {
         app.innerHTML = `<p class="error">${e.message}</p>`;
     }
@@ -92,10 +73,13 @@ async function loadTask(id) {
     }
 }
 
+let escapeHTMLElement = null;
 function escapeHtml(s) {
-    const d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
+    if (escapeHTMLElement === null) {
+        escapeHTMLElement = document.createElement('div');
+    }
+    escapeHTMLElement.textContent = s;
+    return escapeHTMLElement.innerHTML;
 }
 
 function el(tag, attrs, ...children) {

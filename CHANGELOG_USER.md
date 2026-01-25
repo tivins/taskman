@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.11.0] - 2026-01-25
+
+- **API web** : GET /milestone/:id, GET /milestones (limit, page), GET /phase/:id, GET /phases (limit, page).
+
 ## [0.10.0] - 2026-01-25
 
 - **taskman web** [--host \<addr\>] [--port \<n\>] : démarre un serveur HTTP (défaut http://127.0.0.1:8080). La page d’accueil charge une interface qui consulte les tâches via l’API JSON (GET /tasks, GET /task/\<id\>).
