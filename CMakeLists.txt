@@ -91,7 +91,7 @@ add_custom_command(
 # Exécutable taskman
 # -----------------------------------------------------------------------------
 add_executable(taskman
-  src/main.cpp src/db.cpp src/formats.cpp src/milestone.cpp src/phase.cpp src/task.cpp src/web.cpp
+  src/main.cpp src/db.cpp src/formats.cpp src/mcp.cpp src/milestone.cpp src/phase.cpp src/task.cpp src/web.cpp
   "${WEB_ASSETS_HEADER}"
 )
 if(MSVC)

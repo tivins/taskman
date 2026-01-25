@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.12.0] - 2026-01-25
+
+- **taskman mcp** : mode serveur MCP (Model Context Protocol) sur stdio. Lit les requêtes JSON-RPC sur stdin, écrit les réponses sur stdout. À configurer comme serveur MCP dans Cursor (commande `taskman`, args `mcp`). La phase « Infra et squelette » est en place ; les méthodes `initialize`, `tools/list`, `tools/call` seront ajoutées dans les phases suivantes.
+
 ## [0.11.1] - 2026-01-25
 
 - **Vue liste (web)** : à côté du Statut, affichage de « (blocked) » si la tâche dépend d’une tâche non-`done` (utilisation de `/task_deps` et `/task/:id`).

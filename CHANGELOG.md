@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.12.0] - 2026-01-25
+
+### Added
+
+- **taskman mcp** : mode serveur MCP (Model Context Protocol) sur stdio. Lit les requêtes JSON-RPC ligne par ligne sur stdin, écrit les réponses sur stdout. Squelette Phase 1 : boucle getline, parse nlohmann::json, détection `method`/`id` ; lignes vides ignorées ; erreurs JSON-RPC : -32700 (Parse error), -32600 (Invalid Request), -32601 (Method not found) pour toute méthode (initialize, tools/list, tools/call à venir). Fichiers `src/mcp.hpp`, `src/mcp.cpp` ; `mcp` ajouté dans CMake, COMMANDS et usage.
+
 ## [0.11.1] - 2026-01-25
 
 ### Added

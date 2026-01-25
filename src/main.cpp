@@ -6,6 +6,7 @@
  */
 
 #include "db.hpp"
+#include "mcp.hpp"
 #include "milestone.hpp"
 #include "phase.hpp"
 #include "task.hpp"
@@ -43,6 +44,7 @@ static const CmdInfo COMMANDS[] = {
     {"task:list",       "List tasks (option --phase, --status, --role)"},
     {"task:dep:add",    "Add a dependency"},
     {"task:dep:remove", "Remove a dependency"},
+    {"mcp",             "MCP server (stdio): read JSON-RPC on stdin, write on stdout"},
     {"web",             "HTTP server for web UI (--host, --port)"},
 };
 
@@ -95,6 +97,10 @@ int main(int argc, char* argv[]) {
     if (std::strcmp(cmd, "-h") == 0 || std::strcmp(cmd, "--help") == 0) {
         print_usage();
         return 0;
+    }
+
+    if (std::strcmp(cmd, "mcp") == 0) {
+        return taskman::run_mcp_server();
     }
 
     // Dispatch vers sous-commandes (implémentées en phases suivantes)

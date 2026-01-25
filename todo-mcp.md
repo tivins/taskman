@@ -10,14 +10,14 @@ Exposer taskman comme **serveur MCP** en ajoutant un mode `taskman mcp` : le bin
 
 ### Infra et squelette
 
-- [ ] **CMake** — Ajouter `src/mcp.cpp` à `add_executable(taskman ...)`.
-- [ ] **`src/mcp.hpp`** — Déclarer `int run_mcp_server();` (évent. `struct McpTool` ou config outils).
-- [ ] **`src/mcp.cpp`** — Boucle stdio : `while (getline(cin, line))`, parse `nlohmann::json::parse(line)`.
-- [ ] **`src/mcp.cpp`** — Détecter `method` / `id`, ignorer les lignes vides ou non-JSON (ou erreur -32700).
-- [ ] **`src/mcp.cpp`** — Envoyer réponses : `cout << response.dump() << "\n"; cout.flush();`.
-- [ ] **`src/mcp.cpp`** — Erreurs de parse → JSON-RPC `-32700` (Parse error). Requête invalide → `-32600` (Invalid Request).
-- [ ] **`main.cpp`** — Branche `if (strcmp(cmd, "mcp") == 0) return run_mcp_server();`.
-- [ ] **`main.cpp`** — Ajouter `{ "mcp", "MCP server (stdio): read JSON-RPC on stdin, write on stdout" }` dans `COMMANDS` et usage.
+- [x] **CMake** — Ajouter `src/mcp.cpp` à `add_executable(taskman ...)`.
+- [x] **`src/mcp.hpp`** — Déclarer `int run_mcp_server();` (évent. `struct McpTool` ou config outils).
+- [x] **`src/mcp.cpp`** — Boucle stdio : `while (getline(cin, line))`, parse `nlohmann::json::parse(line)`.
+- [x] **`src/mcp.cpp`** — Détecter `method` / `id`, ignorer les lignes vides ou non-JSON (ou erreur -32700).
+- [x] **`src/mcp.cpp`** — Envoyer réponses : `cout << response.dump() << "\n"; cout.flush();`.
+- [x] **`src/mcp.cpp`** — Erreurs de parse → JSON-RPC `-32700` (Parse error). Requête invalide → `-32600` (Invalid Request).
+- [x] **`main.cpp`** — Branche `if (strcmp(cmd, "mcp") == 0) return run_mcp_server();`.
+- [x] **`main.cpp`** — Ajouter `{ "mcp", "MCP server (stdio): read JSON-RPC on stdin, write on stdout" }` dans `COMMANDS` et usage.
 
 ### Lifecycle
 
