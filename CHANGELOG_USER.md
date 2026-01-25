@@ -4,7 +4,7 @@ User-facing changes: new commands, options, formats, and behavior.
 
 ## [0.11.0] - 2026-01-25
 
-- **API web** : GET /milestone/:id, GET /milestones (limit, page), GET /phase/:id, GET /phases (limit, page).
+- **API web** : GET /milestone/:id, GET /milestones (limit, page), GET /phase/:id, GET /phases (limit, page), GET /task_deps (limit, page, ?task_id=), GET /task/:id/deps.
 
 ## [0.10.0] - 2026-01-25
 

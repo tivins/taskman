@@ -8,6 +8,8 @@
 - **GET /milestones?limit=30&page=2** : API JSON listant les jalons avec pagination (limit 1–100, défaut 30 ; page ≥ 1).
 - **GET /phase/:id** : API JSON d'une phase (404 si absente).
 - **GET /phases?limit=30&page=2** : API JSON listant les phases avec pagination (limit 1–100, défaut 30 ; page ≥ 1).
+- **GET /task_deps** : API JSON listant les dépendances entre tâches (task_id, depends_on), pagination limit 1–500 (défaut 100), page ≥ 1, filtre optionnel `?task_id=`.
+- **GET /task/:id/deps** : API JSON des dépendances d’une tâche donnée (404 si la tâche n’existe pas).
 
 ## [0.10.0] - 2026-01-25
 

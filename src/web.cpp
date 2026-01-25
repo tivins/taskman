@@ -1,6 +1,6 @@
 /**
  * Implémentation taskman web : serveur HTTP (GET /, /style.css, /main.js,
- * /task/:id, /tasks, /milestone/:id, /milestones, /phase/:id, /phases).
+ * /task/:id, /task/:id/deps, /tasks, /task_deps, /milestone/:id, /milestones, /phase/:id, /phases).
  * Inclure httplib.h en premier (avant Windows.h sur Windows).
  */
 #include <httplib.h>
@@ -103,6 +103,34 @@ int cmd_web(int argc, char* argv[], Database& db) {
         res.set_content(MAIN_JS, "application/javascript; charset=utf-8");
     });
 
+    svr.Get("/task/:id/deps", [&db](const httplib::Request& req, httplib::Response& res) {
+        auto it = req.path_params.find("id");
+        if (it == req.path_params.end()) {
+            res.status = 400;
+            res.set_content(R"({"error":"missing id"})", "application/json");
+            return;
+        }
+        std::string id = it->second;
+        auto task_rows = db.query("SELECT 1 FROM tasks WHERE id = ?", {id});
+        if (task_rows.empty()) {
+            res.status = 404;
+            res.set_content(R"({"error":"not found"})", "application/json");
+            return;
+        }
+        auto rows = db.query(
+            "SELECT task_id, depends_on FROM task_deps WHERE task_id = ? ORDER BY depends_on",
+            {id});
+        nlohmann::json arr = nlohmann::json::array();
+        for (const auto& row : rows) {
+            nlohmann::json obj;
+            auto get = [&row](const char* k) { return row.count(k) ? row.at(k) : std::nullopt; };
+            obj["task_id"] = get("task_id").value_or("");
+            obj["depends_on"] = get("depends_on").value_or("");
+            arr.push_back(obj);
+        }
+        res.set_content(arr.dump(), "application/json");
+    });
+
     svr.Get("/task/:id", [&db](const httplib::Request& req, httplib::Response& res) {
         auto it = req.path_params.find("id");
         if (it == req.path_params.end()) {
@@ -179,6 +207,45 @@ int cmd_web(int argc, char* argv[], Database& db) {
         for (const auto& row : rows) {
             nlohmann::json obj;
             task_to_json(obj, row);
+            arr.push_back(obj);
+        }
+        res.set_content(arr.dump(), "application/json");
+    });
+
+    svr.Get("/task_deps", [&db](const httplib::Request& req, httplib::Response& res) {
+        int limit = 100, page = 1;
+        if (req.has_param("limit")) {
+            try {
+                int v = std::stoi(req.get_param_value("limit"));
+                if (v >= 1 && v <= 500) limit = v;
+            } catch (...) {}
+        }
+        if (req.has_param("page")) {
+            try {
+                int v = std::stoi(req.get_param_value("page"));
+                if (v >= 1) page = v;
+            } catch (...) {}
+        }
+        int offset = (page - 1) * limit;
+
+        std::string sql = "SELECT task_id, depends_on FROM task_deps";
+        std::vector<std::optional<std::string>> params;
+        if (req.has_param("task_id")) {
+            sql += " WHERE task_id = ?";
+            params.push_back(req.get_param_value("task_id"));
+        }
+        sql += " ORDER BY task_id, depends_on LIMIT ? OFFSET ?";
+        params.push_back(std::to_string(limit));
+        params.push_back(std::to_string(offset));
+
+        auto rows = db.query(sql.c_str(), params);
+
+        nlohmann::json arr = nlohmann::json::array();
+        for (const auto& row : rows) {
+            nlohmann::json obj;
+            auto get = [&row](const char* k) { return row.count(k) ? row.at(k) : std::nullopt; };
+            obj["task_id"] = get("task_id").value_or("");
+            obj["depends_on"] = get("depends_on").value_or("");
             arr.push_back(obj);
         }
         res.set_content(arr.dump(), "application/json");
