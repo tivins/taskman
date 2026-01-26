@@ -21,9 +21,9 @@ Exposer taskman comme **serveur MCP** en ajoutant un mode `taskman mcp` : le bin
 
 ### Lifecycle
 
-- [ ] **`initialize`** — Répondre `protocolVersion`, `capabilities: { tools: { listChanged: false } }`, `serverInfo: { name: "taskman", version }`. Réutiliser `TASKMAN_VERSION`. Réponse avec `id` reçu.
-- [ ] **`initialize`** — Si `protocolVersion` non supportée (ex. pas `2025-11-25`) → erreur `-32602` "Unsupported protocol version".
-- [ ] **`notifications/initialized`** — Accepter sans répondre (notification), marquer phase « opération ».
+- [x] **`initialize`** — Répondre `protocolVersion`, `capabilities: { tools: { listChanged: false } }`, `serverInfo: { name: "taskman", version }`. Réutiliser `TASKMAN_VERSION`. Réponse avec `id` reçu.
+- [x] **`initialize`** — Si `protocolVersion` non supportée (ex. pas `2025-11-25`) → erreur `-32602` "Unsupported protocol version".
+- [x] **`notifications/initialized`** — Accepter sans répondre (notification), marquer phase « opération ».
 
 ### Méthodes
 
