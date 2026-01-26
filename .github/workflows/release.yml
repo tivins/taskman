@@ -1,0 +1,185 @@
+# Création automatique de release GitHub avec artefacts binaires
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract tag and version
+        id: version
+        run: |
+          TAG="${{ github.ref }}"
+          TAG=${TAG#refs/tags/}
+          VERSION=${TAG#v}
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Tag: $TAG, Version: $VERSION"
+
+      - name: Wait for build workflow and find run
+        id: find_build
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const tag = '${{ steps.version.outputs.tag }}';
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            const sha = context.sha;
+            const maxWaitTime = 30 * 60 * 1000; // 30 minutes
+            const checkInterval = 10 * 1000; // 10 secondes
+            const startTime = Date.now();
+            
+            console.log(`Waiting for build workflow run for tag ${tag} (SHA: ${sha})`);
+            
+            let matchingRun = null;
+            while (Date.now() - startTime < maxWaitTime) {
+              // Trouver le workflow run de build pour ce commit SHA
+              const runs = await github.rest.actions.listWorkflowRuns({
+                owner,
+                repo,
+                workflow_id: 'build.yml',
+                head_sha: sha,
+                per_page: 10
+              });
+              
+              // Chercher le run qui correspond au tag (même SHA)
+              matchingRun = runs.data.workflow_runs.find(run => run.head_sha === sha);
+              
+              if (matchingRun) {
+                console.log(`Found build workflow run: ${matchingRun.id} (status: ${matchingRun.status}, conclusion: ${matchingRun.conclusion})`);
+                
+                if (matchingRun.status === 'completed') {
+                  if (matchingRun.conclusion === 'success') {
+                    console.log(`Build workflow completed successfully!`);
+                    break;
+                  } else {
+                    throw new Error(`Build workflow run ${matchingRun.id} did not succeed (conclusion: ${matchingRun.conclusion})`);
+                  }
+                } else {
+                  console.log(`Build workflow still running, waiting... (status: ${matchingRun.status})`);
+                }
+              } else {
+                console.log(`Build workflow run not found yet, waiting...`);
+              }
+              
+              // Attendre avant de réessayer
+              await new Promise(resolve => setTimeout(resolve, checkInterval));
+            }
+            
+            if (!matchingRun || matchingRun.status !== 'completed' || matchingRun.conclusion !== 'success') {
+              throw new Error(`Build workflow did not complete successfully within timeout for tag ${tag}`);
+            }
+            
+            core.setOutput('run_id', matchingRun.id);
+
+      - name: Download all artifacts from build workflow
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: build.yml
+          run_id: ${{ steps.find_build.outputs.run_id }}
+          name: taskman-*
+          path: artifacts
+          if_no_artifact_found: fail
+
+      - name: Prepare release notes
+        id: release_notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          
+          # Extraire la section du changelog pour cette version
+          if grep -q "## \[$VERSION\]" CHANGELOG_USER.md; then
+            # Extraire depuis "## [version]" jusqu'à la prochaine "##"
+            awk "/^## \[$VERSION\]/,/^## \[/{if (!/^## \[/ || /^## \[$VERSION\]/) print}" CHANGELOG_USER.md > release_notes.md
+            # Supprimer la dernière ligne si c'est la prochaine section
+            sed -i '/^## \[/d' release_notes.md || true
+          else
+            # Fallback: utiliser le tag comme titre
+            echo "## $TAG" > release_notes.md
+            echo "" >> release_notes.md
+            echo "Release $TAG" >> release_notes.md
+          fi
+          
+          # Ajouter la section téléchargements
+          echo "" >> release_notes.md
+          echo "### Téléchargements" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "- \`taskman-linux-gcc\` - Linux (GCC)" >> release_notes.md
+          echo "- \`taskman-linux-clang\` - Linux (Clang)" >> release_notes.md
+          echo "- \`taskman-macos-clang\` - macOS (Clang)" >> release_notes.md
+          echo "- \`taskman-windows-msvc.exe\` - Windows (MSVC)" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "### Documentation" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "- [CLI Usage](USAGE_CLI.md)" >> release_notes.md
+          echo "- [Web Interface](USAGE_WEB.md)" >> release_notes.md
+          echo "- [MCP Server](USAGE_MCP.md)" >> release_notes.md
+          echo "- [Build Instructions](BUILD.md)" >> release_notes.md
+          
+          # Afficher le contenu pour debug
+          echo "Release notes content:"
+          cat release_notes.md
+
+      - name: Prepare release files
+        id: prepare_files
+        run: |
+          # Trouver les fichiers binaires dans les sous-dossiers d'artefacts
+          # et les copier à la racine d'artifacts avec les bons noms
+          mkdir -p artifacts_release
+          
+          # Pour chaque artefact téléchargé
+          for dir in artifacts/taskman-*/; do
+            if [ -d "$dir" ]; then
+              dirname=$(basename "$dir")
+              # Trouver le fichier binaire
+              if [ -f "$dir/taskman" ]; then
+                # Linux/macOS
+                cp "$dir/taskman" "artifacts_release/$dirname"
+                chmod +x "artifacts_release/$dirname"
+              elif [ -f "$dir/taskman.exe" ]; then
+                # Windows
+                cp "$dir/taskman.exe" "artifacts_release/${dirname}.exe"
+              else
+                # Chercher n'importe quel fichier
+                file=$(find "$dir" -type f | head -1)
+                if [ -n "$file" ]; then
+                  if [[ "$dirname" == *"windows"* ]]; then
+                    cp "$file" "artifacts_release/${dirname}.exe"
+                  else
+                    cp "$file" "artifacts_release/$dirname"
+                    chmod +x "artifacts_release/$dirname"
+                  fi
+                fi
+              fi
+            fi
+          done
+          
+          # Lister les fichiers préparés
+          echo "Release files prepared:"
+          ls -lh artifacts_release/ || true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
+          body_path: release_notes.md
+          files: |
+            artifacts_release/taskman-linux-gcc
+            artifacts_release/taskman-linux-clang
+            artifacts_release/taskman-macos-clang
+            artifacts_release/taskman-windows-msvc.exe
+          draft: false
+          prerelease: false
