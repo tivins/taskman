@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.13.0] - 2026-01-27
+
+### Added
+
+- **taskman agents:generate** [--output <dir>]: génère les fichiers agents dans `.cursor/agents/` (ou le répertoire spécifié) à partir des fichiers markdown intégrés dans le binaire. Les fichiers sources sont dans `docs/roles_agents/*.md` et sont intégrés dans le binaire lors de la compilation via `scripts/embed_agents.py`. La commande extrait ces fichiers et les écrit dans le répertoire de sortie.
+- **scripts/embed_agents.py**: script Python qui génère `agents.generated.h` à partir des fichiers markdown dans `docs/roles_agents/`. Les fichiers sont intégrés comme raw string literals dans le header généré.
+- **src/agents.cpp**, **src/agents.hpp**: module implémentant la commande `agents:generate` avec gestion des fichiers système (création de répertoires, écriture de fichiers).
+- **CMakeLists.txt**: ajout de la génération de `agents.generated.h` via `add_custom_command` avec dépendances sur tous les fichiers `.md` dans `docs/roles_agents/`.
+
 ## [0.12.0] - 2026-01-25
 
 ### Added

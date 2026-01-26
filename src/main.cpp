@@ -5,6 +5,7 @@
  * Codes de sortie : 0 = succès, 1 = erreur (parsing, DB, validation des args).
  */
 
+#include "agents.hpp"
 #include "db.hpp"
 #include "mcp.hpp"
 #include "milestone.hpp"
@@ -44,6 +45,7 @@ static const CmdInfo COMMANDS[] = {
     {"task:list",       "List tasks (option --phase, --status, --role)"},
     {"task:dep:add",    "Add a dependency"},
     {"task:dep:remove", "Remove a dependency"},
+    {"agents:generate", "Generate .cursor/agents/ files"},
     {"mcp",             "MCP server (stdio): read JSON-RPC on stdin, write on stdout"},
     {"web",             "HTTP server for web UI (--host, --port)"},
 };
@@ -175,6 +177,9 @@ int main(int argc, char* argv[]) {
         taskman::Database db;
         if (!db.open(get_db_path())) return 1;
         return taskman::cmd_task_dep_remove(argc - 1, argv + 1, db);
+    }
+    if (std::strcmp(cmd, "agents:generate") == 0) {
+        return taskman::cmd_agents_generate(argc - 1, argv + 1);
     }
     if (std::strcmp(cmd, "web") == 0) {
         taskman::Database db;

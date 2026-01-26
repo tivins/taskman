@@ -92,11 +92,27 @@ add_custom_command(
 )
 
 # -----------------------------------------------------------------------------
+# Agent files: docs/roles_agents/*.md -> agents.generated.h (embedded in binary)
+# -----------------------------------------------------------------------------
+file(GLOB AGENT_MD_FILES "${CMAKE_SOURCE_DIR}/docs/roles_agents/*.md")
+set(AGENTS_HEADER "${CMAKE_BINARY_DIR}/agents.generated.h")
+add_custom_command(
+  OUTPUT "${AGENTS_HEADER}"
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/embed_agents.py
+    --agents-dir ${CMAKE_SOURCE_DIR}/docs/roles_agents
+    -o "${AGENTS_HEADER}"
+  DEPENDS ${CMAKE_SOURCE_DIR}/scripts/embed_agents.py
+          ${AGENT_MD_FILES}
+  COMMENT "Embedding agent files (docs/roles_agents/*.md) into header"
+)
+
+# -----------------------------------------------------------------------------
 # Exécutable taskman
 # -----------------------------------------------------------------------------
 add_executable(taskman
-  src/main.cpp src/db.cpp src/formats.cpp src/mcp.cpp src/milestone.cpp src/phase.cpp src/roles.cpp src/task.cpp src/web.cpp
+  src/main.cpp src/agents.cpp src/db.cpp src/formats.cpp src/mcp.cpp src/milestone.cpp src/phase.cpp src/roles.cpp src/task.cpp src/web.cpp
   "${WEB_ASSETS_HEADER}"
+  "${AGENTS_HEADER}"
 )
 if(MSVC)
   target_compile_definitions(taskman PRIVATE _CRT_SECURE_NO_WARNINGS)

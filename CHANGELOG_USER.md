@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.13.0] - 2026-01-27
+
+- **taskman agents:generate** [--output <dir>]: génère les fichiers agents Cursor dans `.cursor/agents/` (ou le répertoire spécifié). Les fichiers sont extraits depuis les assets intégrés dans le binaire. Utile pour configurer les agents de rôles taskman dans Cursor.
+
 ## [0.12.0] - 2026-01-25
 
 - **taskman mcp** : mode serveur MCP (Model Context Protocol) sur stdio. Lit les requêtes JSON-RPC sur stdin, écrit les réponses sur stdout. Implémente le protocole MCP 2025-11-25 avec les méthodes `initialize`, `notifications/initialized`, `tools/list`, `tools/call`, et `ping`. Expose les 13 commandes CLI comme outils MCP (`taskman_init`, `taskman_phase_*`, `taskman_milestone_*`, `taskman_task_*`, `taskman_task_dep_*`). À configurer comme serveur MCP dans Cursor (commande `taskman`, args `mcp`). Voir [USAGE_MCP.md](USAGE_MCP.md) pour la configuration.
