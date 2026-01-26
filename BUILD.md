@@ -1,5 +1,15 @@
 # Taskman
 
+## Download
+
+Get from Github and go inside taskman root directory:
+
+```shel
+git clone git@github.com:tivins/taskman.git
+cd taskman
+````
+
+
 ## Build
 
 ### single-config
@@ -53,14 +63,6 @@ Executable
 - `build/Release/taskman.exe` (Windows)
 
 ## Troubleshooting
-
-### "disk I/O error" and `-journal` file
-
-If a `project_tasks.db-journal` (or `*.db-journal`) file is present, a previous run was interrupted before the database was cleanly closed. On open, SQLite attempts recovery; if a "disk I/O error" occurs (antivirus, sandbox, filesystem):
-
-1. Stop any `taskman` process using this database.
-2. Delete the `.db` and `.db-journal` files in question.
-3. Run `taskman init` again to recreate an empty database.
 
 ### "disk I/O error" when using taskman from Cursor’s agent
 
