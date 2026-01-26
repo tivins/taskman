@@ -4,7 +4,7 @@ User-facing changes: new commands, options, formats, and behavior.
 
 ## [0.12.0] - 2026-01-25
 
-- **taskman mcp** : mode serveur MCP (Model Context Protocol) sur stdio. Lit les requêtes JSON-RPC sur stdin, écrit les réponses sur stdout. Implémente le protocole MCP 2025-11-25 avec les méthodes `initialize`, `notifications/initialized`, `tools/list`, `tools/call`, et `ping`. Expose les 13 commandes CLI comme outils MCP (`taskman_init`, `taskman_phase_*`, `taskman_milestone_*`, `taskman_task_*`, `taskman_task_dep_*`). À configurer comme serveur MCP dans Cursor (commande `taskman`, args `mcp`). Voir [USAGE.md](USAGE.md) section 9 pour la configuration.
+- **taskman mcp** : mode serveur MCP (Model Context Protocol) sur stdio. Lit les requêtes JSON-RPC sur stdin, écrit les réponses sur stdout. Implémente le protocole MCP 2025-11-25 avec les méthodes `initialize`, `notifications/initialized`, `tools/list`, `tools/call`, et `ping`. Expose les 13 commandes CLI comme outils MCP (`taskman_init`, `taskman_phase_*`, `taskman_milestone_*`, `taskman_task_*`, `taskman_task_dep_*`). À configurer comme serveur MCP dans Cursor (commande `taskman`, args `mcp`). Voir [USAGE_MCP.md](USAGE_MCP.md) pour la configuration.
 
 ## [0.11.1] - 2026-01-25
 
@@ -36,7 +36,7 @@ User-facing changes: new commands, options, formats, and behavior.
 
 ## [0.9.1] - 2026-01-25
 
-- User guide: [USAGE.md](USAGE.md).
+- User guide: [USAGE_CLI.md](USAGE_CLI.md), [USAGE_WEB.md](USAGE_WEB.md), [USAGE_MCP.md](USAGE_MCP.md).
 
 ## [0.9.0] - 2026-01-25
 
