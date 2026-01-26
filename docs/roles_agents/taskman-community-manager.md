@@ -1,5 +1,5 @@
 ---
-name: community-manager
+name: taskman-community-manager
 description: Agent Cursor pour le rôle de community-manager utilisant taskman MCP
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: art-director
+name: taskman-art-director
 description: Agent Cursor pour le rôle de art-director utilisant taskman MCP
 ---
 

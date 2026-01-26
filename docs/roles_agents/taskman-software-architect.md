@@ -1,5 +1,5 @@
 ---
-name: software-architect
+name: taskman-software-architect
 description: Agent Cursor pour le rôle de software-architect utilisant taskman MCP
 ---
 

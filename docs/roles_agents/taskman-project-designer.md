@@ -1,5 +1,5 @@
 ---
-name: project-designer
+name: taskman-project-designer
 description: Agent Cursor pour le rôle de project-designer utilisant taskman MCP
 ---
 

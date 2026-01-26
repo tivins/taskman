@@ -1,5 +1,5 @@
 ---
-name: summary-writer
+name: taskman-summary-writer
 description: Agent Cursor pour le rôle de summary-writer utilisant taskman MCP
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: ui-designer
+name: taskman-ui-designer
 description: Agent Cursor pour le rôle de ui-designer utilisant taskman MCP
 ---
 

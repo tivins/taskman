@@ -1,5 +1,5 @@
 ---
-name: devops-engineer
+name: taskman-devops-engineer
 description: Agent Cursor pour le rôle de devops-engineer utilisant taskman MCP
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: security-engineer
+name: taskman-security-engineer
 description: Agent Cursor pour le rôle de security-engineer utilisant taskman MCP
 ---
 

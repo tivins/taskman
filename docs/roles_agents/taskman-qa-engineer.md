@@ -1,5 +1,5 @@
 ---
-name: qa-engineer
+name: taskman-qa-engineer
 description: Agent Cursor pour le rôle de qa-engineer utilisant taskman MCP
 ---
 

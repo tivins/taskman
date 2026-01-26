@@ -1,5 +1,5 @@
 ---
-name: product-owner
+name: taskman-product-owner
 description: Agent Cursor pour le rôle de product-owner utilisant taskman MCP
 ---
 

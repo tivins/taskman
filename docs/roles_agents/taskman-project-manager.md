@@ -1,5 +1,5 @@
 ---
-name: project-manager
+name: taskman-project-manager
 description: Agent Cursor pour le rôle de project-manager utilisant taskman MCP
 ---
 

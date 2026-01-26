@@ -1,5 +1,5 @@
 ---
-name: developer
+name: taskman-developer
 description: Agent Cursor pour le rôle de developer utilisant taskman MCP
 ---
 

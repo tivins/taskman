@@ -1,5 +1,5 @@
 ---
-name: documentation-writer
+name: taskman-documentation-writer
 description: Agent Cursor pour le rôle de documentation-writer utilisant taskman MCP
 ---
 
