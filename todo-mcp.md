@@ -27,11 +27,11 @@ Exposer taskman comme **serveur MCP** en ajoutant un mode `taskman mcp` : le bin
 
 ### Méthodes
 
-- [ ] **`tools/list`** — Réponse `{ "tools": [ ... ] }` à partir d’une table statique (nom, description, inputSchema) pour les 13 outils.
-- [ ] **`tools/call`** — Extraire `params.name` et `params.arguments` ; si `name` inconnu → `-32602` "Unknown tool: <name>". Si `arguments` absent ou non-objet → `-32602` "Invalid arguments".
-- [ ] **`tools/call`** — Pour un `name` connu : construire `argv` (positionals + `--key` `value`), ouvrir DB (`get_db_path()`), capturer cout/cerr, appeler la `cmd_*`, former `CallToolResult` : `content: [{ type: "text", text }]`, `isError: (exit_code != 0)`.
-- [ ] **`ping`** — Répondre `result: {}`.
-- [ ] **Méthode inconnue** — Réponse erreur JSON-RPC `-32601` "Method not found".
+- [x] **`tools/list`** — Réponse `{ "tools": [ ... ] }` à partir d’une table statique (nom, description, inputSchema) pour les 13 outils.
+- [x] **`tools/call`** — Extraire `params.name` et `params.arguments` ; si `name` inconnu → `-32602` "Unknown tool: <name>". Si `arguments` absent ou non-objet → `-32602` "Invalid arguments".
+- [x] **`tools/call`** — Pour un `name` connu : construire `argv` (positionals + `--key` `value`), ouvrir DB (`get_db_path()`), capturer cout/cerr, appeler la `cmd_*`, former `CallToolResult` : `content: [{ type: "text", text }]`, `isError: (exit_code != 0)`.
+- [x] **`ping`** — Répondre `result: {}`.
+- [x] **Méthode inconnue** — Réponse erreur JSON-RPC `-32601` "Method not found".
 
 ### Table des 13 outils (nom, description, inputSchema, positionals, options)
 

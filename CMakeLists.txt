@@ -113,6 +113,7 @@ enable_testing()
 add_executable(tests
   tests/test_db.cpp
   tests/test_integration.cpp
+  tests/test_mcp.cpp
   tests/test_milestone.cpp
   tests/test_phase.cpp
   tests/test_task.cpp
