@@ -35,35 +35,35 @@ Exposer taskman comme **serveur MCP** en ajoutant un mode `taskman mcp` : le bin
 
 ### Table des 13 outils (nom, description, inputSchema, positionals, options)
 
-- [ ] `taskman_init` — inputSchema `{}`, pas d’argv.
-- [ ] `taskman_phase_add` — id, name (requis), status, sort-order. argv : `--id`, `--name`, etc.
-- [ ] `taskman_phase_edit` — positionnel `id`, options name, status, sort-order.
-- [ ] `taskman_phase_list` — inputSchema `{}`, argv `[]`.
-- [ ] `taskman_milestone_add` — id, phase (requis), name, criterion, reached.
-- [ ] `taskman_milestone_edit` — positionnel `id`, options name, criterion, reached, phase.
-- [ ] `taskman_milestone_list` — option `phase`.
-- [ ] `taskman_task_add` — title, phase (requis), description, role, milestone, format.
-- [ ] `taskman_task_get` — positionnel `id`, option `format`.
-- [ ] `taskman_task_list` — phase, status, role, format.
-- [ ] `taskman_task_edit` — positionnel `id`, options title, description, status, role, milestone.
-- [ ] `taskman_task_dep_add` — positionnels `task-id`, `dep-id`.
-- [ ] `taskman_task_dep_remove` — positionnels `task-id`, `dep-id`.
+- [x] `taskman_init` — inputSchema `{}`, pas d’argv.
+- [x] `taskman_phase_add` — id, name (requis), status, sort-order. argv : `--id`, `--name`, etc.
+- [x] `taskman_phase_edit` — positionnel `id`, options name, status, sort-order.
+- [x] `taskman_phase_list` — inputSchema `{}`, argv `[]`.
+- [x] `taskman_milestone_add` — id, phase (requis), name, criterion, reached.
+- [x] `taskman_milestone_edit` — positionnel `id`, options name, criterion, reached, phase.
+- [x] `taskman_milestone_list` — option `phase`.
+- [x] `taskman_task_add` — title, phase (requis), description, role, milestone, format.
+- [x] `taskman_task_get` — positionnel `id`, option `format`.
+- [x] `taskman_task_list` — phase, status, role, format.
+- [x] `taskman_task_edit` — positionnel `id`, options title, description, status, role, milestone.
+- [x] `taskman_task_dep_add` — positionnels `task-id`, `dep-id`.
+- [x] `taskman_task_dep_remove` — positionnels `task-id`, `dep-id`.
 
 ### Conversion `arguments` → `argv` et capture
 
-- [ ] **Construction argv** — Pour chaque outil : d’abord positionnels (ordre fixe), puis paires `"--<key>"`, `value` pour les options présentes dans `arguments`. Ignorer clés inconnues. Valeur : string ; si number → `to_string`. `reached` : 0/1 → `"0"`/`"1"`.
-- [ ] **`argv` vers `cmd_*`** — `std::vector<std::string> argv_strs` ; `std::vector<char*> argv_ptrs` pointant sur `s.data()` (ou `&s[0]`) ; passer `argv_ptrs.size()`, `argv_ptrs.data()` à la `cmd_*`. Ne pas ajouter de chaîne vide.
-- [ ] **Capture cout/cerr** — Rdbuf de `cout`/`cerr` sauvegardé, remplacé par `ostringstream` ; appel `cmd_*` ; restauration ; en cas d’exception, restaurer les rdbuf (RAII ou try/finally).
-- [ ] **Dispatch name → cmd_*** — Table ou `if/else` : `taskman_init` → ouvrir DB puis `init_schema(db)` (pas de `cmd_init`), `taskman_phase_list` → `cmd_phase_list`, etc. Pour `taskman_init` : pas d’argv ; succès → `content.text` = `"Database initialized."` ou vide ; échec → stderr capturé, `isError: true`.
-- [ ] **`argc`/`argv` pour cmd_*** — Pour `cmd_phase_list` (aucun arg) : `argc=0` et `argv=nullptr` ou `argc=1` avec `argv[0]` factice selon robustesse. Pour les autres : `argv` construit à partir de `arguments`.
+- [x] **Construction argv** — Pour chaque outil : d’abord positionnels (ordre fixe), puis paires `"--<key>"`, `value` pour les options présentes dans `arguments`. Ignorer clés inconnues. Valeur : string ; si number → `to_string`. `reached` : 0/1 → `"0"`/`"1"`.
+- [x] **`argv` vers `cmd_*`** — `std::vector<std::string> argv_strs` ; `std::vector<char*> argv_ptrs` pointant sur `s.data()` (ou `&s[0]`) ; passer `argv_ptrs.size()`, `argv_ptrs.data()` à la `cmd_*`. Ne pas ajouter de chaîne vide.
+- [x] **Capture cout/cerr** — Rdbuf de `cout`/`cerr` sauvegardé, remplacé par `ostringstream` ; appel `cmd_*` ; restauration ; en cas d’exception, restaurer les rdbuf (RAII ou try/finally).
+- [x] **Dispatch name → cmd_*** — Table ou `if/else` : `taskman_init` → ouvrir DB puis `init_schema(db)` (pas de `cmd_init`), `taskman_phase_list` → `cmd_phase_list`, etc. Pour `taskman_init` : pas d’argv ; succès → `content.text` = `"Database initialized."` ou vide ; échec → stderr capturé, `isError: true`.
+- [x] **`argc`/`argv` pour cmd_*** — Pour `cmd_phase_list` (aucun arg) : `argc=0` et `argv=nullptr` ou `argc=1` avec `argv[0]` factice selon robustesse. Pour les autres : `argv` construit à partir de `arguments`.
 
 ### Intégration et tests
 
-- [ ] **Tests manuels** — `echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{...}}' | taskman mcp` → réponse `InitializeResult`.
-- [ ] **Tests manuels** — `tools/list` → 13 outils.
-- [ ] **Tests manuels** — `tools/call` pour `taskman_init`, `taskman_phase_list`, `taskman_phase_add`, `taskman_task_add`, `taskman_task_list`, `taskman_task_get`, `taskman_task_edit`, `taskman_task_dep_add`, `taskman_task_dep_remove`, `taskman_milestone_*`.
-- [ ] **Tests manuels** — `tools/call` avec task/phase inexistante → `isError: true` et message d’erreur dans `content`.
-- [ ] **Documentation** — Section « MCP » dans README ou USAGE : `taskman mcp`, config Cursor (commande, args, env `TASKMAN_DB_NAME`, `TASKMAN_JOURNAL_MEMORY`).
+- [x] **Tests manuels** — `echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{...}}' | taskman mcp` → réponse `InitializeResult`.
+- [x] **Tests manuels** — `tools/list` → 13 outils.
+- [x] **Tests manuels** — `tools/call` pour `taskman_init`, `taskman_phase_list`, `taskman_phase_add`, `taskman_task_add`, `taskman_task_list`, `taskman_task_get`, `taskman_task_edit`, `taskman_task_dep_add`, `taskman_task_dep_remove`, `taskman_milestone_*`.
+- [x] **Tests manuels** — `tools/call` avec task/phase inexistante → `isError: true` et message d’erreur dans `content`.
+- [x] **Documentation** — Section « MCP » dans README ou USAGE : `taskman mcp`, config Cursor (commande, args, env `TASKMAN_DB_NAME`, `TASKMAN_JOURNAL_MEMORY`).
 
 ---
 

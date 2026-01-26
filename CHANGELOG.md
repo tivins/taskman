@@ -4,7 +4,17 @@
 
 ### Added
 
-- **taskman mcp** : mode serveur MCP (Model Context Protocol) sur stdio. Lit les requêtes JSON-RPC ligne par ligne sur stdin, écrit les réponses sur stdout. Squelette Phase 1 : boucle getline, parse nlohmann::json, détection `method`/`id` ; lignes vides ignorées ; erreurs JSON-RPC : -32700 (Parse error), -32600 (Invalid Request), -32601 (Method not found) pour toute méthode (initialize, tools/list, tools/call à venir). Fichiers `src/mcp.hpp`, `src/mcp.cpp` ; `mcp` ajouté dans CMake, COMMANDS et usage.
+- **taskman mcp** : mode serveur MCP (Model Context Protocol) sur stdio. Lit les requêtes JSON-RPC ligne par ligne sur stdin, écrit les réponses sur stdout. Implémentation complète du protocole MCP 2025-11-25 :
+  - Lifecycle : `initialize` (avec validation de `protocolVersion`), `notifications/initialized`
+  - Méthodes : `tools/list` (retourne les 13 outils), `tools/call` (exécute les commandes CLI), `ping`
+  - Table des 13 outils : définitions complètes avec `name`, `description`, `inputSchema` (JSON Schema), `positional_keys`
+  - Conversion `arguments` → `argv` : construction automatique des arguments CLI à partir des paramètres JSON (positionnels puis options `--key value`)
+  - Capture stdout/stderr : redirection via `rdbuf` (RAII avec `CaptureGuard`) pour capturer la sortie des `cmd_*` sans modification
+  - Dispatch : table de correspondance `name` → `cmd_*` avec gestion spéciale pour `taskman_init` (appel direct à `init_schema`)
+  - Erreurs JSON-RPC : -32700 (Parse error), -32600 (Invalid Request), -32601 (Method not found), -32602 (Invalid params / Unknown tool / Unsupported protocol version)
+  - Erreurs métier : retournées dans `result` avec `isError: true` et message dans `content[0].text`
+- Tests : `tests/test_mcp.cpp` avec 11 cas de test couvrant initialize, tools/list, tools/call, ping, erreurs (outil inconnu, arguments invalides, méthode inconnue, parse error)
+- Documentation : section MCP dans USAGE.md (section 9) avec configuration Cursor, exemples, et description des outils
 
 ## [0.11.1] - 2026-01-25
 
