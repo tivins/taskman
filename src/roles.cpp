@@ -9,7 +9,9 @@ namespace taskman {
 
 const char* const ROLE_VALUES[] = {
     "project-manager", "project-designer", "software-architect",
-    "developer", "summary-writer", "documentation-writer"};
+    "developer", "summary-writer", "documentation-writer",
+    "art-director", "ui-designer", "community-manager", "ux-designer",
+    "qa-engineer", "devops-engineer", "product-owner", "security-engineer"};
 
 const size_t ROLE_COUNT = sizeof(ROLE_VALUES) / sizeof(ROLE_VALUES[0]);
 
