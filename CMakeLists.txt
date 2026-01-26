@@ -71,7 +71,7 @@ FetchContent_MakeAvailable(Catch2)
 add_subdirectory(third_party/sqlite)
 
 # -----------------------------------------------------------------------------
-# Web assets: style.css, main.js -> web_assets.generated.h (embedded in binary)
+# Web assets: style.css, multiple JS files -> web_assets.generated.h (embedded in binary)
 # -----------------------------------------------------------------------------
 find_package(Python3 REQUIRED)
 set(WEB_ASSETS_HEADER "${CMAKE_BINARY_DIR}/web_assets.generated.h")
@@ -79,12 +79,16 @@ add_custom_command(
   OUTPUT "${WEB_ASSETS_HEADER}"
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/embed_assets.py
     --css ${CMAKE_SOURCE_DIR}/src/web/style.css
+    --js ${CMAKE_SOURCE_DIR}/src/web/filters.js
+    --js ${CMAKE_SOURCE_DIR}/src/web/pagination.js
     --js ${CMAKE_SOURCE_DIR}/src/web/main.js
     -o "${WEB_ASSETS_HEADER}"
   DEPENDS ${CMAKE_SOURCE_DIR}/scripts/embed_assets.py
           ${CMAKE_SOURCE_DIR}/src/web/style.css
+          ${CMAKE_SOURCE_DIR}/src/web/filters.js
+          ${CMAKE_SOURCE_DIR}/src/web/pagination.js
           ${CMAKE_SOURCE_DIR}/src/web/main.js
-  COMMENT "Embedding web assets (style.css, main.js) into header"
+  COMMENT "Embedding web assets (style.css, filters.js, pagination.js, main.js) into header"
 )
 
 # -----------------------------------------------------------------------------

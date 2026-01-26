@@ -1,32 +1,240 @@
+import { Filters } from './filters.js';
+import { Pagination } from './pagination.js';
+
 const app = document.getElementById('app');
 
-async function loadTasks(limit = 20, page = 1) {
-    app.innerHTML = '';
+// État global
+let filters = new Filters();
+let pagination = new Pagination();
+let phases = [];
+let milestones = [];
+let tasks = [];
+let taskDeps = [];
+
+/**
+ * Initialisation de l'application
+ */
+async function init() {
+    // Charger les phases et milestones pour les filtres
+    await loadPhasesAndMilestones();
+    
+    // Configurer les callbacks
+    filters.setOnChange(() => {
+        pagination.goToPage(1);
+        loadTasks();
+    });
+    
+    pagination.setOnPageChange(() => {
+        loadTasks();
+    });
+
+    // Afficher la vue principale
+    renderMainView();
+    await loadTasks();
+}
+
+/**
+ * Charge les phases et milestones pour les filtres
+ */
+async function loadPhasesAndMilestones() {
     try {
-        const [tasksRes, depsRes] = await Promise.all([
-            fetch(`/tasks?limit=${limit}&page=${page}`),
+        const [phasesRes, milestonesRes] = await Promise.all([
+            fetch('/phases?limit=100'),
+            fetch('/milestones?limit=100')
+        ]);
+        
+        if (phasesRes.ok) {
+            phases = await phasesRes.json();
+        }
+        
+        if (milestonesRes.ok) {
+            milestones = await milestonesRes.json();
+        }
+    } catch (e) {
+        console.error('Error loading phases/milestones:', e);
+    }
+}
+
+/**
+ * Affiche la vue principale avec filtres et pagination
+ */
+function renderMainView() {
+    app.innerHTML = '';
+    
+    // En-tête avec vue d'ensemble
+    // const header = el('div', { class: 'main-header' }, el('h1', {}, 'Gestionnaire de Projet'));
+    const header = el('div', {});
+    
+    // Vue d'ensemble des phases
+    /*
+    const overviewDiv = document.createElement('div');
+    overviewDiv.className = 'overview-container';
+    overviewDiv.appendChild(el('h2', {}, 'Vue d\'ensemble'));
+    const overviewContent = document.createElement('div');
+    overviewContent.className = 'overview-content';
+    overviewDiv.appendChild(overviewContent);
+    header.appendChild(overviewDiv);
+    */
+    app.appendChild(header);
+    
+    // Filtres
+    const filtersContainer = document.createElement('div');
+    filtersContainer.className = 'filters-wrapper';
+    filters.render(filtersContainer);
+    app.appendChild(filtersContainer);
+    
+    // Mettre à jour les options des selects dynamiques
+    const phaseOptions = [{ value: '', label: 'Tous' }].concat(
+        phases.map(p => ({ value: p.id, label: `${p.id}: ${p.name || p.id}` }))
+    );
+    filters.updateSelectOptions('phase', phaseOptions);
+    
+    const milestoneOptions = [{ value: '', label: 'Tous' }].concat(
+        milestones.map(m => ({ value: m.id, label: `${m.id}: ${m.name || m.id}` }))
+    );
+    filters.updateSelectOptions('milestone', milestoneOptions);
+    
+    // Zone de contenu pour les tâches
+    const contentDiv = el('div', { class: 'tasks-content' }, 'tasks-content');
+    contentDiv.className = 'tasks-content';
+    contentDiv.id = 'tasks-content';
+    app.appendChild(contentDiv);
+    
+    // Pagination
+    const paginationContainer = document.createElement('div');
+    paginationContainer.className = 'pagination-wrapper';
+    paginationContainer.id = 'pagination-container';
+    app.appendChild(paginationContainer);
+    
+    // Charger la vue d'ensemble
+    // updateOverview(overviewContent);
+}
+
+/**
+ * Met à jour la vue d'ensemble des phases
+ */
+async function updateOverview(container) {
+    container.innerHTML = '';
+
+    // Temporary disabled: overview is not used anymore
+    return;
+    
+    if (phases.length === 0) {
+        container.appendChild(el('p', { class: 'muted' }, 'Aucune phase.'));
+        return;
+    }
+    
+    const phasesGrid = document.createElement('div');
+    phasesGrid.className = 'phases-grid';
+    
+    for (const phase of phases) {
+        const phaseCard = document.createElement('div');
+        phaseCard.className = `phase-card phase-${phase.status || 'to_do'}`;
+        
+        const phaseHeader = document.createElement('div');
+        phaseHeader.className = 'phase-header';
+        phaseHeader.appendChild(el('h3', {}, escapeHtml(phase.name || phase.id)));
+        phaseHeader.appendChild(el('span', { class: `status-badge status-${phase.status || 'to_do'}` }, phase.status || 'to_do'));
+        phaseCard.appendChild(phaseHeader);
+        
+        // Compter les milestones et tâches pour cette phase
+        const phaseMilestones = milestones.filter(m => m.phase_id === phase.id);
+        const phaseTasks = tasks.filter(t => t.phase_id === phase.id);
+        const doneTasks = phaseTasks.filter(t => t.status === 'done').length;
+        
+        const stats = document.createElement('div');
+        stats.className = 'phase-stats';
+        stats.appendChild(el('div', {}, `Milestones: ${phaseMilestones.length}`));
+        stats.appendChild(el('div', {}, `Tâches: ${doneTasks}/${phaseTasks.length}`));
+        phaseCard.appendChild(stats);
+        
+        // Afficher les milestones
+        if (phaseMilestones.length > 0) {
+            const milestonesList = document.createElement('div');
+            milestonesList.className = 'milestones-list';
+            phaseMilestones.forEach(m => {
+                const milestoneEl = document.createElement('div');
+                milestoneEl.className = `milestone-item ${m.reached ? 'reached' : ''}`;
+                milestoneEl.appendChild(el('span', {}, escapeHtml(m.name || m.id)));
+                if (m.reached) {
+                    milestoneEl.appendChild(el('span', { class: 'reached-badge' }, '✓'));
+                }
+                milestonesList.appendChild(milestoneEl);
+            });
+            phaseCard.appendChild(milestonesList);
+        }
+        
+        phasesGrid.appendChild(phaseCard);
+    }
+    
+    container.appendChild(phasesGrid);
+}
+
+/**
+ * Charge les tâches avec filtres et pagination
+ */
+async function loadTasks() {
+    const contentDiv = document.getElementById('tasks-content');
+    if (!contentDiv) return;
+    
+    contentDiv.innerHTML = '<p>Chargement...</p>';
+    
+    try {
+        const filterParams = filters.buildQueryParams();
+        filterParams.append('limit', pagination.getPageSize());
+        filterParams.append('page', pagination.getCurrentPage());
+        
+        // Charger le nombre total et les tâches
+        const countParams = filters.buildQueryParams();
+        const [countRes, tasksRes, depsRes] = await Promise.all([
+            fetch(`/tasks/count?${countParams}`),
+            fetch(`/tasks?${filterParams}`),
             fetch(`/task_deps?limit=500`)
         ]);
+        
         if (!tasksRes.ok) {
-            app.innerHTML = `<p class="error">Error ${tasksRes.status}</p>`;
+            contentDiv.innerHTML = `<p class="error">Erreur ${tasksRes.status}</p>`;
             return;
         }
-        const data = await tasksRes.json();
-        if (!Array.isArray(data) || data.length === 0) {
-            app.innerHTML = '<p>No task.</p>';
+        
+        // Mettre à jour le nombre total
+        if (countRes.ok) {
+            const countData = await countRes.json();
+            pagination.setTotalCount(countData.count || 0);
+        }
+        
+        tasks = await tasksRes.json();
+        
+        // Charger les dépendances
+        if (depsRes.ok) {
+            taskDeps = await depsRes.json();
+        } else {
+            taskDeps = [];
+        }
+        
+        // Mettre à jour la pagination
+        const paginationContainer = document.getElementById('pagination-container');
+        if (paginationContainer) {
+            paginationContainer.innerHTML = '';
+            const paginationEl = pagination.render(paginationContainer);
+            // Mettre à jour l'affichage de la pagination
+            if (paginationEl.updateDisplay) {
+                paginationEl.updateDisplay();
+            }
+        }
+        
+        // Afficher les tâches
+        if (!Array.isArray(tasks) || tasks.length === 0) {
+            contentDiv.innerHTML = '<p class="muted">Aucune tâche trouvée.</p>';
             return;
         }
-
-        const idToStatus = new Map(data.map((t) => [t.id, t.status]));
+        
+        // Charger les statuts des dépendances manquantes
+        const idToStatus = new Map(tasks.map(t => [t.id, t.status]));
         const taskIds = new Set(idToStatus.keys());
-        let deps = [];
-        try {
-            const depsJson = depsRes.ok ? await depsRes.json() : [];
-            deps = Array.isArray(depsJson) ? depsJson : [];
-        } catch (_) {}
-        const depsForOurTasks = deps.filter((d) => taskIds.has(d.task_id));
-        const missingDepIds = [...new Set(depsForOurTasks.map((d) => d.depends_on).filter((id) => !idToStatus.has(id)))];
-
+        const depsForOurTasks = taskDeps.filter(d => taskIds.has(d.task_id));
+        const missingDepIds = [...new Set(depsForOurTasks.map(d => d.depends_on).filter(id => !idToStatus.has(id)))];
+        
         await Promise.all(missingDepIds.map(async (id) => {
             try {
                 const r = await fetch(`/task/${id}`);
@@ -36,22 +244,35 @@ async function loadTasks(limit = 20, page = 1) {
                 }
             } catch (_) {}
         }));
-
+        
         const isBlocked = (t) => {
-            const taskDeps = depsForOurTasks.filter((d) => d.task_id === t.id);
-            return taskDeps.some((d) => (idToStatus.get(d.depends_on) || '') !== 'done');
+            const taskDeps = depsForOurTasks.filter(d => d.task_id === t.id);
+            return taskDeps.some(d => (idToStatus.get(d.depends_on) || '') !== 'done');
         };
-
-        const table = createTaskListTable(data, {
+        
+        const table = createTaskListTable(tasks, {
             onTaskClick: (t) => loadTask(t.id),
             getStatusSuffix: (t) => isBlocked(t) ? '(blocked)' : ''
         });
-        app.appendChild(table);
+        
+        contentDiv.innerHTML = '';
+        contentDiv.appendChild(el('h2', {}, 'Tâches'));
+        contentDiv.appendChild(table);
+        
+        // Mettre à jour la vue d'ensemble
+        const overviewContent = document.querySelector('.overview-content');
+        if (overviewContent) {
+            updateOverview(overviewContent);
+        }
+        
     } catch (e) {
-        app.innerHTML = `<p class="error">${e.message}</p>`;
+        contentDiv.innerHTML = `<p class="error">${e.message}</p>`;
     }
 }
 
+/**
+ * Charge les détails d'une tâche
+ */
 async function loadTask(id) {
     app.innerHTML = '';
     try {
@@ -97,7 +318,7 @@ async function loadTask(id) {
         div.className = 'task-detail';
 
         const back = el('p', {}, el('a', { href: '#', id: 'back' }, '← liste des tâches'));
-        back.querySelector('#back').addEventListener('click', (e) => { e.preventDefault(); loadTasks(); });
+        back.querySelector('#back').addEventListener('click', (e) => { e.preventDefault(); init(); });
         div.appendChild(back);
 
         div.appendChild(el('h2', {}, escapeHtml(t.title || 'Sans titre')));
@@ -172,9 +393,7 @@ function el(tag, attrs, ...children) {
 }
 
 /**
- * Liste de tâches réutilisable, même style que la vue liste (id, title, role, status, milestone, phase).
- * @param {Array} tasks - tableau de tâches { id, title, role, status, milestone_id, phase_id, ... }
- * @param {{ onTaskClick: (t) => void, getStatusSuffix?: (t) => string }} opts - onTaskClick requis; getStatusSuffix optionnel (ex: "(blocked)")
+ * Liste de tâches réutilisable
  */
 function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => '' }) {
     const table = document.createElement('table');
@@ -207,4 +426,5 @@ function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => '' })
     return table;
 }
 
-loadTasks();
+// Démarrer l'application
+init();

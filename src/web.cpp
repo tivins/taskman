@@ -51,6 +51,8 @@ const char HTML_PAGE[] = R"x(<!DOCTYPE html>
     <h1>taskman</h1>
     <div id="app"></div>
   </div>
+  <script src="filters.js" type="module"></script>
+  <script src="pagination.js" type="module"></script>
   <script src="main.js" type="module"></script>
 </body>
 </html>
@@ -101,6 +103,14 @@ int cmd_web(int argc, char* argv[], Database& db) {
 
     svr.Get("/style.css", [](const httplib::Request&, httplib::Response& res) {
         res.set_content(STYLE_CSS, "text/css; charset=utf-8");
+    });
+
+    svr.Get("/filters.js", [](const httplib::Request&, httplib::Response& res) {
+        res.set_content(FILTERS_JS, "application/javascript; charset=utf-8");
+    });
+
+    svr.Get("/pagination.js", [](const httplib::Request&, httplib::Response& res) {
+        res.set_content(PAGINATION_JS, "application/javascript; charset=utf-8");
     });
 
     svr.Get("/main.js", [](const httplib::Request&, httplib::Response& res) {
@@ -156,12 +166,59 @@ int cmd_web(int argc, char* argv[], Database& db) {
         res.set_content(obj.dump(), "application/json");
     });
 
+    svr.Get("/tasks/count", [&db](const httplib::Request& req, httplib::Response& res) {
+        std::string sql = "SELECT COUNT(*) as count FROM tasks";
+        std::vector<std::string> where_parts;
+        std::vector<std::optional<std::string>> params;
+
+        if (req.has_param("phase")) {
+            where_parts.push_back("phase_id = ?");
+            params.push_back(req.get_param_value("phase"));
+        }
+        if (req.has_param("milestone")) {
+            where_parts.push_back("milestone_id = ?");
+            params.push_back(req.get_param_value("milestone"));
+        }
+        if (req.has_param("status")) {
+            std::string s = req.get_param_value("status");
+            if (is_valid_status(s)) {
+                where_parts.push_back("status = ?");
+                params.push_back(s);
+            }
+        }
+        if (req.has_param("role")) {
+            std::string r = req.get_param_value("role");
+            if (is_valid_role(r)) {
+                where_parts.push_back("role = ?");
+                params.push_back(r);
+            }
+        }
+        if (!where_parts.empty()) {
+            sql += " WHERE ";
+            for (size_t i = 0; i < where_parts.size(); ++i) {
+                if (i) sql += " AND ";
+                sql += where_parts[i];
+            }
+        }
+
+        auto rows = db.query(sql.c_str(), params);
+        int count = 0;
+        if (!rows.empty() && rows[0].count("count")) {
+            try {
+                count = std::stoi(rows[0].at("count").value_or("0"));
+            } catch (...) {}
+        }
+        nlohmann::json obj;
+        obj["count"] = count;
+        res.set_content(obj.dump(), "application/json");
+    });
+
     svr.Get("/tasks", [&db](const httplib::Request& req, httplib::Response& res) {
-        int limit = 20, page = 1;
+        int limit = 50, page = 1;
         if (req.has_param("limit")) {
             try {
                 int v = std::stoi(req.get_param_value("limit"));
-                if (v >= 1 && v <= 100) limit = v;
+                if (v >= 1 && v <= 200) limit = v;
             } catch (...) {}
         }
         if (req.has_param("page")) {
@@ -179,6 +236,10 @@ int cmd_web(int argc, char* argv[], Database& db) {
         if (req.has_param("phase")) {
             where_parts.push_back("phase_id = ?");
             params.push_back(req.get_param_value("phase"));
+        }
+        if (req.has_param("milestone")) {
+            where_parts.push_back("milestone_id = ?");
+            params.push_back(req.get_param_value("milestone"));
         }
         if (req.has_param("status")) {
             std::string s = req.get_param_value("status");
