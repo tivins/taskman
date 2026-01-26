@@ -5,6 +5,7 @@
 #include "task.hpp"
 #include "db.hpp"
 #include "formats.hpp"
+#include "roles.hpp"
 #include <cxxopts.hpp>
 #include <nlohmann/json.hpp>
 #include <uuid.h>
@@ -18,19 +19,9 @@
 namespace {
 
 const char* const STATUS_VALUES[] = {"to_do", "in_progress", "done"};
-const char* const ROLE_VALUES[] = {
-    "project-manager", "project-designer", "software-architect",
-    "developer", "summary-writer", "documentation-writer"};
 
 bool is_valid_status(const std::string& s) {
     for (const char* v : STATUS_VALUES) {
-        if (s == v) return true;
-    }
-    return false;
-}
-
-bool is_valid_role(const std::string& s) {
-    for (const char* v : ROLE_VALUES) {
         if (s == v) return true;
     }
     return false;
@@ -90,8 +81,7 @@ int cmd_task_add(int argc, char* argv[], Database& db) {
         if (result.count("role")) {
             role = result["role"].as<std::string>();
             if (!is_valid_role(role)) {
-                std::cerr << "taskman: --role must be one of: project-manager, project-designer, "
-                             "software-architect, developer, summary-writer, documentation-writer\n";
+                std::cerr << get_roles_error_message();
                 return 1;
             }
         }
@@ -224,8 +214,7 @@ int cmd_task_list(int argc, char* argv[], Database& db) {
     }
     if (result.count("role")) {
         if (!is_valid_role(result["role"].as<std::string>())) {
-            std::cerr << "taskman: --role must be one of: project-manager, project-designer, "
-                         "software-architect, developer, summary-writer, documentation-writer\n";
+            std::cerr << get_roles_error_message();
             return 1;
         }
     }
@@ -338,8 +327,7 @@ int cmd_task_edit(int argc, char* argv[], Database& db) {
     if (result.count("role")) {
         std::string r = result["role"].as<std::string>();
         if (!is_valid_role(r)) {
-            std::cerr << "taskman: --role must be one of: project-manager, project-designer, "
-                         "software-architect, developer, summary-writer, documentation-writer\n";
+            std::cerr << get_roles_error_message();
             return 1;
         }
         set_parts.push_back("role = ?");

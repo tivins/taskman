@@ -8,6 +8,7 @@
 #include "db.hpp"
 #include "milestone.hpp"
 #include "phase.hpp"
+#include "roles.hpp"
 #include "task.hpp"
 #include "version.h"
 #include <nlohmann/json.hpp>
@@ -153,7 +154,7 @@ std::vector<McpTool> get_mcp_tools() {
         props["title"] = nlohmann::json{{"type", "string"}};
         props["phase"] = nlohmann::json{{"type", "string"}};
         props["description"] = nlohmann::json{{"type", "string"}};
-        props["role"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"project-manager", "project-designer", "software-architect", "developer", "summary-writer", "documentation-writer"})}};
+        props["role"] = nlohmann::json{{"type", "string"}, {"enum", get_roles_json_array()}};
         props["milestone"] = nlohmann::json{{"type", "string"}};
         props["format"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"json", "text"})}, {"default", "json"}};
         t.inputSchema = make_schema(props, {"title", "phase"});
@@ -182,7 +183,7 @@ std::vector<McpTool> get_mcp_tools() {
         std::map<std::string, nlohmann::json> props;
         props["phase"] = nlohmann::json{{"type", "string"}};
         props["status"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"to_do", "in_progress", "done"})}};
-        props["role"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"project-manager", "project-designer", "software-architect", "developer", "summary-writer", "documentation-writer"})}};
+        props["role"] = nlohmann::json{{"type", "string"}, {"enum", get_roles_json_array()}};
         props["format"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"json", "text"})}};
         t.inputSchema = make_schema(props);
         t.positional_keys = {};
@@ -199,7 +200,7 @@ std::vector<McpTool> get_mcp_tools() {
         props["title"] = nlohmann::json{{"type", "string"}};
         props["description"] = nlohmann::json{{"type", "string"}};
         props["status"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"to_do", "in_progress", "done"})}};
-        props["role"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"project-manager", "project-designer", "software-architect", "developer", "summary-writer", "documentation-writer"})}};
+        props["role"] = nlohmann::json{{"type", "string"}, {"enum", get_roles_json_array()}};
         props["milestone"] = nlohmann::json{{"type", "string"}};
         t.inputSchema = make_schema(props, {"id"});
         t.positional_keys = {"id"};

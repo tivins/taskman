@@ -7,6 +7,7 @@
 #include "web.hpp"
 #include "db.hpp"
 #include "formats.hpp"
+#include "roles.hpp"
 #include "web_assets.generated.h"
 #include <nlohmann/json.hpp>
 #include <cxxopts.hpp>
@@ -20,19 +21,9 @@
 namespace {
 
 const char* const STATUS_VALUES[] = {"to_do", "in_progress", "done"};
-const char* const ROLE_VALUES[] = {
-    "project-manager", "project-designer", "software-architect",
-    "developer", "summary-writer", "documentation-writer"};
 
 bool is_valid_status(const std::string& s) {
     for (const char* v : STATUS_VALUES) {
-        if (s == v) return true;
-    }
-    return false;
-}
-
-bool is_valid_role(const std::string& s) {
-    for (const char* v : ROLE_VALUES) {
         if (s == v) return true;
     }
     return false;
