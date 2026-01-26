@@ -1,9 +1,11 @@
 /**
- * MCP server — boucle stdio, parse JSON-RPC, dispatch (squelette phase 1).
- * Erreurs : -32700 Parse error, -32600 Invalid Request, -32601 Method not found.
+ * MCP server — boucle stdio, parse JSON-RPC, dispatch (squelette + lifecycle).
+ * Erreurs : -32700 Parse error, -32600 Invalid Request, -32601 Method not found,
+ *           -32602 Unsupported protocol version.
  */
 
 #include "mcp.hpp"
+#include "version.h"
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <string>
@@ -55,11 +57,39 @@ void send_method_not_found(const nlohmann::json& id) {
     send_response(err);
 }
 
+/** Erreur -32602 Unsupported protocol version. */
+void send_unsupported_protocol_version(const nlohmann::json& id) {
+    nlohmann::json err;
+    err["jsonrpc"] = "2.0";
+    err["id"] = id;
+    err["error"]["code"] = -32602;
+    err["error"]["message"] = "Unsupported protocol version";
+    send_response(err);
+}
+
+/** Réponse InitializeResult : protocolVersion, capabilities, serverInfo. */
+void send_initialize_result(const nlohmann::json& id) {
+    nlohmann::json resp;
+    resp["jsonrpc"] = "2.0";
+    resp["id"] = id;
+    resp["result"]["protocolVersion"] = "2025-11-25";
+    resp["result"]["capabilities"]["tools"]["listChanged"] = false;
+    resp["result"]["serverInfo"]["name"] = "taskman";
+    resp["result"]["serverInfo"]["version"] = TASKMAN_VERSION;
+    send_response(resp);
+}
+
+/** True après réception de notifications/initialized (phase opération). */
+bool g_operational = false;
+
 } // namespace
 
 int run_mcp_server() {
     std::string line;
     while (std::getline(std::cin, line)) {
+        /* Trim trailing \r (Windows CRLF) pour que le JSON parse. */
+        while (!line.empty() && line.back() == '\r')
+            line.pop_back();
         if (is_blank(line))
             continue;
 
@@ -81,12 +111,36 @@ int run_mcp_server() {
             continue;
         }
 
+        /* method (pour notifications et requêtes) */
+        std::string method;
+        if (j.contains("method") && j["method"].is_string())
+            method = j["method"].get<std::string>();
+
         /* Notification : pas d'id → on ne répond pas. */
-        if (!j.contains("id"))
+        if (!j.contains("id")) {
+            if (method == "notifications/initialized")
+                g_operational = true;
             continue;
+        }
 
         nlohmann::json id = j["id"];
-        /* Requête valide mais méthode non implémentée (squelette) : -32601. */
+
+        /* initialize */
+        if (method == "initialize") {
+            nlohmann::json params = j.contains("params") ? j["params"] : nlohmann::json();
+            if (!params.is_object() || !params.contains("protocolVersion")) {
+                send_invalid_request(id);
+                continue;
+            }
+            if (params["protocolVersion"] != "2025-11-25") {
+                send_unsupported_protocol_version(id);
+                continue;
+            }
+            send_initialize_result(id);
+            continue;
+        }
+
+        /* Autres méthodes : -32601 Method not found. */
         send_method_not_found(id);
     }
     return 0;
