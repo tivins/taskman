@@ -1,7 +1,7 @@
 /**
  * Gestion des filtres pour les tâches (milestone, phase, role, status)
  */
-
+const allOpt = '— All —' ;
 export class Filters {
     constructor() {
         this.filters = {
@@ -69,7 +69,7 @@ export class Filters {
 
         // Filtre Role
         const roleGroup = this.createSelectGroup('role', 'Rôle', [
-            { value: '', label: '— Tous —' },
+            { value: '', label:allOpt },
             { value: 'project-manager', label: 'Project Manager' },
             { value: 'project-designer', label: 'Project Designer' },
             { value: 'software-architect', label: 'Software Architect' },
@@ -81,7 +81,7 @@ export class Filters {
 
         // Filtre Status
         const statusGroup = this.createSelectGroup('status', 'Statut', [
-            { value: '', label: '— Tous —' },
+            { value: '', label: allOpt },
             { value: 'to_do', label: 'À faire' },
             { value: 'in_progress', label: 'En cours' },
             { value: 'done', label: 'Terminé' }
@@ -127,7 +127,7 @@ export class Filters {
 
         // Options par défaut si non fournies
         if (options.length === 0) {
-            options.push({ value: '', label: 'Tous' });
+            options.push({ value: '', label: allOpt });
         }
 
         options.forEach(opt => {
@@ -160,7 +160,7 @@ export class Filters {
         
         const defaultOpt = document.createElement('option');
         defaultOpt.value = '';
-        defaultOpt.textContent = 'Tous';
+        defaultOpt.textContent = allOpt;
         select.appendChild(defaultOpt);
 
         options.forEach(opt => {

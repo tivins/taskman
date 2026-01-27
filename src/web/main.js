@@ -60,6 +60,7 @@ async function loadPhasesAndMilestones() {
  * Affiche la vue principale avec filtres et pagination
  */
 function renderMainView() {
+    const ALL = ''
     app.innerHTML = '';
     
     // En-tête avec vue d'ensemble
@@ -85,12 +86,12 @@ function renderMainView() {
     app.appendChild(filtersContainer);
     
     // Mettre à jour les options des selects dynamiques
-    const phaseOptions = [{ value: '', label: 'Tous' }].concat(
+    const phaseOptions = [].concat(
         phases.map(p => ({ value: p.id, label: `${p.id}: ${p.name || p.id}` }))
     );
     filters.updateSelectOptions('phase', phaseOptions);
     
-    const milestoneOptions = [{ value: '', label: 'Tous' }].concat(
+    const milestoneOptions = [].concat(
         milestones.map(m => ({ value: m.id, label: `${m.id}: ${m.name || m.id}` }))
     );
     filters.updateSelectOptions('milestone', milestoneOptions);
@@ -322,43 +323,57 @@ async function loadTask(id) {
         back.querySelector('#back').addEventListener('click', (e) => { e.preventDefault(); init(); });
         div.appendChild(back);
 
-        div.appendChild(el('h2', {}, escapeHtml(t.title || 'Sans titre')));
-        if (t.description) div.appendChild(el('p', { class: 'task-description' }, escapeHtml(t.description)));
+        const head = el('div', {class:"", style:"max-width:40em;margin:3rem;font-size:125%"},
+            el('h2', {}, escapeHtml(t.title || 'Sans titre')),
+            el('p', { class: 'task-description' }, escapeHtml(t.description))
+        );
+        div.appendChild(head);
 
         const isBlocked = parentTasks.length > 0 && parentTasks.some((p) => p && p.status !== 'done');
         const meta = document.createElement('table');
         meta.className = 'task-meta';
         const rows = [
-            ['ID', String(t.id || '—')],
-            ['Statut', null],
-            ['Rôle', String(t.role || '—')],
-            ['Phase', String(t.phase_id || '—')],
-            ['Jalon', String(t.milestone_id || '—')],
-            ['Ordre', t.sort_order != null ? String(t.sort_order) : '—'],
-            ['Créé le', t.created_at != null ? String(t.created_at) : '—'],
-            ['Mis à jour le', t.updated_at != null ? String(t.updated_at) : '—']
+            // ['Subject', escapeHtml(t.title || 'Sans titre'), 'row-title'],
+            // ['Description', escapeHtml(t.description || 'Everything is in the title.'), 'row-description'],
+            ['ID', String(t.id || '—'), 'uuid monospace'],
+            ['Statut', null, ''],
+            ['Rôle', String(t.role || '— THIS TASK IS NOT ASSIGNED —'), (t.role || '' ) ? '' : 'error'],
+            ['Phase', String(t.phase_id || '—'), ''],
+            ['Jalon', String(t.milestone_id || '—'), ''],
+            ['Ordre', t.sort_order != null ? String(t.sort_order) : '—', ''],
+            ['Créé le', t.created_at != null ? String(t.created_at) : '—', ''],
+            ['Mis à jour le', t.updated_at != null ? String(t.updated_at) : '—', '']
         ];
-        for (const [label, val] of rows) {
+        for (const [label, val, className] of rows) {
             const labelTd = el('td', { class: 'task-meta-label' }, label);
             let valueTd;
             if (label === 'Statut') {
                 valueTd = el('td', {}, t.status || '—');
                 if (isBlocked) valueTd.appendChild(el('span', { class: 'blocked' }, ' (blocked)'));
-            } else {
-                valueTd = el('td', {}, escapeHtml(val));
+            }
+            // else if (label === 'Subject') {
+            //     valueTd = el('td', {}, el('div',{style:'width:40em;font-size:150%'},val));
+            // }
+            // else if (label === 'Description') {
+            //     valueTd = el('td', {}, el('div',{style:''},val));
+            // }
+            else {
+                valueTd = el('td', {class:className}, escapeHtml(val));
             }
             meta.appendChild(el('tr', {}, labelTd, valueTd));
         }
-        div.appendChild(meta);
 
-        div.appendChild(el('h3', {}, 'Tâches parentes (dont dépend cette tâche)'));
+
+        div.appendChild(el('div', {class: 'card'}, meta));
+
+        div.appendChild(el('h3', {style:"margin:2rem 0 0;"}, 'Tâches parentes (dont dépend cette tâche)'));
         if (parentTasks.length === 0) {
             div.appendChild(el('p', { class: 'muted' }, 'Aucune tâche.'));
         } else {
             div.appendChild(createTaskListTable(parentTasks, { onTaskClick: (task) => loadTask(task.id) }));
         }
 
-        div.appendChild(el('h3', {}, 'Tâches enfants (qui dépendent de cette tâche)'));
+        div.appendChild(el('h3', {style:"margin:2rem 0 0;"}, 'Tâches enfants (qui dépendent de cette tâche)'));
         if (childTasks.length === 0) {
             div.appendChild(el('p', { class: 'muted' }, 'Aucune tâche.'));
         } else {
@@ -381,7 +396,7 @@ function escapeHtml(s) {
 }
 
 /**
- * Liste de tâches réutilisable
+ * Reusabel task list
  */
 function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => false }) {
     const table = document.createElement('table');
