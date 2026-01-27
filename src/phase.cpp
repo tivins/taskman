@@ -182,6 +182,8 @@ int cmd_phase_edit(int argc, char* argv[], Database& db) {
         return 0; // rien à mettre à jour
     }
 
+    set_parts.push_back("updated_at = datetime('now')");
+
     std::string sql = "UPDATE phases SET ";
     for (size_t i = 0; i < set_parts.size(); ++i) {
         if (i) sql += ", ";
@@ -202,7 +204,7 @@ int cmd_phase_list(int argc, char* argv[], Database& db) {
             return 0;
         }
     }
-    auto rows = db.query("SELECT id, name, status, sort_order FROM phases ORDER BY sort_order");
+    auto rows = db.query("SELECT id, name, status, sort_order, created_at, updated_at FROM phases ORDER BY sort_order");
     nlohmann::json arr = nlohmann::json::array();
     for (const auto& row : rows) {
         nlohmann::json obj;

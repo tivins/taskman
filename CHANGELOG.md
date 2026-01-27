@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.17.0] - 2026-01-27
+
+### Added
+
+- **created_at, updated_at** sur les tables `phases`, `milestones`, `tasks` : colonnes automatiques (non modifiables par l’utilisateur). `created_at` et `updated_at` sont définies à l’insertion via `DEFAULT (datetime('now'))`. À chaque mise à jour (phase:edit, milestone:edit, task:edit), `updated_at` est rafraîchi. Migration automatique pour les bases existantes (ajout des colonnes si absentes). Ces champs sont exposés en JSON et en format text sur tous les canaux (CLI, WEB, MCP).
+
+### Changed
+
+- **Schéma** : `init_schema` crée les tables avec `created_at` et `updated_at` ; une migration ajoute ces colonnes aux tables existantes via `pragma_table_info` et `ALTER TABLE ... ADD COLUMN`.
+- **Formats** : `phase_to_json`, `milestone_to_json`, `task_to_json` et `print_task_text` incluent `created_at` et `updated_at`.
+
 ## [0.16.0] - 2026-01-27
 
 ### Changed

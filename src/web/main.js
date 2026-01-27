@@ -252,7 +252,7 @@ async function loadTasks() {
         
         const table = createTaskListTable(tasks, {
             onTaskClick: (t) => loadTask(t.id),
-            getStatusSuffix: (t) => isBlocked(t) ? 'blocked' : ''
+            getStatusSuffix: (t) => isBlocked(t)
         });
         
         contentDiv.innerHTML = '';
@@ -333,7 +333,9 @@ async function loadTask(id) {
             ['Rôle', String(t.role || '—')],
             ['Phase', String(t.phase_id || '—')],
             ['Jalon', String(t.milestone_id || '—')],
-            ['Ordre', t.sort_order != null ? String(t.sort_order) : '—']
+            ['Ordre', t.sort_order != null ? String(t.sort_order) : '—'],
+            ['Créé le', t.created_at != null ? String(t.created_at) : '—'],
+            ['Mis à jour le', t.updated_at != null ? String(t.updated_at) : '—']
         ];
         for (const [label, val] of rows) {
             const labelTd = el('td', { class: 'task-meta-label' }, label);
@@ -395,7 +397,7 @@ function el(tag, attrs, ...children) {
 /**
  * Liste de tâches réutilisable
  */
-function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => '' }) {
+function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => false }) {
     const table = document.createElement('table');
     table.className = 'tasks-table';
     const thead = document.createElement('thead');
@@ -410,7 +412,7 @@ function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => '' })
         const suffix = getStatusSuffix(t);
 
         let label = t.status || '';
-        if (label === 'to_do' && suffix === 'blocked') {
+        if (label === 'to_do' && suffix) {
             label = 'blocked';
         }
 

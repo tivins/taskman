@@ -203,7 +203,7 @@ int cmd_web(int argc, char* argv[], Database& db) {
         }
         std::string id = it->second;
         auto rows = db.query(
-            "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role FROM tasks WHERE id = ?",
+            "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at FROM tasks WHERE id = ?",
             {id});
         if (rows.empty()) {
             res.status = 404;
@@ -278,7 +278,7 @@ int cmd_web(int argc, char* argv[], Database& db) {
         }
         int offset = (page - 1) * limit;
 
-        std::string sql = "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role FROM tasks";
+        std::string sql = "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at FROM tasks";
         std::vector<std::string> where_parts;
         std::vector<std::optional<std::string>> params;
 
@@ -374,7 +374,7 @@ int cmd_web(int argc, char* argv[], Database& db) {
         }
         std::string id = it->second;
         auto rows = db.query(
-            "SELECT id, phase_id, name, criterion, reached FROM milestones WHERE id = ?",
+            "SELECT id, phase_id, name, criterion, reached, created_at, updated_at FROM milestones WHERE id = ?",
             {id});
         if (rows.empty()) {
             res.status = 404;
@@ -403,7 +403,7 @@ int cmd_web(int argc, char* argv[], Database& db) {
         int offset = (page - 1) * limit;
 
         auto rows = db.query(
-            "SELECT id, phase_id, name, criterion, reached FROM milestones ORDER BY phase_id, id LIMIT ? OFFSET ?",
+            "SELECT id, phase_id, name, criterion, reached, created_at, updated_at FROM milestones ORDER BY phase_id, id LIMIT ? OFFSET ?",
             {std::to_string(limit), std::to_string(offset)});
 
         nlohmann::json arr = nlohmann::json::array();
@@ -424,7 +424,7 @@ int cmd_web(int argc, char* argv[], Database& db) {
         }
         std::string id = it->second;
         auto rows = db.query(
-            "SELECT id, name, status, sort_order FROM phases WHERE id = ?",
+            "SELECT id, name, status, sort_order, created_at, updated_at FROM phases WHERE id = ?",
             {id});
         if (rows.empty()) {
             res.status = 404;
@@ -453,7 +453,7 @@ int cmd_web(int argc, char* argv[], Database& db) {
         int offset = (page - 1) * limit;
 
         auto rows = db.query(
-            "SELECT id, name, status, sort_order FROM phases ORDER BY sort_order LIMIT ? OFFSET ?",
+            "SELECT id, name, status, sort_order, created_at, updated_at FROM phases ORDER BY sort_order LIMIT ? OFFSET ?",
             {std::to_string(limit), std::to_string(offset)});
 
         nlohmann::json arr = nlohmann::json::array();

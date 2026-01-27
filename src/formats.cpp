@@ -50,6 +50,8 @@ void phase_to_json(nlohmann::json& out, const Row& row) {
     set_or_null(out, "name", get("name"));
     set_or_null(out, "status", get("status"));
     set_or_null_int(out, "sort_order", get("sort_order"));
+    set_or_null(out, "created_at", get("created_at"));
+    set_or_null(out, "updated_at", get("updated_at"));
 }
 
 void milestone_to_json(nlohmann::json& out, const Row& row) {
@@ -59,6 +61,8 @@ void milestone_to_json(nlohmann::json& out, const Row& row) {
     set_or_null(out, "name", get("name"));
     set_or_null(out, "criterion", get("criterion"));
     set_or_null_int(out, "reached", get("reached"));
+    set_or_null(out, "created_at", get("created_at"));
+    set_or_null(out, "updated_at", get("updated_at"));
 }
 
 void task_to_json(nlohmann::json& out, const Row& row) {
@@ -71,6 +75,8 @@ void task_to_json(nlohmann::json& out, const Row& row) {
     set_or_null(out, "status", get("status"));
     set_or_null_int(out, "sort_order", get("sort_order"));
     set_or_null(out, "role", get("role"));
+    set_or_null(out, "created_at", get("created_at"));
+    set_or_null(out, "updated_at", get("updated_at"));
 }
 
 void print_task_text(const Row& row) {
@@ -79,7 +85,7 @@ void print_task_text(const Row& row) {
         if (it == row.end() || !it->second.has_value()) return "";
         return *it->second;
     };
-    // Spec : titre, description, status, role sur lignes distinctes ; puis id, phase_id, …
+    // Spec : titre, description, status, role sur lignes distinctes ; puis id, phase_id, … ; created_at, updated_at
     std::cout << "title: " << get("title") << "\n";
     std::cout << "description: " << get("description") << "\n";
     std::cout << "status: " << get("status") << "\n";
@@ -89,6 +95,10 @@ void print_task_text(const Row& row) {
     std::cout << "milestone_id: " << get("milestone_id") << "\n";
     std::string so = get("sort_order");
     if (!so.empty()) std::cout << "sort_order: " << so << "\n";
+    std::string ca = get("created_at");
+    if (!ca.empty()) std::cout << "created_at: " << ca << "\n";
+    std::string ua = get("updated_at");
+    if (!ua.empty()) std::cout << "updated_at: " << ua << "\n";
 }
 
 } // namespace taskman

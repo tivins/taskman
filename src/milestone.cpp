@@ -168,6 +168,8 @@ int cmd_milestone_edit(int argc, char* argv[], Database& db) {
         return 0;
     }
 
+    set_parts.push_back("updated_at = datetime('now')");
+
     std::string sql = "UPDATE milestones SET ";
     for (size_t i = 0; i < set_parts.size(); ++i) {
         if (i) sql += ", ";
@@ -203,11 +205,11 @@ int cmd_milestone_list(int argc, char* argv[], Database& db) {
     if (result.count("phase")) {
         std::string phase_id = result["phase"].as<std::string>();
         rows = db.query(
-            "SELECT id, phase_id, name, criterion, reached FROM milestones WHERE phase_id = ? ORDER BY phase_id, id",
+            "SELECT id, phase_id, name, criterion, reached, created_at, updated_at FROM milestones WHERE phase_id = ? ORDER BY phase_id, id",
             {phase_id});
     } else {
         rows = db.query(
-            "SELECT id, phase_id, name, criterion, reached FROM milestones ORDER BY phase_id, id");
+            "SELECT id, phase_id, name, criterion, reached, created_at, updated_at FROM milestones ORDER BY phase_id, id");
     }
 
     nlohmann::json arr = nlohmann::json::array();

@@ -6,6 +6,7 @@
 #include <sqlite3.h>
 #include <cstdlib>
 #include <iostream>
+#include <string>
 
 namespace taskman {
 
@@ -174,13 +175,43 @@ std::vector<std::map<std::string, std::optional<std::string>>> Database::query(
     return rows;
 }
 
+namespace {
+
+bool table_has_column(Database& db, const char* table, const char* column) {
+    std::string sql = "SELECT name FROM pragma_table_info('";
+    sql += table;
+    sql += "') WHERE name = ?";
+    auto rows = db.query(sql.c_str(), {std::string(column)});
+    return !rows.empty();
+}
+
+bool ensure_timestamps(Database& db, const char* table) {
+    if (!table_has_column(db, table, "created_at")) {
+        std::string sql = "ALTER TABLE ";
+        sql += table;
+        sql += " ADD COLUMN created_at TEXT DEFAULT (datetime('now'))";
+        if (!db.exec(sql.c_str())) return false;
+    }
+    if (!table_has_column(db, table, "updated_at")) {
+        std::string sql = "ALTER TABLE ";
+        sql += table;
+        sql += " ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))";
+        if (!db.exec(sql.c_str())) return false;
+    }
+    return true;
+}
+
+} // namespace
+
 bool init_schema(Database& db) {
     static const char* const phases_sql =
         "CREATE TABLE IF NOT EXISTS phases (\n"
         "  id TEXT PRIMARY KEY,\n"
         "  name TEXT NOT NULL,\n"
         "  status TEXT DEFAULT 'to_do',\n"
-        "  sort_order INTEGER\n"
+        "  sort_order INTEGER,\n"
+        "  created_at TEXT DEFAULT (datetime('now')),\n"
+        "  updated_at TEXT DEFAULT (datetime('now'))\n"
         ");";
     if (!db.exec(phases_sql)) return false;
 
@@ -191,6 +222,8 @@ bool init_schema(Database& db) {
         "  name TEXT,\n"
         "  criterion TEXT,\n"
         "  reached INTEGER DEFAULT 0,\n"
+        "  created_at TEXT DEFAULT (datetime('now')),\n"
+        "  updated_at TEXT DEFAULT (datetime('now')),\n"
         "  FOREIGN KEY (phase_id) REFERENCES phases(id)\n"
         ");";
     if (!db.exec(milestones_sql)) return false;
@@ -205,6 +238,8 @@ bool init_schema(Database& db) {
         "  status TEXT DEFAULT 'to_do',\n"
         "  sort_order INTEGER,\n"
         "  role TEXT,\n"
+        "  created_at TEXT DEFAULT (datetime('now')),\n"
+        "  updated_at TEXT DEFAULT (datetime('now')),\n"
         "  FOREIGN KEY (phase_id) REFERENCES phases(id),\n"
         "  FOREIGN KEY (milestone_id) REFERENCES milestones(id)\n"
         ");";
@@ -219,6 +254,10 @@ bool init_schema(Database& db) {
         "  FOREIGN KEY (depends_on) REFERENCES tasks(id)\n"
         ");";
     if (!db.exec(task_deps_sql)) return false;
+
+    if (!ensure_timestamps(db, "phases")) return false;
+    if (!ensure_timestamps(db, "milestones")) return false;
+    if (!ensure_timestamps(db, "tasks")) return false;
 
     return true;
 }

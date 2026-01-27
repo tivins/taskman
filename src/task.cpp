@@ -181,7 +181,7 @@ int cmd_task_add(int argc, char* argv[], Database& db) {
                   "to_do", sort_order_opt,
                   role.empty() ? std::nullopt : std::optional<std::string>(role))) return 1;
 
-    auto rows = db.query("SELECT id, phase_id, milestone_id, title, description, status, sort_order, role FROM tasks WHERE id = ?",
+    auto rows = db.query("SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at FROM tasks WHERE id = ?",
                          {id});
     if (rows.empty()) {
         std::cerr << "taskman: failed to read created task\n";
@@ -235,7 +235,7 @@ int cmd_task_get(int argc, char* argv[], Database& db) {
         return 1;
     }
 
-    auto rows = db.query("SELECT id, phase_id, milestone_id, title, description, status, sort_order, role FROM tasks WHERE id = ?",
+    auto rows = db.query("SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at FROM tasks WHERE id = ?",
                          {id});
     if (rows.empty()) {
         std::cerr << "taskman: task not found: " << id << "\n";
@@ -291,7 +291,7 @@ int cmd_task_list(int argc, char* argv[], Database& db) {
         }
     }
 
-    std::string sql = "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role FROM tasks";
+    std::string sql = "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at FROM tasks";
     std::vector<std::string> where_parts;
     std::vector<std::optional<std::string>> params;
 
@@ -424,6 +424,8 @@ int cmd_task_edit(int argc, char* argv[], Database& db) {
     if (set_parts.empty()) {
         return 0;
     }
+
+    set_parts.push_back("updated_at = datetime('now')");
 
     std::string sql = "UPDATE tasks SET ";
     for (size_t i = 0; i < set_parts.size(); ++i) {

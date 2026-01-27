@@ -16,13 +16,13 @@ namespace taskman {
 
 using Row = std::map<std::string, std::optional<std::string>>;
 
-/** Phase → JSON : id, name, status, sort_order (sort_order en int si entier). */
+/** Phase → JSON : id, name, status, sort_order, created_at, updated_at (sort_order en int si entier). */
 void phase_to_json(nlohmann::json& out, const Row& row);
 
-/** Milestone → JSON : id, phase_id, name, criterion, reached (reached en int). */
+/** Milestone → JSON : id, phase_id, name, criterion, reached, created_at, updated_at (reached en int). */
 void milestone_to_json(nlohmann::json& out, const Row& row);
 
-/** Task → JSON : id, phase_id, milestone_id, title, description, status, sort_order, role. */
+/** Task → JSON : id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at. */
 void task_to_json(nlohmann::json& out, const Row& row);
 
 /** Task → format text lisible (titre, description, status, role, puis id, phase_id, …). */

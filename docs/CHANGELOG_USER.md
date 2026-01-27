@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.17.0] - 2026-01-27
+
+- **created_at / updated_at** : chaque phase, milestone et tâche affiche désormais une date de création (`created_at`) et une date de dernière modification (`updated_at`). Ces champs sont remplis et mis à jour automatiquement (non modifiables). Ils apparaissent en CLI (JSON et `--format text`), dans l’API web (GET /phases, /milestones, /tasks, etc.) et dans les réponses des outils MCP.
+
 ## [0.15.0] - 2026-01-27
 
 - **taskman demo:generate**: commande intégrée pour créer une base de données de démonstration remplie avec un exemple réaliste (projet MVP de site e-commerce). Remplace le script Python `scripts/create_demo.py` et permet d'utiliser directement les fonctions du codebase C++ sans avoir à fournir le chemin de l'exécutable. La commande supprime automatiquement la base de données existante (et ses fichiers journal) avant de créer la nouvelle, garantissant un résultat reproductible. Crée 4 phases (Design, Development, Acceptance, Delivery), 4 milestones, 9 tâches avec priorités (sort_order), et leurs dépendances. Disponible aussi comme outil MCP `taskman_demo_generate`.
