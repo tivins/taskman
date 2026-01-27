@@ -130,6 +130,18 @@ int cmd_web(int argc, char* argv[], Database& db) {
         res.set_content(STYLE_CSS, "text/css; charset=utf-8");
     });
 
+    svr.Get("/dom.js", [assets_dir](const httplib::Request&, httplib::Response& res) {
+        if (!assets_dir.empty()) {
+            std::string content;
+            if (read_file_to_string(asset_path(assets_dir, "dom.js"), content)) {
+                res.set_header("Cache-Control", "no-store");
+                res.set_content(content, "application/javascript; charset=utf-8");
+                return;
+            }
+        }
+        res.set_content(DOM_JS, "application/javascript; charset=utf-8");
+    });
+
     svr.Get("/filters.js", [assets_dir](const httplib::Request&, httplib::Response& res) {
         if (!assets_dir.empty()) {
             std::string content;

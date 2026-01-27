@@ -67,11 +67,11 @@ li a:hover { text-decoration: underline; }
 .muted { color: var(--muted); }
 .error { color: #c00; }
 .blocked { color: var(--blocked); }
-.blocked:before { content: "× "; } /* ☒ */
+/*.blocked:before { content: "× "; } /* ☒ */
 .done { color: var(--muted-2); text-decoration: line-through; }
-.done:before { content: "✓ "; } /* ☑ */
+/*.done:before { content: "✓ "; } /* ☑ */
 .in_progress { color: var(--in-progress); }
-.in_progress:before { content: "⋯ "; }
+/*.in_progress:before { content: "⋯ "; }*/
 .to-do,.to_do { color: var(--to-do); }
 .reached { color: var(--reached); }
 
@@ -291,7 +291,6 @@ li a:hover { text-decoration: underline; }
 .filter-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
 }
 
 .filter-group label {

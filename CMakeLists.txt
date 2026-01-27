@@ -79,16 +79,18 @@ add_custom_command(
   OUTPUT "${WEB_ASSETS_HEADER}"
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/embed_assets.py
     --css ${CMAKE_SOURCE_DIR}/src/web/style.css
+    --js ${CMAKE_SOURCE_DIR}/src/web/dom.js
     --js ${CMAKE_SOURCE_DIR}/src/web/filters.js
     --js ${CMAKE_SOURCE_DIR}/src/web/pagination.js
     --js ${CMAKE_SOURCE_DIR}/src/web/main.js
     -o "${WEB_ASSETS_HEADER}"
   DEPENDS ${CMAKE_SOURCE_DIR}/scripts/embed_assets.py
           ${CMAKE_SOURCE_DIR}/src/web/style.css
+          ${CMAKE_SOURCE_DIR}/src/web/dom.js
           ${CMAKE_SOURCE_DIR}/src/web/filters.js
           ${CMAKE_SOURCE_DIR}/src/web/pagination.js
           ${CMAKE_SOURCE_DIR}/src/web/main.js
-  COMMENT "Embedding web assets (style.css, filters.js, pagination.js, main.js) into header"
+  COMMENT "Embedding web assets (style.css, dom.js, filters.js, pagination.js, main.js) into header"
 )
 
 # -----------------------------------------------------------------------------

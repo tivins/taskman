@@ -1,3 +1,4 @@
+import { el } from './dom.js';
 import { Filters } from './filters.js';
 import { Pagination } from './pagination.js';
 
@@ -379,21 +380,6 @@ function escapeHtml(s) {
     return escapeHTMLElement.innerHTML;
 }
 
-function el(tag, attrs, ...children) {
-    const elem = document.createElement(tag);
-    for (const [key, value] of Object.entries(attrs)) {
-        if (value != null) elem.setAttribute(key, value);
-    }
-    for (const child of children) {
-        if (typeof child === 'string') {
-            elem.appendChild(document.createTextNode(child));
-        } else if (child != null) {
-            elem.appendChild(child);
-        }
-    }
-    return elem;
-}
-
 /**
  * Liste de tâches réutilisable
  */
@@ -401,7 +387,7 @@ function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => false
     const table = document.createElement('table');
     table.className = 'tasks-table';
     const thead = document.createElement('thead');
-    thead.appendChild(el('tr', {}, ...['id', 'title', 'role', 'status', 'milestone', 'phase'].map((h) => {
+    thead.appendChild(el('tr', {}, ...['id', 'title', 'role', 'status', 'milestone', 'phase', 'changed'].map((h) => {
         const th = document.createElement('th');
         th.textContent = h;
         return th;
@@ -416,8 +402,15 @@ function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => false
             label = 'blocked';
         }
 
+        let updated = new Date(t.updated_at).toLocaleString();
+        if (updated === 'Invalid Date') updated = '';
+        let timeAgo = new Date(t.updated_at).getTime() - new Date().getTime();
+        if (timeAgo < 0) timeAgo = 0;
+        timeAgo = Math.floor(timeAgo / 1000 / 3600 / 24);
+        timeAgo = `${timeAgo} day${timeAgo !== 1 ? 's' : ''} ago`;
+        
 
-        const tr = el('tr', { 'data-task-id': t.id },
+        const tr = el('tr', { 'data-task-id': t.id , class: label },
             el('td', { class: 'monospace uuid' }, escapeHtml(String(t.id ?? '').substring(0, 8))),
             el('td', {}, el('a', { href: '#' }, escapeHtml(t.title || t.id || 'untitled'))),
             el('td', {}, escapeHtml(t.role || '')),
@@ -425,7 +418,8 @@ function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => false
                 el('span', { class: label }, label)
             ),
             el('td', {}, escapeHtml(t.milestone_id || '')),
-            el('td', {}, escapeHtml(t.phase_id || ''))
+            el('td', {}, escapeHtml(t.phase_id || '')),
+            el('td', {class: 'muted'}, escapeHtml(timeAgo))
         );
         tr.addEventListener('click', (e) => { e.preventDefault(); onTaskClick(t); });
         tbody.appendChild(tr);

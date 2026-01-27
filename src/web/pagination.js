@@ -2,6 +2,8 @@
  * Gestion de la pagination pour les tâches
  */
 
+import { el } from './dom.js';
+
 export class Pagination {
     constructor() {
         this.currentPage = 1;
@@ -112,61 +114,35 @@ export class Pagination {
      * Crée l'interface utilisateur de pagination
      */
     render(container) {
-        const paginationDiv = document.createElement('div');
-        paginationDiv.className = 'pagination-container';
-
         const info = this.getInfo();
-        const infoSpan = document.createElement('span');
-        infoSpan.className = 'pagination-info';
-        paginationDiv.appendChild(infoSpan);
+        const infoSpan = el('span', { class: 'pagination-info' });
+        const pageSpan = el('span', { class: 'pagination-page' }, `${this.currentPage} / ${info.totalPages}`);
 
-        const controlsDiv = document.createElement('div');
-        controlsDiv.className = 'pagination-controls';
-
-        // Bouton première page
-        const firstBtn = document.createElement('button');
-        firstBtn.className = 'pagination-btn';
-        firstBtn.textContent = '«';
+        const firstBtn = el('button', { class: 'pagination-btn' }, '«');
         firstBtn.disabled = this.currentPage === 1;
         firstBtn.addEventListener('click', () => this.goToPage(1));
-        controlsDiv.appendChild(firstBtn);
 
-        // Bouton page précédente
-        const prevBtn = document.createElement('button');
-        prevBtn.className = 'pagination-btn';
-        prevBtn.textContent = '‹';
+        const prevBtn = el('button', { class: 'pagination-btn' }, '‹');
         prevBtn.disabled = this.currentPage === 1;
         prevBtn.addEventListener('click', () => this.previousPage());
-        controlsDiv.appendChild(prevBtn);
 
-        // Numéro de page
-        const pageSpan = document.createElement('span');
-        pageSpan.className = 'pagination-page';
-        pageSpan.textContent = `${this.currentPage} / ${info.totalPages}`;
-        controlsDiv.appendChild(pageSpan);
-
-        // Bouton page suivante
-        const nextBtn = document.createElement('button');
-        nextBtn.className = 'pagination-btn';
-        nextBtn.textContent = '›';
+        const nextBtn = el('button', { class: 'pagination-btn' }, '›');
         nextBtn.disabled = this.currentPage >= info.totalPages;
         nextBtn.addEventListener('click', () => this.nextPage());
-        controlsDiv.appendChild(nextBtn);
 
-        // Bouton dernière page
-        const lastBtn = document.createElement('button');
-        lastBtn.className = 'pagination-btn';
-        lastBtn.textContent = '»';
+        const lastBtn = el('button', { class: 'pagination-btn' }, '»');
         lastBtn.disabled = this.currentPage >= info.totalPages;
         lastBtn.addEventListener('click', () => this.goToPage(info.totalPages));
-        controlsDiv.appendChild(lastBtn);
 
-        paginationDiv.appendChild(controlsDiv);
+        const controlsDiv = el('div', { class: 'pagination-controls' },
+            firstBtn, prevBtn, pageSpan, infoSpan, nextBtn, lastBtn
+        );
+        const paginationDiv = el('div', { class: 'pagination-container' }, controlsDiv);
 
         // Fonction pour mettre à jour l'affichage
         const updateDisplay = () => {
             const newInfo = this.getInfo();
-            infoSpan.textContent = `Affichage ${newInfo.start}-${newInfo.end} sur ${newInfo.total}`;
+            infoSpan.textContent = `(${newInfo.start}-${newInfo.end} / ${newInfo.total})`;
             pageSpan.textContent = `${newInfo.currentPage} / ${newInfo.totalPages}`;
             firstBtn.disabled = newInfo.currentPage === 1;
             prevBtn.disabled = newInfo.currentPage === 1;
@@ -174,7 +150,6 @@ export class Pagination {
             lastBtn.disabled = newInfo.currentPage >= newInfo.totalPages;
         };
 
-        // Stocker la fonction de mise à jour pour pouvoir la réutiliser
         paginationDiv.updateDisplay = updateDisplay;
         updateDisplay();
 
