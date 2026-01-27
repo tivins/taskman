@@ -7,8 +7,10 @@ const app = document.getElementById('app');
 // État global
 let filters = new Filters();
 let pagination = new Pagination();
-let phases = [];
-let milestones = [];
+/** @type {Record<string, { id: string, name?: string, [k: string]: unknown }>} phases indexés par id */
+let phases = {};
+/** @type {Record<string, { id: string, name?: string, [k: string]: unknown }>} milestones indexés par id */
+let milestones = {};
 let tasks = [];
 let taskDeps = [];
 
@@ -45,11 +47,13 @@ async function loadPhasesAndMilestones() {
         ]);
         
         if (phasesRes.ok) {
-            phases = await phasesRes.json();
+            const arr = await phasesRes.json();
+            phases = Object.fromEntries((Array.isArray(arr) ? arr : []).map((p) => [p.id, p]));
         }
         
         if (milestonesRes.ok) {
-            milestones = await milestonesRes.json();
+            const arr = await milestonesRes.json();
+            milestones = Object.fromEntries((Array.isArray(arr) ? arr : []).map((m) => [m.id, m]));
         }
     } catch (e) {
         console.error('Error loading phases/milestones:', e);
@@ -87,12 +91,12 @@ function renderMainView() {
     
     // Mettre à jour les options des selects dynamiques
     const phaseOptions = [].concat(
-        phases.map(p => ({ value: p.id, label: `${p.id}: ${p.name || p.id}` }))
+        Object.values(phases).map(p => ({ value: p.id, label: `${p.id}: ${p.name || p.id}` }))
     );
     filters.updateSelectOptions('phase', phaseOptions);
     
     const milestoneOptions = [].concat(
-        milestones.map(m => ({ value: m.id, label: `${m.id}: ${m.name || m.id}` }))
+        Object.values(milestones).map(m => ({ value: m.id, label: `${m.id}: ${m.name || m.id}` }))
     );
     filters.updateSelectOptions('milestone', milestoneOptions);
     
@@ -121,7 +125,7 @@ async function updateOverview(container) {
     // Temporary disabled: overview is not used anymore
     return;
     
-    if (phases.length === 0) {
+    if (Object.keys(phases).length === 0) {
         container.appendChild(el('p', { class: 'muted' }, 'Aucune phase.'));
         return;
     }
@@ -129,7 +133,7 @@ async function updateOverview(container) {
     const phasesGrid = document.createElement('div');
     phasesGrid.className = 'phases-grid';
     
-    for (const phase of phases) {
+    for (const phase of Object.values(phases)) {
         const phaseCard = document.createElement('div');
         phaseCard.className = `phase-card phase-${phase.status || 'to_do'}`;
         
@@ -140,7 +144,7 @@ async function updateOverview(container) {
         phaseCard.appendChild(phaseHeader);
         
         // Compter les milestones et tâches pour cette phase
-        const phaseMilestones = milestones.filter(m => m.phase_id === phase.id);
+        const phaseMilestones = Object.values(milestones).filter(m => m.phase_id === phase.id);
         const phaseTasks = tasks.filter(t => t.phase_id === phase.id);
         const doneTasks = phaseTasks.filter(t => t.status === 'done').length;
         
@@ -272,6 +276,17 @@ async function loadTasks() {
     }
 }
 
+function getMilestoneName(id) {
+    const milestone = milestones[id] || null;
+    if (!milestone) { return '—';}
+    return milestone.id + (milestone.name ? " - " + milestone.name : '');
+}
+function getPhaseName(id) {
+    const phase = phases[id] || null;
+    if (!phase) { return '—';}
+    return phase.id + (phase.name ? " - " + phase.name : '');
+}
+
 /**
  * Charge les détails d'une tâche
  */
@@ -332,14 +347,16 @@ async function loadTask(id) {
         const isBlocked = parentTasks.length > 0 && parentTasks.some((p) => p && p.status !== 'done');
         const meta = document.createElement('table');
         meta.className = 'task-meta';
+        const phaseLabel = getPhaseName(t.phase_id);
+        const milestoneLabel = getMilestoneName(t.milestone_id);
         const rows = [
             // ['Subject', escapeHtml(t.title || 'Sans titre'), 'row-title'],
             // ['Description', escapeHtml(t.description || 'Everything is in the title.'), 'row-description'],
             ['ID', String(t.id || '—'), 'uuid monospace'],
             ['Statut', null, ''],
             ['Rôle', String(t.role || '— THIS TASK IS NOT ASSIGNED —'), (t.role || '' ) ? '' : 'error'],
-            ['Phase', String(t.phase_id || '—'), ''],
-            ['Jalon', String(t.milestone_id || '—'), ''],
+            ['Phase', String(phaseLabel), ''],
+            ['Jalon', String(milestoneLabel), ''],
             ['Ordre', t.sort_order != null ? String(t.sort_order) : '—', ''],
             ['Créé le', t.created_at != null ? String(t.created_at) : '—', ''],
             ['Mis à jour le', t.updated_at != null ? String(t.updated_at) : '—', '']
@@ -425,6 +442,8 @@ function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => false
         timeAgo = `${timeAgo} day${timeAgo !== 1 ? 's' : ''} ago`;
         
 
+        const milestoneName = (milestones[t.milestone_id]?.name ?? t.milestone_id ?? '');
+        const phaseName = (phases[t.phase_id]?.name ?? t.phase_id ?? '');
         const tr = el('tr', { 'data-task-id': t.id , class: label },
             el('td', { class: 'monospace uuid' }, escapeHtml(String(t.id ?? '').substring(0, 8))),
             el('td', {}, el('a', { href: '#' }, escapeHtml(t.title || t.id || 'untitled'))),
@@ -432,8 +451,8 @@ function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => false
             el('td', {},
                 el('span', { class: label }, label)
             ),
-            el('td', {}, escapeHtml(t.milestone_id || '')),
-            el('td', {}, escapeHtml(t.phase_id || '')),
+            el('td', {}, escapeHtml(milestoneName)),
+            el('td', {}, escapeHtml(phaseName)),
             el('td', {class: 'muted'}, escapeHtml(timeAgo))
         );
         tr.addEventListener('click', (e) => { e.preventDefault(); onTaskClick(t); });
