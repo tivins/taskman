@@ -1,17 +1,53 @@
-
+/* --- Dark theme (default): pastel, low contrast --- */
 :root {
-    --bg: #f8fafc;
+    --bg: #232830;
+    --card: #2a303c;
+    --border: #3d4553;
+    --text: #9fa7b3;
+    --muted: #8b92a0;
+    --muted-2: #7a8290;
+    --to-do: #9ca3b0;
+    --in-progress: #7db8e0;
+    --done: #7dbe9a;
+    --blocked: #c99494;
+    --reached: #7dbe9a;
+    --primary: #89b4e0;
+    --overlay: rgba(0, 0, 0, 0.45);
+    --header-subtle: #252b34;
+    --hover-bg: #363d4a;
+    --badge-to-do-bg: #3d4553;
+    --badge-in-progress-bg: rgba(125, 184, 224, 0.18);
+    --badge-done-bg: rgba(125, 190, 154, 0.18);
+    --shadow: 0 0 16px rgba(0, 0, 0, 0.25);
+    --shadow-modal: 0 24px 40px -8px rgba(0, 0, 0, 0.4);
+    --focus-ring: rgba(137, 180, 224, 0.25);
+    --error: #c98a8a;
+}
+
+/* Light theme (opt-in via class on html/body) */
+.theme-light {
+    --bg: #f5f6f8;
     --card: #ffffff;
-    --border: #e2e8f0;
-    --text: #1e293b;
-    --muted: #64748b;
-    --muted-2: #999;
-    --to-do: #64748b;
+    --border: #e0e4e9;
+    --text: #2d333b;
+    --muted: #6b7280;
+    --muted-2: #8b9199;
+    --to-do: #6b7280;
     --in-progress: #0ea5e9;
     --done: #059669;
     --blocked: #dc2626;
     --reached: #059669;
-    --primary: #06c;
+    --primary: #2563eb;
+    --overlay: rgba(15, 23, 42, 0.45);
+    --header-subtle: #f1f3f5;
+    --hover-bg: #e8eaed;
+    --badge-to-do-bg: #e2e8f0;
+    --badge-in-progress-bg: #e0f2fe;
+    --badge-done-bg: #d1fae5;
+    --shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+    --shadow-modal: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    --focus-ring: rgba(37, 99, 235, 0.2);
+    --error: #c00;
 }
 * { 
     box-sizing: border-box; 
@@ -32,7 +68,7 @@ h1 {
     padding: 0 0.75rem;
 }
 .task- {
-    color: #08c;
+    color: var(--primary);
 }
 .-man {
     color: var(--muted);
@@ -42,7 +78,7 @@ h1 {
 .box {
     margin: 1em auto; 
     max-width: 1024px;   
-    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
     border-radius: 5px;
     padding: 1em;
     background: var(--card);
@@ -66,7 +102,7 @@ li a:hover { text-decoration: underline; }
 .monospace { font-family: monospace; }
 
 .muted { color: var(--muted); }
-.error { color: #c00; }
+.error { color: var(--error); }
 .blocked { color: var(--blocked); }
 /*.blocked:before { content: "× "; } /* ☒ */
 .done { color: var(--muted-2); text-decoration: line-through; }
@@ -99,7 +135,7 @@ li a:hover { text-decoration: underline; }
     cursor: pointer;
 }
 .tasks-table tbody tr:hover {
-    background: var(--border);
+    background: var(--hover-bg);
 }
 .tasks-table td a { color: var(--primary); text-decoration: none; }
 .tasks-table td a:hover { text-decoration: underline; }
@@ -111,7 +147,7 @@ li a:hover { text-decoration: underline; }
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.5);
+    background: var(--overlay);
     z-index: 100;
     align-items: center;
     justify-content: center;
@@ -128,7 +164,7 @@ li a:hover { text-decoration: underline; }
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-modal);
   }
   .modal-header {
     display: flex;
@@ -136,7 +172,7 @@ li a:hover { text-decoration: underline; }
     justify-content: space-between;
     padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--border);
-    background: #fafafa;
+    background: var(--header-subtle);
   }
   .modal-header h2 { font-size: 1.1rem; font-weight: 600; margin: 0; font-family: "IBM Plex Mono", monospace; }
   .modal-close {
@@ -152,7 +188,7 @@ li a:hover { text-decoration: underline; }
     line-height: 1;
     padding: 0;
   }
-  .modal-close:hover { background: #f1f5f9; color: var(--text); }
+  .modal-close:hover { background: var(--hover-bg); color: var(--text); }
   .modal-body { padding: 1.25rem; overflow-y: auto; }
 
 /* --- MAIN VIEW --- */
@@ -225,17 +261,17 @@ li a:hover { text-decoration: underline; }
 }
 
 .status-badge.status-to_do {
-    background: #e2e8f0;
+    background: var(--badge-to-do-bg);
     color: var(--to-do);
 }
 
 .status-badge.status-in_progress {
-    background: #e0f2fe;
+    background: var(--badge-in-progress-bg);
     color: var(--in-progress);
 }
 
 .status-badge.status-done {
-    background: #d1fae5;
+    background: var(--badge-done-bg);
     color: var(--done);
 }
 
@@ -319,7 +355,7 @@ li a:hover { text-decoration: underline; }
 .filter-select:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .filter-reset {
@@ -335,7 +371,7 @@ li a:hover { text-decoration: underline; }
 }
 
 .filter-reset:hover {
-    background: var(--border);
+    background: var(--hover-bg);
     border-color: var(--muted);
 }
 
@@ -365,7 +401,8 @@ li a:hover { text-decoration: underline; }
     gap: 0.5rem;
 }
 
-.pagination-btn {
+.pagination-btn,
+.btn {
     padding: 0.5rem 0.75rem;
     background: var(--card);
     border: 1px solid var(--border);
@@ -375,14 +412,18 @@ li a:hover { text-decoration: underline; }
     font-family: inherit;
     cursor: pointer;
     transition: all 0.2s;
-    min-width: 2.5rem;
+    text-decoration: none;
+}
+.btn.ghost {
+    border-color: transparent;
 }
 
+.btn:hover:not(:disabled),
 .pagination-btn:hover:not(:disabled) {
-    background: var(--border);
+    background: var(--hover-bg);
     border-color: var(--primary);
 }
-
+.btn:disabled,
 .pagination-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;

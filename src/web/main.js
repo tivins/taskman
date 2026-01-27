@@ -319,7 +319,7 @@ async function loadTask(id) {
         const div = document.createElement('div');
         div.className = 'task-detail';
 
-        const back = el('p', {}, el('a', { href: '#', id: 'back' }, '← liste des tâches'));
+        const back = el('p', {}, el('a', { href: '#', id: 'back' , class: 'btn ghost'}, '← Back'));
         back.querySelector('#back').addEventListener('click', (e) => { e.preventDefault(); init(); });
         div.appendChild(back);
 
