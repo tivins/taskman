@@ -52,7 +52,31 @@ Each tool accepts the same parameters as its CLI counterpart, passed as JSON in 
 
 ## Configuration in Cursor
 
-To use taskman as an MCP server in Cursor, add it to your MCP configuration file (typically `~/.cursor/mcp.json` or similar):
+To use taskman as an MCP server in Cursor, you can either:
+
+### Option 1: Automatic configuration (recommended)
+
+Use the `mcp:config` command to automatically generate or update the MCP configuration file:
+
+```bash
+taskman mcp:config --executable /path/to/taskman
+```
+
+Or on Windows:
+
+```bash
+taskman mcp:config --executable C:\path\to\taskman.exe
+```
+
+This command will:
+- Create or update `.cursor/mcp.json` (or the file specified with `--output`)
+- Use the current directory + `project_tasks.db` for `TASKMAN_DB_NAME`
+- Set `TASKMAN_JOURNAL_MEMORY=1` automatically
+- Merge with existing MCP servers in the file
+
+### Option 2: Manual configuration
+
+Add taskman to your MCP configuration file manually (typically `~/.cursor/mcp.json` or similar):
 
 ```json
 {

@@ -8,6 +8,7 @@
 #include "agents.hpp"
 #include "db.hpp"
 #include "mcp.hpp"
+#include "mcp_config.hpp"
 #include "milestone.hpp"
 #include "phase.hpp"
 #include "task.hpp"
@@ -46,6 +47,7 @@ static const CmdInfo COMMANDS[] = {
     {"task:dep:add",    "Add a dependency"},
     {"task:dep:remove", "Remove a dependency"},
     {"agents:generate", "Generate .cursor/agents/ files"},
+    {"mcp:config",      "Generate or update .cursor/mcp.json file"},
     {"mcp",             "MCP server (stdio): read JSON-RPC on stdin, write on stdout"},
     {"web",             "HTTP server for web UI (--host, --port)"},
 };
@@ -180,6 +182,9 @@ int main(int argc, char* argv[]) {
     }
     if (std::strcmp(cmd, "agents:generate") == 0) {
         return taskman::cmd_agents_generate(argc - 1, argv + 1);
+    }
+    if (std::strcmp(cmd, "mcp:config") == 0) {
+        return taskman::cmd_mcp_config(argc - 1, argv + 1);
     }
     if (std::strcmp(cmd, "web") == 0) {
         taskman::Database db;

@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.14.0] - 2026-01-27
+
+- **taskman mcp:config** [--executable <path>] [--output <file>]: génère ou met à jour automatiquement le fichier `.cursor/mcp.json` avec la configuration du serveur MCP taskman. Prend en paramètre le chemin absolu de l'exécutable taskman. Configure automatiquement `TASKMAN_DB_NAME` avec le répertoire courant + "project_tasks.db" et `TASKMAN_JOURNAL_MEMORY=1`. Fusionne avec les serveurs MCP existants dans le fichier. Utile pour configurer rapidement taskman comme serveur MCP dans Cursor.
+
 ## [0.13.0] - 2026-01-27
 
 - **taskman agents:generate** [--output <dir>]: génère les fichiers agents Cursor dans `.cursor/agents/` (ou le répertoire spécifié). Les fichiers sont extraits depuis les assets intégrés dans le binaire. Utile pour configurer les agents de rôles taskman dans Cursor.

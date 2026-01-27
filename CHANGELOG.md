@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0] - 2026-01-27
+
+### Added
+
+- **taskman mcp:config** [--executable <path>] [--output <file>]: génère ou met à jour le fichier `.cursor/mcp.json` avec la configuration du serveur MCP taskman. Prend en paramètre le chemin absolu de l'exécutable taskman (ou taskman.exe). Pour `TASKMAN_DB_NAME`, utilise le répertoire courant + "project_tasks.db". Fusionne avec les serveurs MCP existants dans le fichier. Similaire à `agents:generate` pour la configuration MCP.
+- **src/mcp_config.cpp**, **src/mcp_config.hpp**: module implémentant la commande `mcp:config` avec gestion des fichiers JSON (lecture, fusion, écriture).
+
 ## [0.13.0] - 2026-01-27
 
 ### Added
