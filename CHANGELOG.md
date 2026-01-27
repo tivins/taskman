@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.17.1] - 2026-01-27
+
+### Fixed
+
+- **Build (MSVC)** : `scripts/embed_assets.py` découpe désormais les littéraux de chaîne (CSS/JS) en blocs d’au plus 16 000 caractères pour rester sous la limite MSVC (~16 380, erreur C2026). Les blocs sont émis comme littéraux concaténés. Corrige la compilation sur Windows avec MSVC.
+
 ## [0.17.0] - 2026-01-27
 
 ### Added

@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.17.1] - 2026-01-27
+
+- **Build** : la compilation sous MSVC/Windows fonctionne à nouveau (assets web embarqués découpés pour rester sous la limite du compilateur).
+
 ## [0.17.0] - 2026-01-27
 
 - **created_at / updated_at** : chaque phase, milestone et tâche affiche désormais une date de création (`created_at`) et une date de dernière modification (`updated_at`). Ces champs sont remplis et mis à jour automatiquement (non modifiables). Ils apparaissent en CLI (JSON et `--format text`), dans l’API web (GET /phases, /milestones, /tasks, etc.) et dans les réponses des outils MCP.

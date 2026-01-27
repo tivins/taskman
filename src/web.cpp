@@ -323,7 +323,7 @@ int cmd_web(int argc, char* argv[], Database& db) {
                 sql += where_parts[i];
             }
         }
-        sql += " ORDER BY phase_id, sort_order, id LIMIT ? OFFSET ?";
+        sql += " ORDER BY phase_id, milestone_id, sort_order, id LIMIT ? OFFSET ?";
         params.push_back(std::to_string(limit));
         params.push_back(std::to_string(offset));
 

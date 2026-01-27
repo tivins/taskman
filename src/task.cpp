@@ -314,7 +314,7 @@ int cmd_task_list(int argc, char* argv[], Database& db) {
             sql += where_parts[i];
         }
     }
-    sql += " ORDER BY phase_id, sort_order, id";
+    sql += " ORDER BY phase_id, milestone_id, sort_order, id";
 
     std::vector<std::map<std::string, std::optional<std::string>>> rows;
     if (params.empty()) {
