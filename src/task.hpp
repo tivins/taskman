@@ -5,9 +5,26 @@
 #ifndef TASKMAN_TASK_HPP
 #define TASKMAN_TASK_HPP
 
+#include <optional>
+#include <string>
+
 namespace taskman {
 
 class Database;
+
+/** Add a task (reusable by CLI and programmatic code). */
+bool task_add(Database& db,
+              const std::string& id,
+              const std::string& phase_id,
+              const std::optional<std::string>& milestone_id,
+              const std::string& title,
+              const std::optional<std::string>& description = std::nullopt,
+              const std::string& status = "to_do",
+              std::optional<int> sort_order = std::nullopt,
+              const std::optional<std::string>& role = std::nullopt);
+
+/** Add a task dependency: task_id depends on depends_on. */
+bool task_dep_add(Database& db, const std::string& task_id, const std::string& depends_on);
 
 /** task:add --title <title> --phase <id> [--description ...] [--role ...] [--milestone <id>] [--format json|text]
  *  Génère ID UUID v4 ; INSERT ; sortie = tâche créée (comme task:get). */

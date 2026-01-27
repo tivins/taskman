@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.16.0] - 2026-01-27
+
+### Changed
+
+- **Refactorisation utilitaires phase/milestone/task** : les commandes `phase:add`, `milestone:add`, `task:add`, `task:dep:add` et `demo:generate` s'appuient désormais sur des fonctions utilitaires réutilisables (`phase_add`, `milestone_add`, `task_add`, `task_dep_add`) déclarées dans les headers. Cela évite la duplication de logique SQL et de validation, centralise les règles (status, reached, roles) et permet un usage programmatique sans construire artificiellement des `argv`. Voir `docs/REFACTORING.md`.
+- **demo:generate** utilise `phase_add`, `milestone_add`, `task_add` et `task_dep_add` au lieu de requêtes SQL directes.
+
+### Added
+
+- **phase_add(Database&, id, name, status?, sort_order?)** dans `phase.hpp` : ajout d'une phase avec validation du status.
+- **milestone_add(Database&, id, phase_id, name?, criterion?, reached)** dans `milestone.hpp` : ajout d'un milestone.
+- **task_add(Database&, id, phase_id, milestone_id?, title, description?, status?, sort_order?, role?)** dans `task.hpp` : ajout d'une tâche avec validation status et role.
+- **task_dep_add(Database&, task_id, depends_on)** dans `task.hpp` : ajout d'une dépendance entre tâches (vérification existence et non auto-dépendance).
+- Tests unitaires directs pour ces fonctions dans `tests/test_phase.cpp`, `tests/test_milestone.cpp`, `tests/test_task.cpp`.
+
 ## [0.15.0] - 2026-01-27
 
 ### Added

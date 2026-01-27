@@ -157,6 +157,7 @@ target_link_libraries(tests PRIVATE
 )
 if(MSVC)
   target_compile_definitions(tests PRIVATE _CRT_SECURE_NO_WARNINGS)
+  target_compile_options(tests PRIVATE /FS)
 endif()
 add_dependencies(tests taskman)
 add_test(NAME UnitTests COMMAND tests)

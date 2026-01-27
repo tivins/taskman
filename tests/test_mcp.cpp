@@ -219,21 +219,23 @@ TEST_CASE("MCP — tools/list", "[mcp][integration]") {
     REQUIRE(resp.contains("result"));
     REQUIRE(resp["result"].contains("tools"));
     REQUIRE(resp["result"]["tools"].is_array());
-    REQUIRE(resp["result"]["tools"].size() == 13u);
+    REQUIRE(resp["result"]["tools"].size() == 14u);
 
     // Vérifier quelques outils
-    bool found_init = false, found_phase_add = false, found_task_list = false;
+    bool found_init = false, found_phase_add = false, found_task_list = false, found_demo_generate = false;
     for (const auto& tool : resp["result"]["tools"]) {
         std::string name = tool["name"];
         if (name == "taskman_init") found_init = true;
         if (name == "taskman_phase_add") found_phase_add = true;
         if (name == "taskman_task_list") found_task_list = true;
+        if (name == "taskman_demo_generate") found_demo_generate = true;
         REQUIRE(tool.contains("description"));
         REQUIRE(tool.contains("inputSchema"));
     }
     REQUIRE(found_init);
     REQUIRE(found_phase_add);
     REQUIRE(found_task_list);
+    REQUIRE(found_demo_generate);
 }
 
 TEST_CASE("MCP — ping", "[mcp][integration]") {

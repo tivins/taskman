@@ -8,6 +8,7 @@
 #include "phase.hpp"
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <sstream>
 #include <string>
 
@@ -63,6 +64,30 @@ static std::string run_milestone_list(Database& db, std::vector<std::string> arg
     int r = cmd_milestone_list(static_cast<int>(ptrs.size() - 1), ptrs.data(), db);
     REQUIRE(r == 0);
     return redir.str();
+}
+
+TEST_CASE("milestone_add — succès (utilitaire)", "[milestone]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(milestone_add(db, "m1", "p1", std::nullopt, std::nullopt, false));
+    auto rows = db.query("SELECT id, phase_id, name, criterion, reached FROM milestones WHERE id = 'm1'");
+    REQUIRE(rows.size() == 1u);
+    REQUIRE(rows[0]["id"] == "m1");
+    REQUIRE(rows[0]["phase_id"] == "p1");
+    REQUIRE(!rows[0]["name"].has_value());
+    REQUIRE(!rows[0]["criterion"].has_value());
+    REQUIRE(rows[0]["reached"] == "0");
+}
+
+TEST_CASE("milestone_add — avec name, criterion, reached (utilitaire)", "[milestone]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(milestone_add(db, "m2", "p1", "Spec validée", "Doc approuvé", true));
+    auto rows = db.query("SELECT id, phase_id, name, criterion, reached FROM milestones WHERE id = 'm2'");
+    REQUIRE(rows.size() == 1u);
+    REQUIRE(rows[0]["name"] == "Spec validée");
+    REQUIRE(rows[0]["criterion"] == "Doc approuvé");
+    REQUIRE(rows[0]["reached"] == "1");
 }
 
 TEST_CASE("cmd_milestone_add — succès (id, phase)", "[milestone]") {

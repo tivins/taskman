@@ -4,6 +4,9 @@
 
 #include "demo.hpp"
 #include "db.hpp"
+#include "phase.hpp"
+#include "milestone.hpp"
+#include "task.hpp"
 #include <cxxopts.hpp>
 #include <cstring>
 #include <cstdlib>
@@ -97,92 +100,55 @@ int cmd_demo_generate(int argc, char* argv[], Database& db) {
     std::cout << "  init\n";
 
     // Phases
-    if (!db.run("INSERT INTO phases (id, name, status, sort_order) VALUES (?, ?, ?, ?)",
-                {"P1", "Design", "in_progress", "1"})) return 1;
-    if (!db.run("INSERT INTO phases (id, name, status, sort_order) VALUES (?, ?, ?, ?)",
-                {"P2", "Development", "to_do", "2"})) return 1;
-    if (!db.run("INSERT INTO phases (id, name, status, sort_order) VALUES (?, ?, ?, ?)",
-                {"P3", "Acceptance", "to_do", "3"})) return 1;
-    if (!db.run("INSERT INTO phases (id, name, status, sort_order) VALUES (?, ?, ?, ?)",
-                {"P4", "Delivery", "to_do", "4"})) return 1;
+    if (!phase_add(db, "P1", "Design", "in_progress", 1)) return 1;
+    if (!phase_add(db, "P2", "Development", "to_do", 2)) return 1;
+    if (!phase_add(db, "P3", "Acceptance", "to_do", 3)) return 1;
+    if (!phase_add(db, "P4", "Delivery", "to_do", 4)) return 1;
     std::cout << "  phases P1-P4\n";
 
     // Milestones
-    if (!db.run("INSERT INTO milestones (id, phase_id, name, criterion, reached) VALUES (?, ?, ?, ?, ?)",
-                {"M1", "P1", "Specs approved", "Document signed off by client", "1"})) return 1;
-    if (!db.run("INSERT INTO milestones (id, phase_id, name, criterion, reached) VALUES (?, ?, ?, ?, ?)",
-                {"M2", "P2", "MVP delivered", "Catalog, cart and test payment operational", "0"})) return 1;
-    if (!db.run("INSERT INTO milestones (id, phase_id, name, criterion, reached) VALUES (?, ?, ?, ?, ?)",
-                {"M3", "P3", "Acceptance OK", "E2E tests passing, blocking bugs resolved", "0"})) return 1;
-    if (!db.run("INSERT INTO milestones (id, phase_id, name, criterion, reached) VALUES (?, ?, ?, ?, ?)",
-                {"M4", "P4", "Production deployment", "App deployed and reachable", "0"})) return 1;
+    if (!milestone_add(db, "M1", "P1", "Specs approved", "Document signed off by client", true)) return 1;
+    if (!milestone_add(db, "M2", "P2", "MVP delivered", "Catalog, cart and test payment operational", false)) return 1;
+    if (!milestone_add(db, "M3", "P3", "Acceptance OK", "E2E tests passing, blocking bugs resolved", false)) return 1;
+    if (!milestone_add(db, "M4", "P4", "Production deployment", "App deployed and reachable", false)) return 1;
     std::cout << "  milestones M1-M4\n";
 
     // Tasks (order compatible with dependencies)
-    std::vector<std::string> task_ids;
-    
-    // t1: Write requirements document
     std::string t1 = generate_uuid_v4();
-    task_ids.push_back(t1);
-    if (!db.run("INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                {t1, "P1", "M1", "Write requirements document", std::nullopt, "done", "1", "project-manager"})) return 1;
+    if (!task_add(db, t1, "P1", "M1", "Write requirements document", std::nullopt, "done", 1, "project-manager")) return 1;
 
-    // t2: Specify auth API
     std::string t2 = generate_uuid_v4();
-    task_ids.push_back(t2);
-    if (!db.run("INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                {t2, "P1", "M1", "Specify auth API", std::nullopt, "done", "2", "software-architect"})) return 1;
+    if (!task_add(db, t2, "P1", "M1", "Specify auth API", std::nullopt, "done", 2, "software-architect")) return 1;
 
-    // t3: Validate specs
     std::string t3 = generate_uuid_v4();
-    task_ids.push_back(t3);
-    if (!db.run("INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                {t3, "P1", "M1", "Validate specs", std::nullopt, "in_progress", "3", "project-designer"})) return 1;
+    if (!task_add(db, t3, "P1", "M1", "Validate specs", std::nullopt, "in_progress", 3, "project-designer")) return 1;
 
-    // t4: Implement auth module (API)
     std::string t4 = generate_uuid_v4();
-    task_ids.push_back(t4);
-    if (!db.run("INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                {t4, "P2", "M2", "Implement auth module (API)", "Endpoints login, logout, refresh", "in_progress", "4", "developer"})) return 1;
+    if (!task_add(db, t4, "P2", "M2", "Implement auth module (API)", "Endpoints login, logout, refresh", "in_progress", 4, "developer")) return 1;
 
-    // t5: Implement login screen
     std::string t5 = generate_uuid_v4();
-    task_ids.push_back(t5);
-    if (!db.run("INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                {t5, "P2", "M2", "Implement login screen", std::nullopt, "to_do", "5", "developer"})) return 1;
+    if (!task_add(db, t5, "P2", "M2", "Implement login screen", std::nullopt, "to_do", 5, "developer")) return 1;
 
-    // t6: Document auth API
     std::string t6 = generate_uuid_v4();
-    task_ids.push_back(t6);
-    if (!db.run("INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                {t6, "P2", "M2", "Document auth API", std::nullopt, "to_do", "6", "documentation-writer"})) return 1;
+    if (!task_add(db, t6, "P2", "M2", "Document auth API", std::nullopt, "to_do", 6, "documentation-writer")) return 1;
 
-    // t7: Write E2E tests for login
     std::string t7 = generate_uuid_v4();
-    task_ids.push_back(t7);
-    if (!db.run("INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                {t7, "P3", "M3", "Write E2E tests for login", std::nullopt, "to_do", "7", "developer"})) return 1;
+    if (!task_add(db, t7, "P3", "M3", "Write E2E tests for login", std::nullopt, "to_do", 7, "developer")) return 1;
 
-    // t8: Write deployment runbook
     std::string t8 = generate_uuid_v4();
-    task_ids.push_back(t8);
-    if (!db.run("INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                {t8, "P4", "M4", "Write deployment runbook", std::nullopt, "to_do", "8", "documentation-writer"})) return 1;
+    if (!task_add(db, t8, "P4", "M4", "Write deployment runbook", std::nullopt, "to_do", 8, "documentation-writer")) return 1;
 
-    // t9: Deploy to production
     std::string t9 = generate_uuid_v4();
-    task_ids.push_back(t9);
-    if (!db.run("INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                {t9, "P4", "M4", "Deploy to production", std::nullopt, "to_do", "9", "project-manager"})) return 1;
+    if (!task_add(db, t9, "P4", "M4", "Deploy to production", std::nullopt, "to_do", 9, "project-manager")) return 1;
     std::cout << "  tasks 1-9\n";
 
     // Dependencies: 4->2, 5->4, 6->4, 7->5, 9->7, 9->8
-    if (!db.run("INSERT INTO task_deps (task_id, depends_on) VALUES (?, ?)", {t4, t2})) return 1;
-    if (!db.run("INSERT INTO task_deps (task_id, depends_on) VALUES (?, ?)", {t5, t4})) return 1;
-    if (!db.run("INSERT INTO task_deps (task_id, depends_on) VALUES (?, ?)", {t6, t4})) return 1;
-    if (!db.run("INSERT INTO task_deps (task_id, depends_on) VALUES (?, ?)", {t7, t5})) return 1;
-    if (!db.run("INSERT INTO task_deps (task_id, depends_on) VALUES (?, ?)", {t9, t7})) return 1;
-    if (!db.run("INSERT INTO task_deps (task_id, depends_on) VALUES (?, ?)", {t9, t8})) return 1;
+    if (!task_dep_add(db, t4, t2)) return 1;
+    if (!task_dep_add(db, t5, t4)) return 1;
+    if (!task_dep_add(db, t6, t4)) return 1;
+    if (!task_dep_add(db, t7, t5)) return 1;
+    if (!task_dep_add(db, t9, t7)) return 1;
+    if (!task_dep_add(db, t9, t8)) return 1;
     std::cout << "  dependencies\n";
 
     std::cout << "Done. Database: " << db_path << "\n";

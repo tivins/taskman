@@ -33,6 +33,22 @@ bool is_valid_reached(const std::string& s) {
 
 namespace taskman {
 
+bool milestone_add(Database& db,
+                   const std::string& id,
+                   const std::string& phase_id,
+                   const std::optional<std::string>& name,
+                   const std::optional<std::string>& criterion,
+                   bool reached) {
+    const char* sql = "INSERT INTO milestones (id, phase_id, name, criterion, reached) VALUES (?, ?, ?, ?, ?)";
+    std::vector<std::optional<std::string>> params;
+    params.push_back(id);
+    params.push_back(phase_id);
+    params.push_back(name);
+    params.push_back(criterion);
+    params.push_back(reached ? "1" : "0");
+    return db.run(sql, params);
+}
+
 int cmd_milestone_add(int argc, char* argv[], Database& db) {
     cxxopts::Options opts("taskman milestone:add", "Add a milestone");
     opts.add_options()
@@ -80,16 +96,11 @@ int cmd_milestone_add(int argc, char* argv[], Database& db) {
         std::cerr << "taskman: --reached must be 0 or 1\n";
         return 1;
     }
-
-    const char* sql = "INSERT INTO milestones (id, phase_id, name, criterion, reached) VALUES (?, ?, ?, ?, ?)";
-    std::vector<std::optional<std::string>> params;
-    params.push_back(id);
-    params.push_back(phase);
-    params.push_back(name.empty() ? std::nullopt : std::optional<std::string>(name));
-    params.push_back(criterion.empty() ? std::nullopt : std::optional<std::string>(criterion));
-    params.push_back(reached_str);
-
-    if (!db.run(sql, params)) return 1;
+    bool reached = (reached_str == "1");
+    if (!milestone_add(db, id, phase,
+                       name.empty() ? std::nullopt : std::optional<std::string>(name),
+                       criterion.empty() ? std::nullopt : std::optional<std::string>(criterion),
+                       reached)) return 1;
     return 0;
 }
 

@@ -39,6 +39,26 @@ bool parse_int(const std::string& s, int& out) {
 
 namespace taskman {
 
+bool phase_add(Database& db,
+               const std::string& id,
+               const std::string& name,
+               const std::string& status,
+               std::optional<int> sort_order) {
+    if (!is_valid_status(status)) {
+        std::cerr << "taskman: invalid status\n";
+        return false;
+    }
+    const char* sql = "INSERT INTO phases (id, name, status, sort_order) VALUES (?, ?, ?, ?)";
+    std::vector<std::optional<std::string>> params;
+    params.push_back(id);
+    params.push_back(name);
+    params.push_back(status);
+    params.push_back(sort_order.has_value()
+                     ? std::optional<std::string>(std::to_string(*sort_order))
+                     : std::nullopt);
+    return db.run(sql, params);
+}
+
 int cmd_phase_add(int argc, char* argv[], Database& db) {
     cxxopts::Options opts("taskman phase:add", "Add a phase");
     opts.add_options()
@@ -84,22 +104,16 @@ int cmd_phase_add(int argc, char* argv[], Database& db) {
         std::cerr << "taskman: --status must be one of: to_do, in_progress, done\n";
         return 1;
     }
+    std::optional<int> sort_order_opt;
     if (!sort_order_str.empty()) {
         int n = 0;
         if (!parse_int(sort_order_str, n)) {
             std::cerr << "taskman: --sort-order must be an integer\n";
             return 1;
         }
+        sort_order_opt = n;
     }
-
-    const char* sql = "INSERT INTO phases (id, name, status, sort_order) VALUES (?, ?, ?, ?)";
-    std::vector<std::optional<std::string>> params;
-    params.push_back(id);
-    params.push_back(name);
-    params.push_back(status);
-    params.push_back(sort_order_str.empty() ? std::nullopt : std::optional<std::string>(sort_order_str));
-
-    if (!db.run(sql, params)) return 1;
+    if (!phase_add(db, id, name, status, sort_order_opt)) return 1;
     return 0;
 }
 

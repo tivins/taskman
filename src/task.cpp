@@ -49,6 +49,63 @@ std::string generate_uuid_v4() {
 
 namespace taskman {
 
+bool task_add(Database& db,
+              const std::string& id,
+              const std::string& phase_id,
+              const std::optional<std::string>& milestone_id,
+              const std::string& title,
+              const std::optional<std::string>& description,
+              const std::string& status,
+              std::optional<int> sort_order,
+              const std::optional<std::string>& role) {
+    if (!is_valid_status(status)) {
+        std::cerr << "taskman: invalid status\n";
+        return false;
+    }
+    if (role.has_value() && !is_valid_role(*role)) {
+        std::cerr << get_roles_error_message();
+        return false;
+    }
+    const char* sql = "INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) "
+                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    std::vector<std::optional<std::string>> params;
+    params.push_back(id);
+    params.push_back(phase_id);
+    params.push_back(milestone_id);
+    params.push_back(title);
+    params.push_back(description);
+    params.push_back(status);
+    params.push_back(sort_order.has_value()
+                     ? std::optional<std::string>(std::to_string(*sort_order))
+                     : std::nullopt);
+    params.push_back(role);
+    return db.run(sql, params);
+}
+
+bool task_dep_add(Database& db, const std::string& task_id, const std::string& depends_on) {
+    if (task_id == depends_on) {
+        std::cerr << "taskman: a task cannot depend on itself\n";
+        return false;
+    }
+    auto rows_task = db.query("SELECT 1 FROM tasks WHERE id = ?", {task_id});
+    if (rows_task.empty()) {
+        std::cerr << "taskman: task not found: " << task_id << "\n";
+        return false;
+    }
+    auto rows_dep = db.query("SELECT 1 FROM tasks WHERE id = ?", {depends_on});
+    if (rows_dep.empty()) {
+        std::cerr << "taskman: task not found: " << depends_on << "\n";
+        return false;
+    }
+    auto rows_exist = db.query("SELECT 1 FROM task_deps WHERE task_id = ? AND depends_on = ?",
+                               {task_id, depends_on});
+    if (!rows_exist.empty()) {
+        std::cerr << "taskman: dependency already exists\n";
+        return false;
+    }
+    return db.run("INSERT INTO task_deps (task_id, depends_on) VALUES (?, ?)", {task_id, depends_on});
+}
+
 int cmd_task_add(int argc, char* argv[], Database& db) {
     cxxopts::Options opts("taskman task:add", "Add a task");
     opts.add_options()
@@ -107,27 +164,22 @@ int cmd_task_add(int argc, char* argv[], Database& db) {
         std::cerr << "taskman: --format must be json or text\n";
         return 1;
     }
+    std::optional<int> sort_order_opt;
     if (!sort_order_str.empty()) {
         int n = 0;
         if (!parse_int(sort_order_str, n)) {
             std::cerr << "taskman: --sort-order must be an integer\n";
             return 1;
         }
+        sort_order_opt = n;
     }
-
     std::string id = generate_uuid_v4();
-    const char* sql = "INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) "
-                      "VALUES (?, ?, ?, ?, ?, 'to_do', ?, ?)";
-    std::vector<std::optional<std::string>> params;
-    params.push_back(id);
-    params.push_back(phase);
-    params.push_back(milestone.empty() ? std::nullopt : std::optional<std::string>(milestone));
-    params.push_back(title);
-    params.push_back(description.empty() ? std::nullopt : std::optional<std::string>(description));
-    params.push_back(sort_order_str.empty() ? std::nullopt : std::optional<std::string>(sort_order_str));
-    params.push_back(role.empty() ? std::nullopt : std::optional<std::string>(role));
-
-    if (!db.run(sql, params)) return 1;
+    if (!task_add(db, id, phase,
+                  milestone.empty() ? std::nullopt : std::optional<std::string>(milestone),
+                  title,
+                  description.empty() ? std::nullopt : std::optional<std::string>(description),
+                  "to_do", sort_order_opt,
+                  role.empty() ? std::nullopt : std::optional<std::string>(role))) return 1;
 
     auto rows = db.query("SELECT id, phase_id, milestone_id, title, description, status, sort_order, role FROM tasks WHERE id = ?",
                          {id});
@@ -418,31 +470,7 @@ int cmd_task_dep_add(int argc, char* argv[], Database& db) {
         std::cerr << "taskman: task:dep:add requires <task-id> and <dep-id>\n";
         return 1;
     }
-    if (task_id == dep_id) {
-        std::cerr << "taskman: a task cannot depend on itself\n";
-        return 1;
-    }
-
-    auto rows_task = db.query("SELECT 1 FROM tasks WHERE id = ?", {task_id});
-    if (rows_task.empty()) {
-        std::cerr << "taskman: task not found: " << task_id << "\n";
-        return 1;
-    }
-    auto rows_dep = db.query("SELECT 1 FROM tasks WHERE id = ?", {dep_id});
-    if (rows_dep.empty()) {
-        std::cerr << "taskman: task not found: " << dep_id << "\n";
-        return 1;
-    }
-    auto rows_exist = db.query("SELECT 1 FROM task_deps WHERE task_id = ? AND depends_on = ?",
-                               {task_id, dep_id});
-    if (!rows_exist.empty()) {
-        std::cerr << "taskman: dependency already exists\n";
-        return 1;
-    }
-
-    if (!db.run("INSERT INTO task_deps (task_id, depends_on) VALUES (?, ?)", {task_id, dep_id})) {
-        return 1;
-    }
+    if (!task_dep_add(db, task_id, dep_id)) return 1;
     return 0;
 }
 

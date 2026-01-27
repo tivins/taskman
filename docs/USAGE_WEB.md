@@ -9,7 +9,7 @@ The **Taskman** web interface provides a browser-based UI to view and manage you
 Launch the HTTP server to access the web interface from your browser.
 
 ```bash
-taskman web                    # default: 127.0.0.1:8080
+taskman web # default: 127.0.0.1:8080
 taskman web --host 0.0.0.0 --port 3000
 ```
 

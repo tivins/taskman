@@ -4,10 +4,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include "db.hpp"
+#include "milestone.hpp"
 #include "phase.hpp"
 #include "task.hpp"
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <sstream>
 #include <string>
 
@@ -104,6 +106,59 @@ static bool looks_like_uuid(const std::string& s) {
         else return false;
     }
     return hyphens == 4;
+}
+
+TEST_CASE("task_add — succès (utilitaire)", "[task]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(task_add(db, "t1", "p1", std::nullopt, "Tâche 1", std::nullopt, "to_do", std::nullopt, std::nullopt));
+    auto rows = db.query("SELECT id, phase_id, title, status FROM tasks WHERE id = 't1'");
+    REQUIRE(rows.size() == 1u);
+    REQUIRE(rows[0]["id"] == "t1");
+    REQUIRE(rows[0]["phase_id"] == "p1");
+    REQUIRE(rows[0]["title"] == "Tâche 1");
+    REQUIRE(rows[0]["status"] == "to_do");
+}
+
+TEST_CASE("task_add — avec description, status, sort_order, role (utilitaire)", "[task]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(task_add(db, "t2", "p1", std::nullopt, "T2", "Desc", "in_progress", 5, "developer"));
+    auto rows = db.query("SELECT id, title, description, status, sort_order, role FROM tasks WHERE id = 't2'");
+    REQUIRE(rows.size() == 1u);
+    REQUIRE(rows[0]["description"] == "Desc");
+    REQUIRE(rows[0]["status"] == "in_progress");
+    REQUIRE(rows[0]["sort_order"] == "5");
+    REQUIRE(rows[0]["role"] == "developer");
+}
+
+TEST_CASE("task_add — status invalide (utilitaire)", "[task]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(!task_add(db, "t1", "p1", std::nullopt, "T", std::nullopt, "invalid", std::nullopt, std::nullopt));
+    auto rows = db.query("SELECT 1 FROM tasks WHERE id = 't1'");
+    REQUIRE(rows.empty());
+}
+
+TEST_CASE("task_dep_add — succès (utilitaire)", "[task]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(task_add(db, "t1", "p1", std::nullopt, "T1", std::nullopt, "to_do", std::nullopt, std::nullopt));
+    REQUIRE(task_add(db, "t2", "p1", std::nullopt, "T2", std::nullopt, "to_do", std::nullopt, std::nullopt));
+    REQUIRE(task_dep_add(db, "t1", "t2"));
+    auto rows = db.query("SELECT task_id, depends_on FROM task_deps WHERE task_id = ? AND depends_on = ?", {"t1", "t2"});
+    REQUIRE(rows.size() == 1u);
+    REQUIRE(rows[0]["task_id"].value() == "t1");
+    REQUIRE(rows[0]["depends_on"].value() == "t2");
+}
+
+TEST_CASE("task_dep_add — auto-dépendance refusée (utilitaire)", "[task]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(task_add(db, "t1", "p1", std::nullopt, "T1", std::nullopt, "to_do", std::nullopt, std::nullopt));
+    REQUIRE(!task_dep_add(db, "t1", "t1"));
+    auto rows = db.query("SELECT 1 FROM task_deps WHERE task_id = 't1' AND depends_on = 't1'");
+    REQUIRE(rows.empty());
 }
 
 TEST_CASE("cmd_task_add — génération ID UUID v4 et sortie JSON", "[task]") {

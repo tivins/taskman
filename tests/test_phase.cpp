@@ -7,6 +7,7 @@
 #include "phase.hpp"
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <sstream>
 #include <string>
 
@@ -47,6 +48,36 @@ static std::string run_phase_list(Database& db) {
     int r = taskman::cmd_phase_list(1, argv, db);
     REQUIRE(r == 0);
     return redir.str();
+}
+
+TEST_CASE("phase_add — succès (utilitaire)", "[phase]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(phase_add(db, "p1", "Conception", "to_do", std::nullopt));
+    auto rows = db.query("SELECT id, name, status, sort_order FROM phases WHERE id = 'p1'");
+    REQUIRE(rows.size() == 1u);
+    REQUIRE(rows[0]["id"] == "p1");
+    REQUIRE(rows[0]["name"] == "Conception");
+    REQUIRE(rows[0]["status"] == "to_do");
+    REQUIRE(!rows[0]["sort_order"].has_value());
+}
+
+TEST_CASE("phase_add — avec sort_order (utilitaire)", "[phase]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(phase_add(db, "p2", "Dev", "in_progress", 42));
+    auto rows = db.query("SELECT id, name, status, sort_order FROM phases WHERE id = 'p2'");
+    REQUIRE(rows.size() == 1u);
+    REQUIRE(rows[0]["status"] == "in_progress");
+    REQUIRE(rows[0]["sort_order"] == "42");
+}
+
+TEST_CASE("phase_add — status invalide (utilitaire)", "[phase]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(!phase_add(db, "p1", "X", "invalid", std::nullopt));
+    auto rows = db.query("SELECT 1 FROM phases WHERE id = 'p1'");
+    REQUIRE(rows.empty());
 }
 
 TEST_CASE("cmd_phase_add — succès", "[phase]") {
