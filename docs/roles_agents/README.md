@@ -5,26 +5,26 @@ Ce dossier contient les définitions d'agents Cursor pour chaque rôle du systè
 ## Rôles disponibles
 
 ### Gestion et coordination
-- **[project-manager.md](project-manager.md)** : Gestion de projet, planification, coordination
-- **[product-owner.md](product-owner.md)** : Vision produit, backlog, priorisation
+- **[project-manager.md](taskman-project-manager.md)** : Gestion de projet, planification, coordination
+- **[product-owner.md](taskman-product-owner.md)** : Vision produit, backlog, priorisation
 
 ### Conception et design
-- **[project-designer.md](project-designer.md)** : Conception fonctionnelle, spécifications
-- **[art-director.md](art-director.md)** : Direction artistique, identité visuelle
-- **[ui-designer.md](ui-designer.md)** : Design d'interface, composants visuels
-- **[ux-designer.md](ux-designer.md)** : Expérience utilisateur, ergonomie
+- **[project-designer.md](taskman-project-designer.md)** : Conception fonctionnelle, spécifications
+- **[art-director.md](taskman-art-director.md)** : Direction artistique, identité visuelle
+- **[ui-designer.md](taskman-ui-designer.md)** : Design d'interface, composants visuels
+- **[ux-designer.md](taskman-ux-designer.md)** : Expérience utilisateur, ergonomie
 
 ### Technique
-- **[software-architect.md](software-architect.md)** : Architecture technique, choix technologiques
-- **[developer.md](developer.md)** : Implémentation, développement
-- **[devops-engineer.md](devops-engineer.md)** : Infrastructure, CI/CD, déploiements
-- **[security-engineer.md](security-engineer.md)** : Sécurité, audits, vulnérabilités
-- **[qa-engineer.md](qa-engineer.md)** : Tests, qualité, validation
+- **[software-architect.md](taskman-software-architect.md)** : Architecture technique, choix technologiques
+- **[developer.md](taskman-developer.md)** : Implémentation, développement
+- **[devops-engineer.md](taskman-devops-engineer.md)** : Infrastructure, CI/CD, déploiements
+- **[security-engineer.md](taskman-security-engineer.md)** : Sécurité, audits, vulnérabilités
+- **[qa-engineer.md](taskman-qa-engineer.md)** : Tests, qualité, validation
 
 ### Communication et documentation
-- **[summary-writer.md](summary-writer.md)** : Résumés, rapports, synthèses
-- **[documentation-writer.md](documentation-writer.md)** : Documentation utilisateur et technique
-- **[community-manager.md](community-manager.md)** : Gestion de communauté, communication externe
+- **[summary-writer.md](taskman-summary-writer.md)** : Résumés, rapports, synthèses
+- **[documentation-writer.md](taskman-documentation-writer.md)** : Documentation utilisateur et technique
+- **[community-manager.md](taskman-community-manager.md)** : Gestion de communauté, communication externe
 
 ## Utilisation dans Cursor
 

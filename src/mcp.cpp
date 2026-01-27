@@ -69,7 +69,7 @@ std::vector<McpTool> get_mcp_tools() {
         props["id"] = nlohmann::json{{"type", "string"}, {"description", "Unique phase identifier"}};
         props["name"] = nlohmann::json{{"type", "string"}, {"description", "Phase name"}};
         props["status"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"to_do", "in_progress", "done"})}, {"description", "Phase status"}};
-        props["sort-order"] = nlohmann::json{{"type", nlohmann::json::array({"string", "integer"})}, {"description", "Display order (integer)"}};
+        props["sort-order"] = nlohmann::json{{"type", nlohmann::json::array({"string", "integer"})}, {"description", "Display order for this phase. Lower values appear first. IMPORTANT: Always set this to control display order. Use increments of 10 (e.g. 10, 20, 30) to allow easy insertion later."}};
         t.inputSchema = make_schema(props, {"id", "name"});
         t.positional_keys = {};
         tools.push_back(t);
@@ -84,7 +84,7 @@ std::vector<McpTool> get_mcp_tools() {
         props["id"] = nlohmann::json{{"type", "string"}, {"description", "Phase ID to edit"}};
         props["name"] = nlohmann::json{{"type", "string"}};
         props["status"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"to_do", "in_progress", "done"})}};
-        props["sort-order"] = nlohmann::json{{"type", nlohmann::json::array({"string", "integer"})}};
+        props["sort-order"] = nlohmann::json{{"type", nlohmann::json::array({"string", "integer"})}, {"description", "Display order for this phase. Lower values appear first."}};
         t.inputSchema = make_schema(props, {"id"});
         t.positional_keys = {"id"};
         tools.push_back(t);
@@ -156,6 +156,7 @@ std::vector<McpTool> get_mcp_tools() {
         props["description"] = nlohmann::json{{"type", "string"}};
         props["role"] = nlohmann::json{{"type", "string"}, {"enum", get_roles_json_array()}};
         props["milestone"] = nlohmann::json{{"type", "string"}};
+        props["sort-order"] = nlohmann::json{{"type", nlohmann::json::array({"string", "integer"})}, {"description", "Display order for this task within its phase. Lower values appear first. IMPORTANT: Always set this to control display order. Use increments of 10 (e.g. 10, 20, 30) to allow easy insertion later."}};
         props["format"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"json", "text"})}, {"default", "json"}};
         t.inputSchema = make_schema(props, {"title", "phase"});
         t.positional_keys = {};
@@ -202,6 +203,7 @@ std::vector<McpTool> get_mcp_tools() {
         props["status"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"to_do", "in_progress", "done"})}};
         props["role"] = nlohmann::json{{"type", "string"}, {"enum", get_roles_json_array()}};
         props["milestone"] = nlohmann::json{{"type", "string"}};
+        props["sort-order"] = nlohmann::json{{"type", nlohmann::json::array({"string", "integer"})}, {"description", "Display order for this task within its phase. Lower values appear first."}};
         t.inputSchema = make_schema(props, {"id"});
         t.positional_keys = {"id"};
         tools.push_back(t);

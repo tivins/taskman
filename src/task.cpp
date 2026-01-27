@@ -27,6 +27,16 @@ bool is_valid_status(const std::string& s) {
     return false;
 }
 
+bool parse_int(const std::string& s, int& out) {
+    try {
+        size_t pos = 0;
+        out = std::stoi(s, &pos);
+        return pos == s.size();
+    } catch (...) {
+        return false;
+    }
+}
+
 std::string generate_uuid_v4() {
     std::random_device rd;
     std::mt19937 rng(rd());
@@ -47,6 +57,7 @@ int cmd_task_add(int argc, char* argv[], Database& db) {
         ("description", "Description", cxxopts::value<std::string>())
         ("role", "Role", cxxopts::value<std::string>())
         ("milestone", "Milestone ID", cxxopts::value<std::string>())
+        ("sort-order", "Sort order (integer)", cxxopts::value<std::string>())
         ("format", "Output: json or text", cxxopts::value<std::string>()->default_value("json"));
 
     for (int i = 0; i < argc; ++i) {
@@ -72,7 +83,7 @@ int cmd_task_add(int argc, char* argv[], Database& db) {
         return 1;
     }
 
-    std::string title, phase, description, role, milestone, format;
+    std::string title, phase, description, role, milestone, sort_order_str, format;
     try {
         title = result["title"].as<std::string>();
         phase = result["phase"].as<std::string>();
@@ -86,6 +97,7 @@ int cmd_task_add(int argc, char* argv[], Database& db) {
             }
         }
         if (result.count("milestone")) milestone = result["milestone"].as<std::string>();
+        if (result.count("sort-order")) sort_order_str = result["sort-order"].as<std::string>();
     } catch (const cxxopts::exceptions::exception& e) {
         std::cerr << "taskman: " << e.what() << "\n";
         return 1;
@@ -95,16 +107,24 @@ int cmd_task_add(int argc, char* argv[], Database& db) {
         std::cerr << "taskman: --format must be json or text\n";
         return 1;
     }
+    if (!sort_order_str.empty()) {
+        int n = 0;
+        if (!parse_int(sort_order_str, n)) {
+            std::cerr << "taskman: --sort-order must be an integer\n";
+            return 1;
+        }
+    }
 
     std::string id = generate_uuid_v4();
     const char* sql = "INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) "
-                      "VALUES (?, ?, ?, ?, ?, 'to_do', NULL, ?)";
+                      "VALUES (?, ?, ?, ?, ?, 'to_do', ?, ?)";
     std::vector<std::optional<std::string>> params;
     params.push_back(id);
     params.push_back(phase);
     params.push_back(milestone.empty() ? std::nullopt : std::optional<std::string>(milestone));
     params.push_back(title);
     params.push_back(description.empty() ? std::nullopt : std::optional<std::string>(description));
+    params.push_back(sort_order_str.empty() ? std::nullopt : std::optional<std::string>(sort_order_str));
     params.push_back(role.empty() ? std::nullopt : std::optional<std::string>(role));
 
     if (!db.run(sql, params)) return 1;
@@ -276,7 +296,8 @@ int cmd_task_edit(int argc, char* argv[], Database& db) {
         ("description", "Description", cxxopts::value<std::string>())
         ("status", "Status: to_do, in_progress, done", cxxopts::value<std::string>())
         ("role", "Role", cxxopts::value<std::string>())
-        ("milestone", "Milestone ID", cxxopts::value<std::string>());
+        ("milestone", "Milestone ID", cxxopts::value<std::string>())
+        ("sort-order", "Sort order (integer)", cxxopts::value<std::string>());
     opts.parse_positional({"id"});
 
     for (int i = 0; i < argc; ++i) {
@@ -336,6 +357,16 @@ int cmd_task_edit(int argc, char* argv[], Database& db) {
     if (result.count("milestone")) {
         set_parts.push_back("milestone_id = ?");
         params.push_back(result["milestone"].as<std::string>());
+    }
+    if (result.count("sort-order")) {
+        std::string so = result["sort-order"].as<std::string>();
+        int n = 0;
+        if (!parse_int(so, n)) {
+            std::cerr << "taskman: --sort-order must be an integer\n";
+            return 1;
+        }
+        set_parts.push_back("sort_order = ?");
+        params.push_back(so);
     }
 
     if (set_parts.empty()) {
