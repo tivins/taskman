@@ -90,7 +90,8 @@ jobs:
         with:
           workflow: build.yml
           run_id: ${{ steps.find_build.outputs.run_id }}
-          name: taskman-*
+          name: taskman-.*
+          name_is_regexp: true
           path: artifacts
           if_no_artifact_found: fail
 
