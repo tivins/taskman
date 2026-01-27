@@ -40,6 +40,26 @@ taskman init
 
 If errors occur (e.g. corrupted database or orphan `.db-journal`), see [BUILD.md](BUILD.md). When using taskman from **Cursor's agent**, `TASKMAN_JOURNAL_MEMORY=1` often fixes "disk I/O error" (see BUILD.md).
 
+### Generate a demo database
+
+Creates a database filled with a realistic example (e-commerce site MVP project) for demonstration or testing purposes. The command automatically removes any existing database file (and related journal files) before creating the new one.
+
+```bash
+taskman demo:generate
+```
+
+The demo database includes:
+- **4 phases**: Design (in progress), Development, Acceptance, Delivery
+- **4 milestones**: Specs approved (reached), MVP delivered, Acceptance OK, Production deployment
+- **9 tasks** with priorities (sort_order), roles, and realistic statuses (some done, some in progress, some to do)
+- **Dependencies** between tasks
+
+You can specify a custom database path using the `TASKMAN_DB_NAME` environment variable:
+
+```bash
+TASKMAN_DB_NAME=./demo.db taskman demo:generate
+```
+
 ---
 
 ## 2. Phases
@@ -298,12 +318,17 @@ Error messages are written to standard error (`stderr`).
 | `task:edit`       | Edit a task                                  |
 | `task:dep:add`    | Add a task dependency                        |
 | `task:dep:remove` | Remove a dependency                          |
+| `demo:generate`   | Generate a demo database                     |
 
 ---
 
 ## 8. Example workflow
 
 ```bash
+# Option A: Start with a demo database (recommended for first-time users)
+taskman demo:generate
+
+# Option B: Initialize an empty database
 # 1. Initialize the database
 taskman init
 

@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.15.0] - 2026-01-27
+
+- **taskman demo:generate**: commande intégrée pour créer une base de données de démonstration remplie avec un exemple réaliste (projet MVP de site e-commerce). Remplace le script Python `scripts/create_demo.py` et permet d'utiliser directement les fonctions du codebase C++ sans avoir à fournir le chemin de l'exécutable. La commande supprime automatiquement la base de données existante (et ses fichiers journal) avant de créer la nouvelle, garantissant un résultat reproductible. Crée 4 phases (Design, Development, Acceptance, Delivery), 4 milestones, 9 tâches avec priorités (sort_order), et leurs dépendances. Disponible aussi comme outil MCP `taskman_demo_generate`.
+
 ## [0.14.0] - 2026-01-27
 
 - **taskman mcp:config** [--executable <path>] [--output <file>]: génère ou met à jour automatiquement le fichier `.cursor/mcp.json` avec la configuration du serveur MCP taskman. Prend en paramètre le chemin absolu de l'exécutable taskman. Configure automatiquement `TASKMAN_DB_NAME` avec le répertoire courant + "project_tasks.db" et `TASKMAN_JOURNAL_MEMORY=1`. Fusionne avec les serveurs MCP existants dans le fichier. Utile pour configurer rapidement taskman comme serveur MCP dans Cursor.
@@ -12,7 +16,7 @@ User-facing changes: new commands, options, formats, and behavior.
 
 ## [0.12.0] - 2026-01-25
 
-- **taskman mcp** : mode serveur MCP (Model Context Protocol) sur stdio. Lit les requêtes JSON-RPC sur stdin, écrit les réponses sur stdout. Implémente le protocole MCP 2025-11-25 avec les méthodes `initialize`, `notifications/initialized`, `tools/list`, `tools/call`, et `ping`. Expose les 13 commandes CLI comme outils MCP (`taskman_init`, `taskman_phase_*`, `taskman_milestone_*`, `taskman_task_*`, `taskman_task_dep_*`). À configurer comme serveur MCP dans Cursor (commande `taskman`, args `mcp`). Voir [USAGE_MCP.md](USAGE_MCP.md) pour la configuration.
+- **taskman mcp** : mode serveur MCP (Model Context Protocol) sur stdio. Lit les requêtes JSON-RPC sur stdin, écrit les réponses sur stdout. Implémente le protocole MCP 2025-11-25 avec les méthodes `initialize`, `notifications/initialized`, `tools/list`, `tools/call`, et `ping`. Expose les 14 commandes CLI comme outils MCP (`taskman_init`, `taskman_phase_*`, `taskman_milestone_*`, `taskman_task_*`, `taskman_task_dep_*`, `taskman_demo_generate`). À configurer comme serveur MCP dans Cursor (commande `taskman`, args `mcp`). Voir [USAGE_MCP.md](USAGE_MCP.md) pour la configuration.
 
 ## [0.11.1] - 2026-01-25
 

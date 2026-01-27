@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.0] - 2026-01-27
+
+### Added
+
+- **taskman demo:generate**: commande intégrée pour créer une base de données de démonstration remplie avec un exemple réaliste (projet MVP de site e-commerce). Remplace le script Python `scripts/create_demo.py` et permet d'utiliser directement les fonctions du codebase C++ sans avoir à fournir le chemin de l'exécutable. La commande supprime automatiquement la base de données existante (et ses fichiers journal) avant de créer la nouvelle, garantissant un résultat reproductible. Crée 4 phases (Design, Development, Acceptance, Delivery), 4 milestones, 9 tâches avec priorités (sort_order), et leurs dépendances.
+- **src/demo.cpp**, **src/demo.hpp**: module implémentant la commande `demo:generate` avec création directe des données via SQL.
+
 ## [0.14.0] - 2026-01-27
 
 ### Added

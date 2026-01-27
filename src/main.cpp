@@ -7,6 +7,7 @@
 
 #include "agents.hpp"
 #include "db.hpp"
+#include "demo.hpp"
 #include "mcp.hpp"
 #include "mcp_config.hpp"
 #include "milestone.hpp"
@@ -46,6 +47,7 @@ static const CmdInfo COMMANDS[] = {
     {"task:list",       "List tasks (option --phase, --status, --role)"},
     {"task:dep:add",    "Add a dependency"},
     {"task:dep:remove", "Remove a dependency"},
+    {"demo:generate",   "Generate a demo database"},
     {"agents:generate", "Generate .cursor/agents/ files"},
     {"mcp:config",      "Generate or update .cursor/mcp.json file"},
     {"mcp",             "MCP server (stdio): read JSON-RPC on stdin, write on stdout"},
@@ -179,6 +181,12 @@ int main(int argc, char* argv[]) {
         taskman::Database db;
         if (!db.open(get_db_path())) return 1;
         return taskman::cmd_task_dep_remove(argc - 1, argv + 1, db);
+    }
+    if (std::strcmp(cmd, "demo:generate") == 0) {
+        taskman::Database db;
+        // cmd_demo_generate will handle opening/closing the database itself
+        // since it needs to delete the existing database first
+        return taskman::cmd_demo_generate(argc - 1, argv + 1, db);
     }
     if (std::strcmp(cmd, "agents:generate") == 0) {
         return taskman::cmd_agents_generate(argc - 1, argv + 1);

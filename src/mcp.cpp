@@ -6,6 +6,7 @@
 
 #include "mcp.hpp"
 #include "db.hpp"
+#include "demo.hpp"
 #include "milestone.hpp"
 #include "phase.hpp"
 #include "roles.hpp"
@@ -232,6 +233,17 @@ std::vector<McpTool> get_mcp_tools() {
         props["dep-id"] = nlohmann::json{{"type", "string"}, {"description", "Task that must be completed first"}};
         t.inputSchema = make_schema(props, {"task-id", "dep-id"});
         t.positional_keys = {"task-id", "dep-id"};
+        tools.push_back(t);
+    }
+
+    // taskman_demo_generate
+    {
+        McpTool t;
+        t.name = "taskman_demo_generate";
+        t.description = "Generate a demo database filled with a realistic example (e-commerce site MVP project). Automatically removes any existing database file before creating the new one.";
+        t.inputSchema = make_schema({});
+        t.inputSchema["additionalProperties"] = false;
+        t.positional_keys = {};
         tools.push_back(t);
     }
 
@@ -493,6 +505,10 @@ int dispatch_tool_call(const std::string& name, const nlohmann::json& arguments,
             exit_code = cmd_task_dep_add(static_cast<int>(argv_ptrs.size()), argv_ptrs.data(), db);
         } else if (name == "taskman_task_dep_remove") {
             exit_code = cmd_task_dep_remove(static_cast<int>(argv_ptrs.size()), argv_ptrs.data(), db);
+        } else if (name == "taskman_demo_generate") {
+            // demo:generate needs to close the database first since it deletes the file
+            db.close();
+            exit_code = cmd_demo_generate(static_cast<int>(argv_ptrs.size()), argv_ptrs.data(), db);
         } else {
             output = "Unknown tool: " + name;
             is_error = true;

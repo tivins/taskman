@@ -69,7 +69,7 @@ export class Filters {
 
         // Filtre Role
         const roleGroup = this.createSelectGroup('role', 'Rôle', [
-            { value: '', label: 'Tous' },
+            { value: '', label: '— Tous —' },
             { value: 'project-manager', label: 'Project Manager' },
             { value: 'project-designer', label: 'Project Designer' },
             { value: 'software-architect', label: 'Software Architect' },
@@ -81,7 +81,7 @@ export class Filters {
 
         // Filtre Status
         const statusGroup = this.createSelectGroup('status', 'Statut', [
-            { value: '', label: 'Tous' },
+            { value: '', label: '— Tous —' },
             { value: 'to_do', label: 'À faire' },
             { value: 'in_progress', label: 'En cours' },
             { value: 'done', label: 'Terminé' }
@@ -89,6 +89,7 @@ export class Filters {
         filtersDiv.appendChild(statusGroup);
 
         // Bouton réinitialiser
+        /* // Temporary disabled: reset button is not used anymore
         const resetBtn = document.createElement('button');
         resetBtn.className = 'filter-reset';
         resetBtn.textContent = 'Réinitialiser';
@@ -102,6 +103,7 @@ export class Filters {
             }
         });
         filtersDiv.appendChild(resetBtn);
+        */
 
         container.appendChild(filtersDiv);
         return filtersDiv;
