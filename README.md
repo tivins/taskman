@@ -4,12 +4,12 @@ CLI, web interface, and MCP server to manage project phases, milestones, and tas
 
 ## Documentation
 
-* [CLI Usage](USAGE_CLI.md) (command-line interface, commands, options, formats)
-* [Web Interface](USAGE_WEB.md) (browser-based UI)
-* [MCP Server](USAGE_MCP.md) (integration with AI assistants)
-* [Build](BUILD.md) (download, build and run instructions)
+* [CLI Usage](docs/USAGE_CLI.md) (command-line interface, commands, options, formats)
+* [Web Interface](docs/USAGE_WEB.md) (browser-based UI)
+* [MCP Server](docs/USAGE_MCP.md) (integration with AI assistants)
+* [Build](docs/BUILD.md) (download, build and run instructions)
 
 ## Changes
 
-* [User changelog](CHANGELOG_USER.md) (non-developer changes)
+* [User changelog](docs/CHANGELOG_USER.md) (non-developer changes)
 * [Global Changelog](CHANGELOG.md) (all changes)

@@ -68,7 +68,7 @@ User-facing changes: new commands, options, formats, and behavior.
 ## [0.5.0] - 2026-01-25
 
 - **Milestones**: `milestone:add` (--id, --phase, --name, --criterion, --reached), `milestone:edit`, `milestone:list [--phase]`.
-- BUILD.md: troubleshooting for "disk I/O error" and `.db-journal` files.
+- [BUILD.md](BUILD.md): troubleshooting for "disk I/O error" and `.db-journal` files.
 
 ## [0.3.0] - 2026-01-25
 

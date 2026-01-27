@@ -101,9 +101,9 @@ jobs:
           TAG="${{ steps.version.outputs.tag }}"
           
           # Extraire la section du changelog pour cette version
-          if grep -q "## \[$VERSION\]" CHANGELOG_USER.md; then
+          if grep -q "## \[$VERSION\]" docs/CHANGELOG_USER.md; then
             # Extraire depuis "## [version]" jusqu'à la prochaine "##"
-            awk "/^## \[$VERSION\]/,/^## \[/{if (!/^## \[/ || /^## \[$VERSION\]/) print}" CHANGELOG_USER.md > release_notes.md
+            awk "/^## \[$VERSION\]/,/^## \[/{if (!/^## \[/ || /^## \[$VERSION\]/) print}" docs/CHANGELOG_USER.md > release_notes.md
             # Supprimer la dernière ligne si c'est la prochaine section
             sed -i '/^## \[/d' release_notes.md || true
           else
@@ -124,10 +124,10 @@ jobs:
           echo "" >> release_notes.md
           echo "### Documentation" >> release_notes.md
           echo "" >> release_notes.md
-          echo "- [CLI Usage](USAGE_CLI.md)" >> release_notes.md
-          echo "- [Web Interface](USAGE_WEB.md)" >> release_notes.md
-          echo "- [MCP Server](USAGE_MCP.md)" >> release_notes.md
-          echo "- [Build Instructions](BUILD.md)" >> release_notes.md
+          echo "- [CLI Usage](docs/USAGE_CLI.md)" >> release_notes.md
+          echo "- [Web Interface](docs/USAGE_WEB.md)" >> release_notes.md
+          echo "- [MCP Server](docs/USAGE_MCP.md)" >> release_notes.md
+          echo "- [Build Instructions](docs/BUILD.md)" >> release_notes.md
           
           # Afficher le contenu pour debug
           echo "Release notes content:"

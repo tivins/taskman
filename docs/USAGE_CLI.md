@@ -329,4 +329,4 @@ taskman milestone:edit M1 --reached 1
 
 ---
 
-See also: [README](README.md), [Web Interface](USAGE_WEB.md), [MCP Server](USAGE_MCP.md). Users: [User changelog](CHANGELOG_USER.md). Developers: [BUILD](BUILD.md), [CHANGELOG](CHANGELOG.md).
+See also: [README](../README.md), [Web Interface](USAGE_WEB.md), [MCP Server](USAGE_MCP.md). Users: [User changelog](CHANGELOG_USER.md). Developers: [BUILD](BUILD.md), [CHANGELOG](../CHANGELOG.md).
