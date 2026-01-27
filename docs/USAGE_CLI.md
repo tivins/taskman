@@ -308,7 +308,7 @@ Error messages are written to standard error (`stderr`).
 | `init`            | Create / initialize tables                   |
 | `phase:add`       | Add a phase                                  |
 | `phase:edit`      | Edit a phase                                 |
-| `phase:list`      | List phases (JSON)                           |
+| `phase:list`      | List phases                                  |
 | `milestone:add`   | Add a milestone                              |
 | `milestone:edit`  | Edit a milestone                             |
 | `milestone:list`  | List milestones (option `--phase`)          |
