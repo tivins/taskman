@@ -5,6 +5,7 @@
     --border: #e2e8f0;
     --text: #1e293b;
     --muted: #64748b;
+    --muted-2: #999;
     --to-do: #64748b;
     --in-progress: #0ea5e9;
     --done: #059669;
@@ -23,6 +24,22 @@ body {
     background: var(--bg);
     color: var(--text);
 }
+
+h1 { 
+    margin: 0 0 1rem 0; 
+    border:1px solid var(--border);
+    border-radius: 5px;
+    /*text-transform: uppercase;*/
+    font-weight: 400;
+    padding: 0 0.75rem;
+}
+.task- {
+    color: #08c;
+}
+.-man {
+    color: var(--muted);
+}
+
 
 .box {
     margin: 1em auto; 
@@ -44,15 +61,21 @@ li a:hover { text-decoration: underline; }
 .task-meta { margin: 0.75em 0; border-collapse: collapse; }
 .task-meta td { padding: 0.2em 0.5em 0.2em 0; vertical-align: top; }
 .task-meta .task-meta-label { font-weight: 600; padding-right: 1em; white-space: nowrap; }
+
+.monospace { font-family: monospace; }
+
 .muted { color: var(--muted); }
 .error { color: #c00; }
-.monospace { font-family: monospace; }
-.blocked { color: var(--blocked); margin-left: 0.5em; }
-.done { color: var(--done); margin-left: 0.5em; }
-.in-progress { color: var(--in-progress); margin-left: 0.5em; }
-.to-do { color: var(--to-do); margin-left: 0.5em; }
-.reached { color: var(--reached); margin-left: 0.5em; }
+.blocked { color: var(--blocked); }
+.blocked:before { content: "× "; } /* ☒ */
+.done { color: var(--muted-2); text-decoration: line-through; }
+.done:before { content: "✓ "; } /* ☑ */
+.in_progress { color: var(--in-progress); }
+.in_progress:before { content: "⋯ "; }
+.to-do,.to_do { color: var(--to-do); }
+.reached { color: var(--reached); }
 
+.uuid { color: var(--muted); }
 
 
 /* Tableau des tâches */

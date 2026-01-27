@@ -11,12 +11,24 @@ Launch the HTTP server to access the web interface from your browser.
 ```bash
 taskman web # default: 127.0.0.1:8080
 taskman web --host 0.0.0.0 --port 3000
+taskman web --serve-assets-from src/web   # dev: serve CSS/JS from disk, edit and refresh without recompile
 ```
 
-| Option    | Description           | Default      |
-|-----------|-----------------------|--------------|
-| `--host`  | Listen address        | `127.0.0.1`  |
-| `--port`  | Port (1–65535)        | `8080`       |
+| Option                 | Description                               | Default      |
+|------------------------|-------------------------------------------|--------------|
+| `--host`               | Listen address                            | `127.0.0.1`  |
+| `--port`               | Port (1–65535)                            | `8080`       |
+| `--serve-assets-from`  | Serve CSS/JS from directory (dev mode)    | *(embedded)* |
+
+### Development (faster UI iteration)
+
+Use `--serve-assets-from <dir>` so the server reads CSS and JS from the given directory instead of the embedded build. Example from the project root:
+
+```bash
+taskman web --serve-assets-from src/web
+```
+
+Edit `src/web/style.css`, `src/web/main.js`, etc., then refresh the browser — no recompile needed. The binary still embeds assets; this option only changes how they are served at runtime.
 
 ---
 

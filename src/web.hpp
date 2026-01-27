@@ -10,8 +10,8 @@ namespace taskman {
 
 class Database;
 
-/** taskman web [--host <h>] [--port <p>]
- *  Défaut : 127.0.0.1:8080. Démarre le serveur HTTP (bloquant). */
+/** taskman web [--host <h>] [--port <p>] [--serve-assets-from <dir>]
+ *  Défaut : 127.0.0.1:8080. --serve-assets-from : en dev, servir CSS/JS depuis <dir> (sans recompile). */
 int cmd_web(int argc, char* argv[], Database& db);
 
 } // namespace taskman

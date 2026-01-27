@@ -13,7 +13,9 @@
 #include <cxxopts.hpp>
 #include <cerrno>
 #include <cstring>
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include <optional>
 #include <string>
 #include <vector>
@@ -21,6 +23,22 @@
 namespace {
 
 const char* const STATUS_VALUES[] = {"to_do", "in_progress", "done"};
+
+/** Read file into string; returns false on error. */
+bool read_file_to_string(const std::string& path, std::string& out) {
+    std::ifstream f(path, std::ios::binary);
+    if (!f) return false;
+    out.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
+    return true;
+}
+
+/** Build path base/name, normalizing to a single slash. */
+std::string asset_path(const std::string& base, const std::string& name) {
+    if (base.empty()) return "";
+    std::string p = base;
+    while (!p.empty() && (p.back() == '/' || p.back() == '\\')) p.pop_back();
+    return p + "/" + name;
+}
 
 bool is_valid_status(const std::string& s) {
     for (const char* v : STATUS_VALUES) {
@@ -35,11 +53,14 @@ const char HTML_PAGE[] = R"x(<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>taskman</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="box">
-    <h1>taskman</h1>
+    <h1><span class="task-">task</span><span class="-man">man</span></h1>
     <div id="app"></div>
   </div>
   <script src="filters.js" type="module"></script>
@@ -57,14 +78,17 @@ int cmd_web(int argc, char* argv[], Database& db) {
     cxxopts::Options opts("taskman web", "Start HTTP server for web UI");
     opts.add_options()
         ("host", "Bind address", cxxopts::value<std::string>()->default_value("127.0.0.1"))
-        ("port", "Port", cxxopts::value<std::string>()->default_value("8080"));
+        ("port", "Port", cxxopts::value<std::string>()->default_value("8080"))
+        ("serve-assets-from", "Serve CSS/JS from directory (dev); default: use embedded",
+         cxxopts::value<std::string>()->default_value(""));
 
     for (int i = 0; i < argc; ++i) {
         if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
             std::cout << opts.help() << "\n\n"
                       << "Examples:\n"
                       << "  taskman web\n"
-                      << "  taskman web --host 127.0.0.1 --port 8080\n\n";
+                      << "  taskman web --host 127.0.0.1 --port 8080\n"
+                      << "  taskman web --serve-assets-from src/web   # dev: edit CSS/JS and refresh\n\n";
             return 0;
         }
     }
@@ -86,25 +110,59 @@ int cmd_web(int argc, char* argv[], Database& db) {
         return 1;
     }
 
+    std::string assets_dir = result["serve-assets-from"].as<std::string>();
+
     httplib::Server svr;
 
     svr.Get("/", [](const httplib::Request&, httplib::Response& res) {
         res.set_content(HTML_PAGE, "text/html; charset=utf-8");
     });
 
-    svr.Get("/style.css", [](const httplib::Request&, httplib::Response& res) {
+    svr.Get("/style.css", [assets_dir](const httplib::Request&, httplib::Response& res) {
+        if (!assets_dir.empty()) {
+            std::string content;
+            if (read_file_to_string(asset_path(assets_dir, "style.css"), content)) {
+                res.set_header("Cache-Control", "no-store");
+                res.set_content(content, "text/css; charset=utf-8");
+                return;
+            }
+        }
         res.set_content(STYLE_CSS, "text/css; charset=utf-8");
     });
 
-    svr.Get("/filters.js", [](const httplib::Request&, httplib::Response& res) {
+    svr.Get("/filters.js", [assets_dir](const httplib::Request&, httplib::Response& res) {
+        if (!assets_dir.empty()) {
+            std::string content;
+            if (read_file_to_string(asset_path(assets_dir, "filters.js"), content)) {
+                res.set_header("Cache-Control", "no-store");
+                res.set_content(content, "application/javascript; charset=utf-8");
+                return;
+            }
+        }
         res.set_content(FILTERS_JS, "application/javascript; charset=utf-8");
     });
 
-    svr.Get("/pagination.js", [](const httplib::Request&, httplib::Response& res) {
+    svr.Get("/pagination.js", [assets_dir](const httplib::Request&, httplib::Response& res) {
+        if (!assets_dir.empty()) {
+            std::string content;
+            if (read_file_to_string(asset_path(assets_dir, "pagination.js"), content)) {
+                res.set_header("Cache-Control", "no-store");
+                res.set_content(content, "application/javascript; charset=utf-8");
+                return;
+            }
+        }
         res.set_content(PAGINATION_JS, "application/javascript; charset=utf-8");
     });
 
-    svr.Get("/main.js", [](const httplib::Request&, httplib::Response& res) {
+    svr.Get("/main.js", [assets_dir](const httplib::Request&, httplib::Response& res) {
+        if (!assets_dir.empty()) {
+            std::string content;
+            if (read_file_to_string(asset_path(assets_dir, "main.js"), content)) {
+                res.set_header("Cache-Control", "no-store");
+                res.set_content(content, "application/javascript; charset=utf-8");
+                return;
+            }
+        }
         res.set_content(MAIN_JS, "application/javascript; charset=utf-8");
     });
 

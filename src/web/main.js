@@ -252,7 +252,7 @@ async function loadTasks() {
         
         const table = createTaskListTable(tasks, {
             onTaskClick: (t) => loadTask(t.id),
-            getStatusSuffix: (t) => isBlocked(t) ? '(blocked)' : ''
+            getStatusSuffix: (t) => isBlocked(t) ? 'blocked' : ''
         });
         
         contentDiv.innerHTML = '';
@@ -408,13 +408,19 @@ function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => '' })
     const tbody = document.createElement('tbody');
     for (const t of tasks) {
         const suffix = getStatusSuffix(t);
+
+        let label = t.status || '';
+        if (label === 'to_do' && suffix === 'blocked') {
+            label = 'blocked';
+        }
+
+
         const tr = el('tr', { 'data-task-id': t.id },
-            el('td', { class: 'monospace' }, escapeHtml(String(t.id ?? '').substring(0, 8))),
+            el('td', { class: 'monospace uuid' }, escapeHtml(String(t.id ?? '').substring(0, 8))),
             el('td', {}, el('a', { href: '#' }, escapeHtml(t.title || t.id || 'untitled'))),
             el('td', {}, escapeHtml(t.role || '')),
             el('td', {},
-                el('span', { class: t.status === 'done' ? 'done' : t.status === 'in_progress' ? 'in-progress' : t.status === 'to_do' ? 'to-do' : '' }, t.status || ''),
-                ...(suffix ? [el('span', { class: 'blocked' }, suffix)] : [])
+                el('span', { class: label }, label)
             ),
             el('td', {}, escapeHtml(t.milestone_id || '')),
             el('td', {}, escapeHtml(t.phase_id || ''))
