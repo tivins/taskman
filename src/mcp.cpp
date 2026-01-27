@@ -8,6 +8,7 @@
 #include "db.hpp"
 #include "demo.hpp"
 #include "milestone.hpp"
+#include "note.hpp"
 #include "phase.hpp"
 #include "roles.hpp"
 #include "task.hpp"
@@ -46,7 +47,7 @@ nlohmann::json make_schema(const std::map<std::string, nlohmann::json>& props,
     return schema;
 }
 
-/** Table statique des 13 outils MCP. */
+/** Table statique des 16 outils MCP. */
 std::vector<McpTool> get_mcp_tools() {
     std::vector<McpTool> tools;
 
@@ -233,6 +234,35 @@ std::vector<McpTool> get_mcp_tools() {
         props["dep-id"] = nlohmann::json{{"type", "string"}, {"description", "Task that must be completed first"}};
         t.inputSchema = make_schema(props, {"task-id", "dep-id"});
         t.positional_keys = {"task-id", "dep-id"};
+        tools.push_back(t);
+    }
+
+    // taskman_task_note_add
+    {
+        McpTool t;
+        t.name = "taskman_task_note_add";
+        t.description = "Add a note to a task (e.g. completion summary, progress, or issue).";
+        std::map<std::string, nlohmann::json> props;
+        props["task-id"] = nlohmann::json{{"type", "string"}, {"description", "Task ID to attach the note to"}};
+        props["content"] = nlohmann::json{{"type", "string"}, {"description", "Note content"}};
+        props["kind"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"completion", "progress", "issue"})}, {"description", "Note kind: completion, progress, or issue"}};
+        props["role"] = nlohmann::json{{"type", "string"}, {"enum", get_roles_json_array()}, {"description", "Role of the agent who added the note"}};
+        props["format"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"json", "text"})}, {"default", "json"}};
+        t.inputSchema = make_schema(props, {"task-id", "content"});
+        t.positional_keys = {"task-id"};
+        tools.push_back(t);
+    }
+
+    // taskman_task_note_list
+    {
+        McpTool t;
+        t.name = "taskman_task_note_list";
+        t.description = "List notes for a task.";
+        std::map<std::string, nlohmann::json> props;
+        props["task-id"] = nlohmann::json{{"type", "string"}, {"description", "Task ID"}};
+        props["format"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"json", "text"})}, {"default", "json"}};
+        t.inputSchema = make_schema(props, {"task-id"});
+        t.positional_keys = {"task-id"};
         tools.push_back(t);
     }
 
@@ -505,6 +535,10 @@ int dispatch_tool_call(const std::string& name, const nlohmann::json& arguments,
             exit_code = cmd_task_dep_add(static_cast<int>(argv_ptrs.size()), argv_ptrs.data(), db);
         } else if (name == "taskman_task_dep_remove") {
             exit_code = cmd_task_dep_remove(static_cast<int>(argv_ptrs.size()), argv_ptrs.data(), db);
+        } else if (name == "taskman_task_note_add") {
+            exit_code = cmd_note_add(static_cast<int>(argv_ptrs.size()), argv_ptrs.data(), db);
+        } else if (name == "taskman_task_note_list") {
+            exit_code = cmd_note_list(static_cast<int>(argv_ptrs.size()), argv_ptrs.data(), db);
         } else if (name == "taskman_demo_generate") {
             // demo:generate needs to close the database first since it deletes the file
             db.close();

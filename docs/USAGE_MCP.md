@@ -20,7 +20,7 @@ The server implements the MCP specification (version `2025-11-25`):
 
 - **`initialize`**: Handshake with protocol version and server info
 - **`notifications/initialized`**: Notification after initialization
-- **`tools/list`**: Returns the list of 14 available tools
+- **`tools/list`**: Returns the list of 16 available tools
 - **`tools/call`**: Executes a tool with JSON arguments
 - **`ping`**: Health check (returns empty result)
 
@@ -45,6 +45,8 @@ All CLI commands (except `web`) are exposed as MCP tools with the `taskman_` pre
 | `task:edit`      | `taskman_task_edit`       |
 | `task:dep:add`   | `taskman_task_dep_add`    |
 | `task:dep:remove`| `taskman_task_dep_remove` |
+| `task:note:add`  | `taskman_task_note_add`   |
+| `task:note:list` | `taskman_task_note_list`  |
 | `demo:generate`  | `taskman_demo_generate`   |
 
 Each tool accepts the same parameters as its CLI counterpart, passed as JSON in the `arguments` object of `tools/call`.

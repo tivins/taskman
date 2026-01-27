@@ -2,6 +2,11 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.18.0] - 2026-01-27
+
+- **Notes sur les tâches** : `task:note:add <task-id> --content "..." [--kind completion|progress|issue] [--role <role>]` ajoute une note à une tâche ; `task:note:list <task-id>` liste les notes (ordre par date). Les outils MCP `taskman_task_note_add` et `taskman_task_note_list` exposent les mêmes actions. À l'ajout d'une note, la date de mise à jour (`updated_at`) de la tâche est rafraîchie.
+- **demo:generate** : la base démo contient désormais 7 notes (résumés de fin, avancement) sur plusieurs tâches.
+
 ## [0.17.1] - 2026-01-27
 
 - **Build** : la compilation sous MSVC/Windows fonctionne à nouveau (assets web embarqués découpés pour rester sous la limite du compilateur).

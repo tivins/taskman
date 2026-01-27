@@ -255,6 +255,18 @@ bool init_schema(Database& db) {
         ");";
     if (!db.exec(task_deps_sql)) return false;
 
+    static const char* const task_notes_sql =
+        "CREATE TABLE IF NOT EXISTS task_notes (\n"
+        "  id TEXT PRIMARY KEY,\n"
+        "  task_id TEXT NOT NULL,\n"
+        "  content TEXT NOT NULL,\n"
+        "  kind TEXT,\n"
+        "  role TEXT,\n"
+        "  created_at TEXT DEFAULT (datetime('now')),\n"
+        "  FOREIGN KEY (task_id) REFERENCES tasks(id)\n"
+        ");";
+    if (!db.exec(task_notes_sql)) return false;
+
     if (!ensure_timestamps(db, "phases")) return false;
     if (!ensure_timestamps(db, "milestones")) return false;
     if (!ensure_timestamps(db, "tasks")) return false;

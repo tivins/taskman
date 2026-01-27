@@ -11,6 +11,7 @@
 #include "mcp.hpp"
 #include "mcp_config.hpp"
 #include "milestone.hpp"
+#include "note.hpp"
 #include "phase.hpp"
 #include "task.hpp"
 #include "web.hpp"
@@ -47,6 +48,8 @@ static const CmdInfo COMMANDS[] = {
     {"task:list",       "List tasks (option --phase, --status, --role)"},
     {"task:dep:add",    "Add a dependency"},
     {"task:dep:remove", "Remove a dependency"},
+    {"task:note:add",   "Add a note to a task"},
+    {"task:note:list",  "List notes for a task"},
     {"demo:generate",   "Generate a demo database"},
     {"agents:generate", "Generate .cursor/agents/ files"},
     {"mcp:config",      "Generate or update .cursor/mcp.json file"},
@@ -181,6 +184,16 @@ int main(int argc, char* argv[]) {
         taskman::Database db;
         if (!db.open(get_db_path())) return 1;
         return taskman::cmd_task_dep_remove(argc - 1, argv + 1, db);
+    }
+    if (std::strcmp(cmd, "task:note:add") == 0) {
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        return taskman::cmd_note_add(argc - 1, argv + 1, db);
+    }
+    if (std::strcmp(cmd, "task:note:list") == 0) {
+        taskman::Database db;
+        if (!db.open(get_db_path())) return 1;
+        return taskman::cmd_note_list(argc - 1, argv + 1, db);
     }
     if (std::strcmp(cmd, "demo:generate") == 0) {
         taskman::Database db;

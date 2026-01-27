@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.18.0] - 2026-01-27
+
+### Added
+
+- **Notes sur les tâches** : table `task_notes` (id, task_id, content, kind, role, created_at), créée par `init_schema`. Fonction réutilisable `note_add()` et commandes CLI `task:note:add <task-id> --content "..." [--kind completion|progress|issue] [--role <role>] [--format json|text]` et `task:note:list <task-id> [--format json|text]`. Outils MCP `taskman_task_note_add` et `taskman_task_note_list`. La tâche doit exister ; `kind` et `role` sont optionnels. Sortie : note créée (add) ou liste ordonnée par `created_at` (list).
+- **demo:generate** : ajout de 7 notes (completion / progress) sur des tâches de la démo (t1, t2, t3, t4, t5, t7, t15).
+
+### Changed
+
+- **note_add** : à l'ajout d'une note, mise à jour de `updated_at` sur la tâche liée (`UPDATE tasks SET updated_at = datetime('now') WHERE id = ?`).
+
 ## [0.17.1] - 2026-01-27
 
 ### Fixed

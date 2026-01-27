@@ -32,7 +32,7 @@ $env:TASKMAN_DB_NAME = ".\my_project.db"
 
 ### Initialize the database
 
-Creates the `phases`, `milestones`, `tasks`, and `task_deps` tables (if they do not exist). Run once when starting a new project.
+Creates the `phases`, `milestones`, `tasks`, `task_deps`, and `task_notes` tables (if they do not exist). Run once when starting a new project.
 
 ```bash
 taskman init
@@ -51,8 +51,9 @@ taskman demo:generate
 The demo database includes:
 - **4 phases**: Design (in progress), Development, Acceptance, Delivery
 - **4 milestones**: Specs approved (reached), MVP delivered, Acceptance OK, Production deployment
-- **9 tasks** with priorities (sort_order), roles, and realistic statuses (some done, some in progress, some to do)
+- **31 tasks** with priorities (sort_order), roles, and realistic statuses (some done, some in progress, some to do)
 - **Dependencies** between tasks
+- **Notes** on several tasks (completion and progress kinds)
 
 You can specify a custom database path using the `TASKMAN_DB_NAME` environment variable:
 
@@ -272,6 +273,43 @@ taskman task:dep:add abc-123-def xyz-456-uvw
 taskman task:dep:remove <task-id> <dep-id>
 ```
 
+### `task:note:add` — Add a note to a task
+
+Adds a note to a task (e.g. completion summary, progress, or issue). The note ID is an auto-generated UUID v4.
+
+```bash
+taskman task:note:add <task-id> --content "..." [--kind completion|progress|issue] [--role <role>] [--format json|text]
+```
+
+| Option     | Required | Description                                      | Default |
+|------------|----------|--------------------------------------------------|---------|
+| `<task-id>`| yes      | Task UUID to attach the note to                 | —       |
+| `--content`| yes      | Note content                                    | —       |
+| `--kind`   | no       | `completion`, `progress`, or `issue`             | —       |
+| `--role`   | no       | Role of the agent who added the note (see roles) | —       |
+| `--format` | no       | `json` or `text` for the created note           | `json`  |
+
+The task must exist. Output shows the created note (id, task_id, content, kind, role, created_at).
+
+Example:
+
+```bash
+taskman task:note:add abc-123-def --content "Done. Fixed lint." --kind completion --role developer
+```
+
+### `task:note:list` — List notes for a task
+
+```bash
+taskman task:note:list <task-id> [--format json|text]
+```
+
+| Option     | Required | Description                         | Default |
+|------------|----------|-------------------------------------|---------|
+| `<task-id>`| yes      | Task UUID                           | —       |
+| `--format`| no       | `json` (array) or `text`            | `json`  |
+
+Notes are ordered by `created_at`. For a non-existent task, returns an empty list.
+
 ---
 
 ## 5. Output formats
@@ -318,6 +356,8 @@ Error messages are written to standard error (`stderr`).
 | `task:edit`       | Edit a task                                  |
 | `task:dep:add`    | Add a task dependency                        |
 | `task:dep:remove` | Remove a dependency                          |
+| `task:note:add`   | Add a note to a task                         |
+| `task:note:list`  | List notes for a task                        |
 | `demo:generate`   | Generate a demo database                     |
 
 ---

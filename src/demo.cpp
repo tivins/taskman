@@ -4,8 +4,9 @@
 
 #include "demo.hpp"
 #include "db.hpp"
-#include "phase.hpp"
 #include "milestone.hpp"
+#include "note.hpp"
+#include "phase.hpp"
 #include "task.hpp"
 #include <cxxopts.hpp>
 #include <cstring>
@@ -332,6 +333,16 @@ int cmd_demo_generate(int argc, char* argv[], Database& db) {
     if (!task_dep_add(db, t29, t27)) return 1; // prod after runbook
     if (!task_dep_add(db, t31, t29)) return 1; // handover after prod
     std::cout << "  dependencies\n";
+
+    // Notes (completion / progress) on a few tasks
+    if (!note_add(db, generate_uuid_v4(), t1, "Requirements doc approved by client on review. Scope locked for MVP.", "completion", "project-manager")) return 1;
+    if (!note_add(db, generate_uuid_v4(), t2, "OpenAPI spec published. SSO deferred to phase 2.", "completion", "software-architect")) return 1;
+    if (!note_add(db, generate_uuid_v4(), t3, "Review session scheduled. One open point on error-message wording.", "progress", "project-designer")) return 1;
+    if (!note_add(db, generate_uuid_v4(), t4, "Structure validated with inventory team. Multi-language fields added for later.", "completion", "project-designer")) return 1;
+    if (!note_add(db, generate_uuid_v4(), t5, "Flows signed off. Abandoned-cart recovery moved to phase 2.", "completion", "ux-designer")) return 1;
+    if (!note_add(db, generate_uuid_v4(), t7, "Login and refresh implemented. Revoke endpoint in progress.", "progress", "developer")) return 1;
+    if (!note_add(db, generate_uuid_v4(), t15, "Stripe chosen: better docs and webhook UX. Recommendation doc in Confluence.", "completion", "software-architect")) return 1;
+    std::cout << "  notes (7)\n";
 
     std::cout << "Done. Database: " << db_path << "\n";
     return 0;

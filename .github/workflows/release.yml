@@ -116,7 +116,7 @@ jobs:
           
           # Ajouter la section téléchargements
           echo "" >> release_notes.md
-          echo "### Téléchargements" >> release_notes.md
+          echo "### Downloads" >> release_notes.md
           echo "" >> release_notes.md
           echo "- \`taskman-linux-gcc\` - Linux (GCC)" >> release_notes.md
           echo "- \`taskman-linux-clang\` - Linux (Clang)" >> release_notes.md
