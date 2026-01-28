@@ -16,8 +16,8 @@
 #include "phase_service.hpp"
 #include "phase_formatter.hpp"
 #include "phase_command_parser.hpp"
-#include "db.hpp"
-#include "query_executor.hpp"
+#include "infrastructure/db/db.hpp"
+#include "infrastructure/db/query_executor.hpp"
 #include <memory>
 
 namespace taskman {

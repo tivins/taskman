@@ -112,14 +112,72 @@ add_custom_command(
 # Exécutable taskman
 # -----------------------------------------------------------------------------
 add_executable(taskman
-  src/main.cpp src/agents.cpp src/command.cpp src/commands.cpp src/db_connection.cpp src/query_executor.cpp src/schema_manager.cpp src/demo.cpp src/formats.cpp src/mcp.cpp src/mcp_config.cpp src/mcp_protocol_handler.cpp src/mcp_tool_registry.cpp src/mcp_tool_executor.cpp src/milestone.cpp src/note.cpp src/phase.cpp src/roles.cpp src/task.cpp src/task_repository.cpp src/task_service.cpp src/task_formatter.cpp src/task_command_parser.cpp src/web.cpp src/web_server.cpp src/web_controllers.cpp src/phase_repository.cpp src/milestone_repository.cpp src/note_repository.cpp src/phase_service.cpp src/phase_formatter.cpp src/phase_command_parser.cpp src/milestone_service.cpp src/milestone_formatter.cpp src/milestone_command_parser.cpp src/note_service.cpp src/note_formatter.cpp src/note_command_parser.cpp
+  # Point d'entrée
+  src/main.cpp
+  
+  # Core - Task
+  src/core/task/task.cpp
+  src/core/task/task_repository.cpp
+  src/core/task/task_service.cpp
+  src/core/task/task_formatter.cpp
+  src/core/task/task_command_parser.cpp
+  
+  # Core - Phase
+  src/core/phase/phase.cpp
+  src/core/phase/phase_repository.cpp
+  src/core/phase/phase_service.cpp
+  src/core/phase/phase_formatter.cpp
+  src/core/phase/phase_command_parser.cpp
+  
+  # Core - Milestone
+  src/core/milestone/milestone.cpp
+  src/core/milestone/milestone_repository.cpp
+  src/core/milestone/milestone_service.cpp
+  src/core/milestone/milestone_formatter.cpp
+  src/core/milestone/milestone_command_parser.cpp
+  
+  # Core - Note
+  src/core/note/note.cpp
+  src/core/note/note_repository.cpp
+  src/core/note/note_service.cpp
+  src/core/note/note_formatter.cpp
+  src/core/note/note_command_parser.cpp
+  
+  # Infrastructure - Database
+  src/infrastructure/db/db_connection.cpp
+  src/infrastructure/db/query_executor.cpp
+  src/infrastructure/db/schema_manager.cpp
+  
+  # CLI
+  src/cli/command.cpp
+  src/cli/commands.cpp
+  
+  # Web
+  src/web/web.cpp
+  src/web/web_server.cpp
+  src/web/web_controllers.cpp
+  
+  # MCP
+  src/mcp/mcp.cpp
+  src/mcp/mcp_config.cpp
+  src/mcp/mcp_protocol_handler.cpp
+  src/mcp/mcp_tool_registry.cpp
+  src/mcp/mcp_tool_executor.cpp
+  
+  # Util
+  src/util/agents.cpp
+  src/util/demo.cpp
+  src/util/formats.cpp
+  src/util/roles.cpp
+  
+  # Assets générés
   "${WEB_ASSETS_HEADER}"
   "${AGENTS_HEADER}"
 )
 if(MSVC)
   target_compile_definitions(taskman PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
-target_include_directories(taskman PRIVATE ${CMAKE_BINARY_DIR} ${SQLITE_AMALGAMATION_SOURCE_DIR})
+target_include_directories(taskman PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR} ${SQLITE_AMALGAMATION_SOURCE_DIR})
 target_link_libraries(taskman PRIVATE
   nlohmann_json::nlohmann_json
   cxxopts::cxxopts
@@ -140,34 +198,47 @@ add_executable(tests
   tests/test_note.cpp
   tests/test_phase.cpp
   tests/test_task.cpp
-  src/db_connection.cpp
-  src/query_executor.cpp
-  src/schema_manager.cpp
-  src/formats.cpp
-  src/milestone.cpp
-  src/note.cpp
-  src/phase.cpp
-  src/roles.cpp
-  src/task.cpp
-  src/task_repository.cpp
-  src/task_service.cpp
-  src/task_formatter.cpp
-  src/task_command_parser.cpp
-  src/phase_repository.cpp
-  src/milestone_repository.cpp
-  src/note_repository.cpp
-  src/phase_service.cpp
-  src/phase_formatter.cpp
-  src/phase_command_parser.cpp
-  src/milestone_service.cpp
-  src/milestone_formatter.cpp
-  src/milestone_command_parser.cpp
-  src/note_service.cpp
-  src/note_formatter.cpp
-  src/note_command_parser.cpp
+  
+  # Core - Task
+  src/core/task/task.cpp
+  src/core/task/task_repository.cpp
+  src/core/task/task_service.cpp
+  src/core/task/task_formatter.cpp
+  src/core/task/task_command_parser.cpp
+  
+  # Core - Phase
+  src/core/phase/phase.cpp
+  src/core/phase/phase_repository.cpp
+  src/core/phase/phase_service.cpp
+  src/core/phase/phase_formatter.cpp
+  src/core/phase/phase_command_parser.cpp
+  
+  # Core - Milestone
+  src/core/milestone/milestone.cpp
+  src/core/milestone/milestone_repository.cpp
+  src/core/milestone/milestone_service.cpp
+  src/core/milestone/milestone_formatter.cpp
+  src/core/milestone/milestone_command_parser.cpp
+  
+  # Core - Note
+  src/core/note/note.cpp
+  src/core/note/note_repository.cpp
+  src/core/note/note_service.cpp
+  src/core/note/note_formatter.cpp
+  src/core/note/note_command_parser.cpp
+  
+  # Infrastructure - Database
+  src/infrastructure/db/db_connection.cpp
+  src/infrastructure/db/query_executor.cpp
+  src/infrastructure/db/schema_manager.cpp
+  
+  # Util
+  src/util/formats.cpp
+  src/util/roles.cpp
 )
 target_include_directories(tests PRIVATE
   ${CMAKE_SOURCE_DIR}/src
+  ${CMAKE_BINARY_DIR}
   ${SQLITE_AMALGAMATION_SOURCE_DIR}
 )
 target_link_libraries(tests PRIVATE

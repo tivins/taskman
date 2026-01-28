@@ -7,7 +7,7 @@
 #include "mcp_protocol_handler.hpp"
 #include "mcp_tool_registry.hpp"
 #include "mcp_tool_executor.hpp"
-#include "command.hpp"
+#include "cli/command.hpp"
 #include <nlohmann/json.hpp>
 #include <cstdlib>
 #include <iostream>

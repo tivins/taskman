@@ -3,8 +3,8 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
-#include "db.hpp"
-#include "phase.hpp"
+#include "infrastructure/db/db.hpp"
+#include "core/phase/phase.hpp"
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <optional>

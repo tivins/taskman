@@ -3,8 +3,8 @@
  */
 
 #include "mcp_tool_executor.hpp"
-#include "command.hpp"
-#include "db.hpp"
+#include "cli/command.hpp"
+#include "infrastructure/db/db.hpp"
 #include <sstream>
 #include <iostream>
 #include <cstdlib>

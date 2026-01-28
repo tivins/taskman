@@ -3,10 +3,10 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
-#include "db.hpp"
-#include "milestone.hpp"
-#include "phase.hpp"
-#include "task.hpp"
+#include "infrastructure/db/db.hpp"
+#include "core/milestone/milestone.hpp"
+#include "core/phase/phase.hpp"
+#include "core/task/task.hpp"
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <optional>

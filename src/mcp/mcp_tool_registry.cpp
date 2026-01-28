@@ -3,7 +3,7 @@
  */
 
 #include "mcp_tool_registry.hpp"
-#include "roles.hpp"
+#include "util/roles.hpp"
 #include <algorithm>
 
 namespace taskman {

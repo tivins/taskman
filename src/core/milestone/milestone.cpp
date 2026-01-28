@@ -16,8 +16,8 @@
 #include "milestone_service.hpp"
 #include "milestone_formatter.hpp"
 #include "milestone_command_parser.hpp"
-#include "db.hpp"
-#include "query_executor.hpp"
+#include "infrastructure/db/db.hpp"
+#include "infrastructure/db/query_executor.hpp"
 #include <memory>
 
 namespace taskman {

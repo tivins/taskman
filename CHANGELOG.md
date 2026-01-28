@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.26.0] - 2026-01-28
+
+### Changed
+
+- **Réorganisation de la structure des dossiers source**: réorganisation complète du dossier `src/` en une structure modulaire avec séparation claire des responsabilités :
+  - **`src/core/`** : entités métier (domain layer) organisées par module :
+    - `core/task/` : tâches (task.hpp, task_repository.hpp, task_service.hpp, task_formatter.hpp, task_command_parser.hpp)
+    - `core/phase/` : phases (phase.hpp, phase_repository.hpp, phase_service.hpp, phase_formatter.hpp, phase_command_parser.hpp)
+    - `core/milestone/` : milestones (milestone.hpp, milestone_repository.hpp, milestone_service.hpp, milestone_formatter.hpp, milestone_command_parser.hpp)
+    - `core/note/` : notes (note.hpp, note_repository.hpp, note_service.hpp, note_formatter.hpp, note_command_parser.hpp)
+  - **`src/infrastructure/`** : infrastructure technique :
+    - `infrastructure/db/` : couche base de données (db.hpp, db_connection.hpp, query_executor.hpp, schema_manager.hpp)
+  - **`src/cli/`** : interface ligne de commande (command.hpp, commands.cpp)
+  - **`src/web/`** : interface web (web.hpp, web_server.hpp, web_controllers.hpp)
+  - **`src/mcp/`** : interface MCP (mcp.hpp, mcp_config.hpp, mcp_protocol_handler.hpp, mcp_tool_registry.hpp, mcp_tool_executor.hpp)
+  - **`src/util/`** : utilitaires (formats.hpp, roles.hpp, agents.hpp, demo.hpp)
+- Tous les includes ont été mis à jour pour utiliser les nouveaux chemins relatifs depuis `src/`
+- `CMakeLists.txt` a été mis à jour avec les nouveaux chemins, organisés par catégorie pour une meilleure lisibilité
+- Les include directories ont été configurés pour permettre l'utilisation des chemins depuis `src/`
+- Cette réorganisation améliore la navigation dans le code, facilite la maintenance et prépare le projet pour une éventuelle introduction de namespaces dans le futur
+
 ## [0.25.0] - 2026-01-28
 
 ### Changed

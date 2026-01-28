@@ -9,7 +9,7 @@
 #define TASKMAN_NOTE_SERVICE_HPP
 
 #include "note_repository.hpp"
-#include "roles.hpp"
+#include "util/roles.hpp"
 #include <map>
 #include <optional>
 #include <string>

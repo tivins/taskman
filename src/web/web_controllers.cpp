@@ -3,14 +3,14 @@
  */
 
 #include "web_controllers.hpp"
-#include "task_repository.hpp"
-#include "task_service.hpp"
-#include "task_formatter.hpp"
-#include "phase_repository.hpp"
-#include "milestone_repository.hpp"
-#include "note_repository.hpp"
-#include "formats.hpp"
-#include "roles.hpp"
+#include "core/task/task_repository.hpp"
+#include "core/task/task_service.hpp"
+#include "core/task/task_formatter.hpp"
+#include "core/phase/phase_repository.hpp"
+#include "core/milestone/milestone_repository.hpp"
+#include "core/note/note_repository.hpp"
+#include "util/formats.hpp"
+#include "util/roles.hpp"
 #include <nlohmann/json.hpp>
 #include <climits>
 #include <string>

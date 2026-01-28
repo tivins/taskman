@@ -6,7 +6,7 @@
  */
 
 #include "command.hpp"
-#include "db.hpp"
+#include "infrastructure/db/db.hpp"
 #include "version.h"
 #include <cstdlib>
 #include <cstring>

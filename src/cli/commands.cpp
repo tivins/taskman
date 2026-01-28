@@ -4,7 +4,7 @@
  */
 
 #include "command.hpp"
-#include "db.hpp"
+#include "infrastructure/db/db.hpp"
 #include "task.hpp"
 #include "phase.hpp"
 #include "milestone.hpp"

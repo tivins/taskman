@@ -3,11 +3,11 @@
  */
 
 #include "demo.hpp"
-#include "db.hpp"
-#include "milestone.hpp"
-#include "note.hpp"
-#include "phase.hpp"
-#include "task.hpp"
+#include "infrastructure/db/db.hpp"
+#include "core/milestone/milestone.hpp"
+#include "core/note/note.hpp"
+#include "core/phase/phase.hpp"
+#include "core/task/task.hpp"
 #include <cxxopts.hpp>
 #include <cstring>
 #include <cstdlib>

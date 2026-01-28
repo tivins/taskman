@@ -16,8 +16,8 @@
 #include "task_service.hpp"
 #include "task_formatter.hpp"
 #include "task_command_parser.hpp"
-#include "db.hpp"
-#include "query_executor.hpp"
+#include "infrastructure/db/db.hpp"
+#include "infrastructure/db/query_executor.hpp"
 #include <memory>
 
 namespace taskman {

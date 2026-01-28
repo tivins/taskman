@@ -7,7 +7,7 @@
 #ifndef TASKMAN_NOTE_REPOSITORY_HPP
 #define TASKMAN_NOTE_REPOSITORY_HPP
 
-#include "query_executor.hpp"
+#include "infrastructure/db/query_executor.hpp"
 #include <map>
 #include <optional>
 #include <string>

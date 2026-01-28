@@ -3,7 +3,7 @@
  */
 
 #include "note_command_parser.hpp"
-#include "roles.hpp"
+#include "util/roles.hpp"
 #include <cxxopts.hpp>
 #include <cstring>
 #include <iostream>

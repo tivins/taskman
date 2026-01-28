@@ -16,8 +16,8 @@
 #include "note_service.hpp"
 #include "note_formatter.hpp"
 #include "note_command_parser.hpp"
-#include "db.hpp"
-#include "query_executor.hpp"
+#include "infrastructure/db/db.hpp"
+#include "infrastructure/db/query_executor.hpp"
 #include <memory>
 
 namespace taskman {
