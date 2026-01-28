@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.22.0] - 2026-01-28
+
+### Changed
+
+- **Refactoring SOLID - main.cpp (point 1.3)** : implémentation du pattern Command pour le routage des commandes CLI, respectant les principes SRP (Single Responsibility Principle) et OCP (Open/Closed Principle). Le fichier `main.cpp` a été refactorisé pour utiliser un `CommandRegistry` au lieu d'une longue chaîne de if/else :
+  - `Command` : interface abstraite pour toutes les commandes CLI (`execute()`, `name()`, `summary()`, `requires_database()`)
+  - `CommandRegistry` : registre centralisé des commandes permettant d'enregistrer et d'exécuter des commandes par nom
+  - Classes de commandes concrètes : wrappers pour chaque commande existante (`InitCommand`, `PhaseAddCommand`, `TaskAddCommand`, etc.)
+  - `register_all_commands()` : fonction centralisée qui enregistre toutes les commandes disponibles
+- Les nouvelles commandes peuvent maintenant être ajoutées sans modifier `main.cpp` : il suffit de créer une classe héritant de `Command` et de l'enregistrer dans `register_all_commands()`
+- La génération de l'aide (`taskman -h`) utilise maintenant le registre de commandes pour lister dynamiquement toutes les commandes disponibles
+- Gestion optimisée de la base de données : ouverture uniquement pour les commandes qui en ont besoin (via `requires_database()`)
+
+### Added
+
+- **Nouveaux fichiers** : `command.hpp`/`command.cpp` (interface Command et CommandRegistry), `commands.cpp` (implémentations concrètes de toutes les commandes)
+
 ## [0.21.0] - 2026-01-28
 
 ### Changed

@@ -1,24 +1,17 @@
 /**
  * taskman — point d'entrée
  * Lit TASKMAN_DB_NAME (env), défaut project_tasks.db.
- * Dispatch argc/argv vers sous-commandes.
+ * Dispatch argc/argv vers sous-commandes via CommandRegistry (pattern Command).
  * Codes de sortie : 0 = succès, 1 = erreur (parsing, DB, validation des args).
  */
 
-#include "agents.hpp"
+#include "command.hpp"
 #include "db.hpp"
-#include "demo.hpp"
-#include "mcp.hpp"
-#include "mcp_config.hpp"
-#include "milestone.hpp"
-#include "note.hpp"
-#include "phase.hpp"
-#include "task.hpp"
-#include "web.hpp"
 #include "version.h"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <sstream>
 
@@ -29,37 +22,7 @@ const char* get_db_path() {
     return (env && env[0] != '\0') ? env : "project_tasks.db";
 }
 
-struct CmdInfo {
-    const char* name;
-    const char* summary;
-};
-
-static const CmdInfo COMMANDS[] = {
-    {"init",            "Create / initialize tables"},
-    {"phase:add",       "Add a phase"},
-    {"phase:edit",      "Edit a phase"},
-    {"phase:list",      "List phases"},
-    {"milestone:add",   "Add a milestone"},
-    {"milestone:edit",  "Edit a milestone"},
-    {"milestone:list",  "List milestones (option --phase)"},
-    {"task:add",        "Add a task (auto UUID)"},
-    {"task:edit",       "Edit a task"},
-    {"task:get",        "Get a task"},
-    {"task:list",       "List tasks (option --phase, --status, --role)"},
-    {"task:dep:add",    "Add a dependency"},
-    {"task:dep:remove", "Remove a dependency"},
-    {"task:note:add",   "Add a note to a task"},
-    {"task:note:list",  "List notes for a task"},
-    {"demo:generate",   "Generate a demo database"},
-    {"agents:generate", "Generate .cursor/agents/ files"},
-    {"mcp:config",      "Generate or update .cursor/mcp.json file"},
-    {"mcp",             "MCP server (stdio): read JSON-RPC on stdin, write on stdout"},
-    {"web",             "HTTP server for web UI (--host, --port)"},
-};
-
-static const std::size_t NUM_COMMANDS = sizeof(COMMANDS) / sizeof(COMMANDS[0]);
-
-std::string get_usage_string() {
+std::string get_usage_string(const taskman::CommandRegistry& registry) {
     std::stringstream ss;
     ss << "\nTaskman " << TASKMAN_VERSION << "\n"
               << "https://github.com/tivins/taskman\n\n"
@@ -68,12 +31,14 @@ std::string get_usage_string() {
               << "  -h, --help      Show this help\n"
               << "  -v, --version   Show version\n"
               << "Commands:\n";
-    for (std::size_t i = 0; i < NUM_COMMANDS; ++i) {
-        ss << "  " << COMMANDS[i].name;
-        const std::size_t len = std::strlen(COMMANDS[i].name);
+    
+    auto commands = registry.list_commands();
+    for (const auto& [name, summary] : commands) {
+        ss << "  " << name;
+        const std::size_t len = name.length();
         const std::size_t pad = (len <= 16) ? (16 - len) : 0;
         for (std::size_t k = 0; k < pad; ++k) ss << ' ';
-        ss << " " << COMMANDS[i].summary << "\n";
+        ss << " " << summary << "\n";
     }
     ss << "\n"
               << "Use 'taskman <command> --help' for command-specific options.\n\n"
@@ -84,136 +49,62 @@ std::string get_usage_string() {
     return ss.str();
 }
 
-
-void print_usage() {
-    std::cerr << get_usage_string() << "\n";
+void print_usage(const taskman::CommandRegistry& registry) {
+    std::cerr << get_usage_string(registry) << "\n";
 }
 
 } // namespace
 
 int main(int argc, char* argv[]) {
+    // Initialiser le registre de commandes
+    taskman::CommandRegistry registry;
+    taskman::register_all_commands(registry);
+
     if (argc < 2) {
-        print_usage();
+        print_usage(registry);
         return 1;
     }
 
     const char* cmd = argv[1];
+    
+    // Gestion des options globales
     if (std::strcmp(cmd, "-v") == 0 || std::strcmp(cmd, "--version") == 0) {
         std::cout << "taskman " << TASKMAN_VERSION << "\n";
         return 0;
     }
 
     if (std::strcmp(cmd, "-h") == 0 || std::strcmp(cmd, "--help") == 0) {
-        print_usage();
+        print_usage(registry);
         return 0;
     }
 
-    if (std::strcmp(cmd, "mcp") == 0) {
-        return taskman::run_mcp_server();
+    // Vérifier si la commande existe
+    if (!registry.has_command(cmd)) {
+        std::cerr << "Unknown command: " << cmd << "\n";
+        print_usage(registry);
+        return 1;
     }
 
-    // Dispatch vers sous-commandes (implémentées en phases suivantes)
-    if (std::strcmp(cmd, "init") == 0) {
-        if (argc >= 3 && (std::strcmp(argv[2], "--help") == 0 || std::strcmp(argv[2], "-h") == 0)) {
-            std::cout << "taskman init\n\n"
-                         "Create and initialize the database tables (phases, milestones, tasks, task_deps).\n"
-                         "Run once when starting a new project.\n\n";
-            return 0;
+    // Préparer la base de données si nécessaire
+    std::unique_ptr<taskman::Database> db;
+    taskman::Database* db_ptr = nullptr;
+    
+    if (registry.command_requires_database(cmd)) {
+        db = std::make_unique<taskman::Database>();
+        if (!db->open(get_db_path())) {
+            return 1;
         }
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        if (!db.init_schema()) return 1;
-        return 0;
-    }
-    if (std::strcmp(cmd, "phase:add") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_phase_add(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "phase:edit") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_phase_edit(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "phase:list") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_phase_list(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "milestone:add") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_milestone_add(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "milestone:edit") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_milestone_edit(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "milestone:list") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_milestone_list(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "task:add") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_task_add(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "task:edit") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_task_edit(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "task:get") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_task_get(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "task:list") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_task_list(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "task:dep:add") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_task_dep_add(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "task:dep:remove") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_task_dep_remove(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "task:note:add") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_note_add(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "task:note:list") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_note_list(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "demo:generate") == 0) {
-        taskman::Database db;
-        // cmd_demo_generate will handle opening/closing the database itself
-        // since it needs to delete the existing database first
-        return taskman::cmd_demo_generate(argc - 1, argv + 1, db);
-    }
-    if (std::strcmp(cmd, "agents:generate") == 0) {
-        return taskman::cmd_agents_generate(argc - 1, argv + 1);
-    }
-    if (std::strcmp(cmd, "mcp:config") == 0) {
-        return taskman::cmd_mcp_config(argc - 1, argv + 1);
-    }
-    if (std::strcmp(cmd, "web") == 0) {
-        taskman::Database db;
-        if (!db.open(get_db_path())) return 1;
-        return taskman::cmd_web(argc - 1, argv + 1, db);
+        db_ptr = db.get();
     }
 
-    std::cerr << "Unknown command: " << cmd << "\n";
-    print_usage();
-    return 1;
+    // Exécuter la commande via le registre
+    int result = registry.execute(cmd, argc - 1, argv + 1, db_ptr);
+    
+    if (result == -1) {
+        std::cerr << "Unknown command: " << cmd << "\n";
+        print_usage(registry);
+        return 1;
+    }
+
+    return result;
 }
