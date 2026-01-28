@@ -506,7 +506,7 @@ int dispatch_tool_call(const std::string& name, const nlohmann::json& arguments,
     try {
         // Dispatch vers la bonne cmd_*
         if (name == "taskman_init") {
-            if (!taskman::init_schema(db)) {
+            if (!db.init_schema()) {
                 exit_code = 1;
             } else {
                 output = "Database initialized.";

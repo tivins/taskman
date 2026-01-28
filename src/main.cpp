@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
         }
         taskman::Database db;
         if (!db.open(get_db_path())) return 1;
-        if (!taskman::init_schema(db)) return 1;
+        if (!db.init_schema()) return 1;
         return 0;
     }
     if (std::strcmp(cmd, "phase:add") == 0) {

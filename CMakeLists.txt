@@ -112,7 +112,7 @@ add_custom_command(
 # Exécutable taskman
 # -----------------------------------------------------------------------------
 add_executable(taskman
-  src/main.cpp src/agents.cpp src/db.cpp src/demo.cpp src/formats.cpp src/mcp.cpp src/mcp_config.cpp src/milestone.cpp src/note.cpp src/phase.cpp src/roles.cpp src/task.cpp src/web.cpp
+  src/main.cpp src/agents.cpp src/db_connection.cpp src/query_executor.cpp src/schema_manager.cpp src/demo.cpp src/formats.cpp src/mcp.cpp src/mcp_config.cpp src/milestone.cpp src/note.cpp src/phase.cpp src/roles.cpp src/task.cpp src/web.cpp
   "${WEB_ASSETS_HEADER}"
   "${AGENTS_HEADER}"
 )
@@ -140,7 +140,9 @@ add_executable(tests
   tests/test_note.cpp
   tests/test_phase.cpp
   tests/test_task.cpp
-  src/db.cpp
+  src/db_connection.cpp
+  src/query_executor.cpp
+  src/schema_manager.cpp
   src/formats.cpp
   src/milestone.cpp
   src/note.cpp

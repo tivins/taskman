@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.19.0] - 2026-01-28
+
+### Changed
+
+- **Refactoring SOLID - Classe Database** : séparation des responsabilités selon le principe SRP (Single Responsibility Principle). La classe `Database` a été refactorisée en trois classes spécialisées :
+  - `DatabaseConnection` : gestion exclusive de la connexion SQLite (open, close, is_open)
+  - `QueryExecutor` : exécution exclusive des requêtes SQL (exec, run, query)
+  - `SchemaManager` : gestion exclusive du schéma et des migrations (init_schema, table_has_column, ensure_timestamps)
+- La classe `Database` devient une façade qui délègue aux trois classes spécialisées, maintenant la compatibilité avec le code existant tout en respectant les principes SOLID.
+
+### Added
+
+- **Nouveaux fichiers** : `db_connection.hpp`/`db_connection.cpp`, `query_executor.hpp`/`query_executor.cpp`, `schema_manager.hpp`/`schema_manager.cpp`
+
 ## [0.18.1] - 2026-01-28
 
 ### Added

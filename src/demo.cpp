@@ -94,7 +94,7 @@ int cmd_demo_generate(int argc, char* argv[], Database& db) {
     }
 
     // Initialize schema
-    if (!init_schema(db)) {
+    if (!db.init_schema()) {
         std::cerr << "taskman: failed to initialize schema\n";
         return 1;
     }

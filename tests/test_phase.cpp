@@ -24,7 +24,7 @@ struct CoutRedirect {
 
 static void setup_db(taskman::Database& db) {
     REQUIRE(db.open(":memory:"));
-    REQUIRE(taskman::init_schema(db));
+    REQUIRE(db.init_schema());
 }
 
 // Construire argv pour éviter les avertissements literal -> char*.

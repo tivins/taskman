@@ -24,7 +24,7 @@ struct CoutRedirect {
 
 static void setup_db(Database& db) {
     REQUIRE(db.open(":memory:"));
-    REQUIRE(init_schema(db));
+    REQUIRE(db.init_schema());
     // Ajouter une phase (FK milestone.phase_id)
     std::vector<char*> add_phase_argv;
     std::vector<std::string> phase_args = {"phase:add", "--id", "p1", "--name", "Conception"};

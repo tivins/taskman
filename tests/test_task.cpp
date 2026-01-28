@@ -25,7 +25,7 @@ struct CoutRedirect {
 
 static void setup_db(Database& db) {
     REQUIRE(db.open(":memory:"));
-    REQUIRE(init_schema(db));
+    REQUIRE(db.init_schema());
     std::vector<std::string> phase_args = {"phase:add", "--id", "p1", "--name", "Conception"};
     std::vector<char*> ptrs;
     for (auto& s : phase_args) ptrs.push_back(s.data());
