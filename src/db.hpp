@@ -68,6 +68,11 @@ public:
      * Retourne false en cas d'erreur (stderr déjà écrit par executor). */
     bool init_schema() { return schema_manager_.init_schema(); }
 
+    /** Obtient une référence à QueryExecutor pour utilisation par les repositories.
+     * Permet aux nouvelles classes (TaskRepository, etc.) d'accéder à QueryExecutor
+     * sans violer l'encapsulation. */
+    QueryExecutor& get_executor() { return executor_; }
+
 private:
     DatabaseConnection connection_;
     QueryExecutor executor_;

@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.21.0] - 2026-01-28
+
+### Changed
+
+- **Refactoring SOLID - Module Task (point 1.2)** : séparation des responsabilités selon le principe SRP (Single Responsibility Principle). Le module `task.cpp` a été refactorisé en quatre classes spécialisées :
+  - `TaskRepository` : accès exclusif à la base de données pour les tâches (CRUD, dépendances)
+  - `TaskService` : logique métier exclusive (validation, génération UUID, règles métier)
+  - `TaskFormatter` : formatage de sortie exclusif (JSON, text)
+  - `TaskCommandParser` : parsing CLI exclusif (cxxopts)
+- Les fonctions `cmd_task_*` sont maintenant des wrappers qui utilisent les nouvelles classes, maintenant la compatibilité avec le code existant (`main.cpp`, `mcp.cpp`).
+- Ajout de `Database::get_executor()` pour permettre aux repositories d'accéder à QueryExecutor.
+
+### Added
+
+- **Nouveaux fichiers** : `task_repository.hpp`/`task_repository.cpp`, `task_service.hpp`/`task_service.cpp`, `task_formatter.hpp`/`task_formatter.cpp`, `task_command_parser.hpp`/`task_command_parser.cpp`
+
 ## [0.20.0] - 2026-01-28
 
 ### Changed
