@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.25.0] - 2026-01-28
+
+### Changed
+
+- **SOLID Refactoring - phase/milestone/note modules (item 1.2 completion)**: completion of the refactoring following the SRP (Single Responsibility Principle) for the phase, milestone, and note modules. These modules have been refactored to separate responsibilities into specialized classes:
+  - **Phase module**: `PhaseService` (business logic and validation), `PhaseFormatter` (output formatting), `PhaseCommandParser` (CLI parsing), `PhaseRepository` extended with `add()` and `update()` methods
+  - **Milestone module**: `MilestoneService` (business logic and validation), `MilestoneFormatter` (output formatting), `MilestoneCommandParser` (CLI parsing), `MilestoneRepository` extended with `add()`, `update()`, and `list_by_phase()` methods
+  - **Note module**: `NoteService` (business logic, validation, UUID generation), `NoteFormatter` (output formatting), `NoteCommandParser` (CLI parsing), `NoteRepository` extended with `add()`, `get_by_id()`, and `task_exists()` methods
+- The `cmd_phase_*`, `cmd_milestone_*`, and `cmd_note_*` functions are now wrappers using the new classes, maintaining compatibility with existing code (`main.cpp`, `mcp.cpp`)
+- The code now fully complies with the SRP principle: each class has a single, clear responsibility, matching the pattern established for the Task module in v0.20.0
+
+### Added
+
+- **New files**: `phase_service.hpp`/`phase_service.cpp`, `phase_formatter.hpp`/`phase_formatter.cpp`, `phase_command_parser.hpp`/`phase_command_parser.cpp`, `milestone_service.hpp`/`milestone_service.cpp`, `milestone_formatter.hpp`/`milestone_formatter.cpp`, `milestone_command_parser.hpp`/`milestone_command_parser.cpp`, `note_service.hpp`/`note_service.cpp`, `note_formatter.hpp`/`note_formatter.cpp`, `note_command_parser.hpp`/`note_command_parser.cpp`
+
 ## [0.24.0] - 2026-01-28
 
 ### Changed
