@@ -99,6 +99,28 @@ li a:hover { text-decoration: underline; }
 .task-meta .row-title { font-size: 150%; }
 .task-meta .row-description { font-size:110%; padding-top: 1rem;padding-bottom: 1rem; }
 
+.task-notes-history {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0.5rem 0;
+}
+.task-note-card {
+    padding: 0.75rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary);
+}
+.task-note-meta {
+    font-size: 0.8125rem;
+    margin-bottom: 0.35rem;
+}
+.task-note-content {
+    white-space: pre-wrap;
+    font-size: 0.9375rem;
+}
+
 .monospace { font-family: monospace; }
 
 .muted { color: var(--muted); }

@@ -74,6 +74,12 @@ Returns the dependencies for a specific task.
 
 **Response:** JSON array of objects with `task_id` and `depends_on` fields. Returns 404 if the task is not found.
 
+### GET /task/:id/notes
+
+Returns the notes history for a specific task (notes added by the agent during execution).
+
+**Response:** JSON array of objects with `id`, `task_id`, `content`, `kind`, `role`, `created_at`. Ordered by `created_at`. Returns 404 if the task is not found. The task detail view uses this endpoint to display the "Historique des notes" section.
+
 ### GET /tasks
 
 Returns a paginated list of tasks in JSON format.

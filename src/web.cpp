@@ -1,6 +1,6 @@
 /**
  * Implémentation taskman web : serveur HTTP (GET /, /style.css, /main.js,
- * /task/:id, /task/:id/deps, /tasks, /task_deps, /milestone/:id, /milestones, /phase/:id, /phases).
+ * /task/:id, /task/:id/deps, /task/:id/notes, /tasks, /task_deps, /milestone/:id, /milestones, /phase/:id, /phases).
  * Inclure httplib.h en premier (avant Windows.h sur Windows).
  */
 #include <httplib.h>
@@ -201,6 +201,38 @@ int cmd_web(int argc, char* argv[], Database& db) {
             auto get = [&row](const char* k) { return row.count(k) ? row.at(k) : std::nullopt; };
             obj["task_id"] = get("task_id").value_or("");
             obj["depends_on"] = get("depends_on").value_or("");
+            arr.push_back(obj);
+        }
+        res.set_content(arr.dump(), "application/json");
+    });
+
+    svr.Get("/task/:id/notes", [&db](const httplib::Request& req, httplib::Response& res) {
+        auto it = req.path_params.find("id");
+        if (it == req.path_params.end()) {
+            res.status = 400;
+            res.set_content(R"({"error":"missing id"})", "application/json");
+            return;
+        }
+        std::string id = it->second;
+        auto task_rows = db.query("SELECT 1 FROM tasks WHERE id = ?", {id});
+        if (task_rows.empty()) {
+            res.status = 404;
+            res.set_content(R"({"error":"not found"})", "application/json");
+            return;
+        }
+        auto rows = db.query(
+            "SELECT id, task_id, content, kind, role, created_at FROM task_notes WHERE task_id = ? ORDER BY created_at",
+            {id});
+        nlohmann::json arr = nlohmann::json::array();
+        for (const auto& row : rows) {
+            nlohmann::json obj;
+            auto get = [&row](const char* k) { return row.count(k) ? row.at(k) : std::nullopt; };
+            obj["id"] = get("id").value_or("");
+            obj["task_id"] = get("task_id").value_or("");
+            obj["content"] = get("content").value_or("");
+            obj["kind"] = get("kind").value_or("");
+            obj["role"] = get("role").value_or("");
+            obj["created_at"] = get("created_at").value_or("");
             arr.push_back(obj);
         }
         res.set_content(arr.dump(), "application/json");

@@ -342,7 +342,15 @@ int cmd_demo_generate(int argc, char* argv[], Database& db) {
     if (!note_add(db, generate_uuid_v4(), t5, "Flows signed off. Abandoned-cart recovery moved to phase 2.", "completion", "ux-designer")) return 1;
     if (!note_add(db, generate_uuid_v4(), t7, "Login and refresh implemented. Revoke endpoint in progress.", "progress", "developer")) return 1;
     if (!note_add(db, generate_uuid_v4(), t15, "Stripe chosen: better docs and webhook UX. Recommendation doc in Confluence.", "completion", "software-architect")) return 1;
-    std::cout << "  notes (7)\n";
+
+    // Notes on a task with complications (t24: Fix blocking bugs) — multiple agents, issue/progress/completion
+    if (!note_add(db, generate_uuid_v4(), t24, "3 blocking bugs in checkout and payment: BUG-101 webhook race causes duplicate order, BUG-102 promo stacks wrongly, BUG-103 3DS timeout leaves order stuck. Details in JIRA.", "issue", "qa-engineer")) return 1;
+    if (!note_add(db, generate_uuid_v4(), t24, "BUG-101 root cause: missing idempotency in webhook handler. Patch in review.", "progress", "developer")) return 1;
+    if (!note_add(db, generate_uuid_v4(), t24, "BUG-102 (wrong total with promo) is P0. BUG-101 and BUG-103 can slip to hotfix if needed. Prioritise BUG-102.", "progress", "product-owner")) return 1;
+    if (!note_add(db, generate_uuid_v4(), t24, "BUG-102 fix on staging. QA to regress. BUG-101 merged. Starting BUG-103 (timeout handling).", "progress", "developer")) return 1;
+    if (!note_add(db, generate_uuid_v4(), t24, "All three regressed and verified. Ready for PO sign-off on this task.", "completion", "qa-engineer")) return 1;
+
+    std::cout << "  notes (12)\n";
 
     std::cout << "Done. Database: " << db_path << "\n";
     return 0;

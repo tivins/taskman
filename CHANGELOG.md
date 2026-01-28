@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.18.1] - 2026-01-28
+
+### Added
+
+- **Vue web** : route GET `/task/:id/notes` et section « Historique des notes » dans la vue détail d’une tâche, pour consulter les notes ajoutées par l’agent pendant la réalisation (id, content, kind, role, created_at).
+
 ## [0.18.0] - 2026-01-27
 
 ### Added
