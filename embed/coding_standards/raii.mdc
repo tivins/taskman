@@ -1,0 +1,202 @@
+---
+description: Utiliser la gestion automatique des ressources (RAII) pour garantir la libération des ressources
+globs: **/*.{cpp,hpp,java,cs,py,js,ts}
+alwaysApply: false
+---
+
+# Gestion automatique des ressources (RAII)
+
+Utiliser la gestion automatique des ressources pour garantir la libération des ressources, même en cas d'exception ou de retour anticipé.
+
+## Principe
+
+La gestion automatique des ressources lie la durée de vie d'une ressource à la durée de vie d'un objet ou d'un bloc. L'acquisition de la ressource se fait lors de l'initialisation, la libération se fait automatiquement à la fin de la portée.
+
+## Quand utiliser la gestion automatique des ressources
+
+Utiliser cette approche pour toute ressource qui nécessite un nettoyage explicite :
+- Mémoire allouée dynamiquement
+- Fichiers ouverts
+- Verrous (mutex, locks)
+- Connexions réseau/base de données
+- Handles système
+- Flux de données (streams)
+
+## Gestion de la mémoire
+
+Préférer les mécanismes de gestion automatique de la mémoire aux allocations manuelles.
+
+```java
+// BAD : Allocation manuelle, risque de fuite mémoire
+void processData() {
+    Data data = new Data(...);
+    if (someCondition) {
+        return; // Fuite mémoire si pas de garbage collector !
+    }
+    // Libération manuelle nécessaire
+}
+
+// GOOD : Gestion automatique (try-with-resources, using, etc.)
+void processData() {
+    try (Data data = new Data(...)) {
+        if (someCondition) {
+            return; // Ressource libérée automatiquement
+        }
+        // Utilisation de data
+    } // data.close() appelé automatiquement
+}
+```
+
+## Gestion des ressources système
+
+Pour les ressources qui ne sont pas de la mémoire (fichiers, handles, etc.), utiliser des mécanismes de gestion automatique.
+
+```java
+// GOOD : FileHandle utilise la gestion automatique
+class FileHandle implements AutoCloseable {
+    private File file;
+    
+    public FileHandle(String path) {
+        this.file = new File(path);
+    }
+    
+    public boolean open() {
+        // Ouvrir le fichier
+        return file != null;
+    }
+    
+    @Override
+    public void close() {
+        if (file != null) {
+            file.close();
+            file = null;
+        }
+    }
+}
+
+// Utilisation : le fichier est fermé automatiquement
+void process() {
+    try (FileHandle file = new FileHandle("data.txt")) {
+        if (!file.open()) return; // close() appelé automatiquement
+        // ...
+    } // close() appelé automatiquement même en cas d'exception
+}
+```
+
+## Verrous et synchronisation
+
+Utiliser des mécanismes de gestion automatique pour les verrous.
+
+```java
+// BAD : Verrou manuel, risque d'oubli de déverrouillage
+void unsafeFunction() {
+    lock.lock();
+    if (errorCondition) {
+        return; // Verrou jamais déverrouillé !
+    }
+    lock.unlock();
+}
+
+// GOOD : Gestion automatique du verrou
+void safeFunction() {
+    try (LockGuard guard = new LockGuard(lock)) {
+        if (errorCondition) {
+            return; // Verrou déverrouillé automatiquement
+        }
+        // Verrou déverrouillé automatiquement à la fin du bloc
+    }
+}
+```
+
+## Ressources temporaires
+
+Pour les ressources temporaires (handles système, connexions, etc.), utiliser des wrappers avec gestion automatique.
+
+```java
+// BAD : Handle système non libéré en cas d'exception
+boolean allocateResource() {
+    ResourceHandle handle = acquireResource();
+    // Si exception ici, handle n'est jamais libéré
+    useResource(handle);
+    releaseResource(handle);
+    return true;
+}
+
+// GOOD : Wrapper avec gestion automatique
+class ResourceGuard implements AutoCloseable {
+    private ResourceHandle handle;
+    
+    public ResourceGuard() {
+        this.handle = acquireResource();
+    }
+    
+    @Override
+    public void close() {
+        if (handle != null && handle != INVALID_HANDLE) {
+            releaseResource(handle);
+            handle = null;
+        }
+    }
+    
+    public ResourceHandle get() {
+        return handle;
+    }
+}
+
+boolean allocateResource() {
+    try (ResourceGuard guard = new ResourceGuard()) {
+        useResource(guard.get());
+        return true;
+    } // releaseResource appelé automatiquement
+}
+```
+
+## Patterns par langage
+
+### Java
+Utiliser `try-with-resources` avec des classes implémentant `AutoCloseable` :
+```java
+try (Resource resource = new Resource()) {
+    // Utilisation
+} // resource.close() appelé automatiquement
+```
+
+### C#
+Utiliser `using` avec des classes implémentant `IDisposable` :
+```csharp
+using (var resource = new Resource()) {
+    // Utilisation
+} // resource.Dispose() appelé automatiquement
+```
+
+### C++
+Utiliser RAII avec destructeurs et smart pointers :
+```cpp
+{
+    std::unique_ptr<Resource> resource(new Resource());
+    // Utilisation
+} // Destructeur appelé automatiquement
+```
+
+### Python
+Utiliser `with` avec des context managers :
+```python
+with Resource() as resource:
+    # Utilisation
+# __exit__() appelé automatiquement
+```
+
+## Bonnes pratiques
+
+- Toujours libérer les ressources dans un bloc `finally` ou utiliser les mécanismes de gestion automatique
+- Implémenter les interfaces appropriées (`AutoCloseable`, `IDisposable`, context manager) pour les classes gérant des ressources
+- Éviter les allocations manuelles quand des mécanismes automatiques sont disponibles
+- S'assurer que les ressources sont libérées même en cas d'exception
+
+## Checklist
+
+- [ ] Les ressources sont acquises et libérées dans le même bloc de portée
+- [ ] Les mécanismes de gestion automatique sont utilisés (try-with-resources, using, with, etc.)
+- [ ] Les classes gérant des ressources implémentent les interfaces appropriées
+- [ ] Les ressources sont libérées même en cas d'exception ou de retour anticipé
+- [ ] Les verrous utilisent des mécanismes de gestion automatique

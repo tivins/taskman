@@ -1,0 +1,162 @@
+---
+description: Respecter les principes SOLID dans le code
+alwaysApply: true
+---
+
+# Principes SOLID
+
+Respecter les cinq principes SOLID lors de la conception et du refactoring du code.
+
+## Single Responsibility Principle (SRP)
+
+Une classe ne doit avoir qu'une seule raison de changer.
+
+```java
+// BAD : Une classe qui fait tout
+class Entity {
+    void saveToDatabase() { }
+    void validate() { }
+    void serialize() { }
+    void parseInput() { }
+}
+
+// GOOD : Séparation des responsabilités
+class Repository {
+    // Responsabilité unique : accès aux données
+    boolean persist(Entity entity) { }
+    Optional<Entity> findById(String id) { }
+}
+
+class Service {
+    // Responsabilité unique : logique métier
+    Optional<String> createEntity(...) { }
+    boolean updateEntity(...) { }
+}
+
+class Serializer {
+    // Responsabilité unique : sérialisation
+    String serialize(Entity entity) { }
+}
+```
+
+## Open/Closed Principle (OCP)
+
+Les entités doivent être ouvertes à l'extension mais fermées à la modification.
+
+```java
+// BAD : Modification nécessaire pour ajouter un nouveau format
+class Formatter {
+    String format(Entity entity, String type) {
+        if (type.equals("json")) return formatJson(entity);
+        if (type.equals("xml")) return formatXml(entity);
+        // Besoin de modifier pour ajouter "yaml"
+    }
+}
+
+// GOOD : Extension sans modification
+abstract class Formatter {
+    abstract String format(Entity entity);
+}
+
+class JsonFormatter extends Formatter {
+    String format(Entity entity) { /* ... */ }
+}
+
+class XmlFormatter extends Formatter {
+    String format(Entity entity) { /* ... */ }
+}
+```
+
+## Liskov Substitution Principle (LSP)
+
+Les objets d'une classe dérivée doivent pouvoir remplacer les objets de la classe de base sans casser le comportement.
+
+```java
+// GOOD : Les sous-classes respectent le contrat de la classe de base
+abstract class Executor {
+    abstract boolean execute(String command);
+}
+
+class ConcreteExecutor extends Executor {
+    boolean execute(String command) {
+        // Implémentation concrète
+    }
+}
+
+// Peut être remplacé par ConcreteExecutor sans casser le code client
+void useExecutor(Executor executor) {
+    executor.execute("some_command");
+}
+```
+
+## Interface Segregation Principle (ISP)
+
+Les clients ne doivent pas dépendre d'interfaces qu'ils n'utilisent pas.
+
+```java
+// BAD : Interface trop large
+interface DataStore {
+    void connect();
+    void disconnect();
+    void executeQuery();
+    void backup();
+    void restore();
+    void optimize();
+}
+
+// GOOD : Interfaces séparées selon les besoins
+interface Connection {
+    void connect();
+    void disconnect();
+    boolean isOpen();
+}
+
+interface QueryInterface {
+    boolean execute(String query);
+    List<Result> fetchAll(...);
+}
+
+interface Maintenance {
+    void backup();
+    void restore();
+    void optimize();
+}
+```
+
+## Dependency Inversion Principle (DIP)
+
+Dépendre d'abstractions, pas de concrétions.
+
+```java
+// BAD : Dépendance directe sur une implémentation concrète
+class Service {
+    ConcreteImplementation impl;  // Dépendance concrète
+    
+    Service() {
+        this.impl = new ConcreteImplementation();
+    }
+}
+
+// GOOD : Dépendance sur une abstraction
+class Service {
+    AbstractInterface interface;  // Dépendance sur abstraction
+    
+    Service(AbstractInterface interface) {
+        this.interface = interface;
+    }
+}
+
+// Injection de dépendance au niveau supérieur
+void setup() {
+    ConcreteImplementation impl = new ConcreteImplementation();
+    Service service = new Service(impl);
+}
+```
+
+## Checklist lors du refactoring
+
+- [ ] Chaque classe a une responsabilité unique et claire
+- [ ] Les nouvelles fonctionnalités s'ajoutent par extension, pas par modification
+- [ ] Les sous-classes peuvent remplacer leurs classes de base sans casser le code
+- [ ] Les interfaces sont petites et ciblées
+- [ ] Les dépendances pointent vers des abstractions (interfaces/types abstraits), pas des concrétions
