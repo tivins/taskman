@@ -1,35 +1,28 @@
 /**
- * Couche DB — connexion SQLite, exécution requêtes, gestion erreurs.
- * Chemin fourni par l'appelant (TASKMAN_DB_NAME via main).
- * En cas d'erreur : stderr + retour false (appelant retourne code 1).
+ * QueryExecutor — exécution de requêtes SQL uniquement.
+ * Responsabilité unique : exécuter des requêtes SQL (DDL, DML, SELECT).
+ * Nécessite une DatabaseConnection pour fonctionner.
  */
 
-#ifndef TASKMAN_DB_HPP
-#define TASKMAN_DB_HPP
+#ifndef TASKMAN_QUERY_EXECUTOR_HPP
+#define TASKMAN_QUERY_EXECUTOR_HPP
 
+#include "db_connection.hpp"
 #include <map>
 #include <optional>
 #include <string>
 #include <vector>
 
-struct sqlite3;
-
 namespace taskman {
 
-class Database {
+class QueryExecutor {
 public:
-    Database() : db_(nullptr) {}
-    ~Database();
+    /** Constructeur prenant une référence à DatabaseConnection.
+     * La connexion doit être ouverte avant d'utiliser QueryExecutor. */
+    explicit QueryExecutor(DatabaseConnection& connection) : connection_(connection) {}
 
-    Database(const Database&) = delete;
-    Database& operator=(const Database&) = delete;
-
-    /** Ouvre la base au chemin donné. Crée le fichier si nécessaire.
-     * En échec : message sur stderr, retour false. */
-    bool open(const char* path);
-
-    /** Ferme la connexion. No-op si déjà fermée. */
-    void close();
+    QueryExecutor(const QueryExecutor&) = delete;
+    QueryExecutor& operator=(const QueryExecutor&) = delete;
 
     /** Exécute une requête SQL (DDL/DML).
      * En échec : message sur stderr, retour false. */
@@ -47,17 +40,10 @@ public:
     std::vector<std::map<std::string, std::optional<std::string>>> query(
         const char* sql, const std::vector<std::optional<std::string>>& params);
 
-    /** Vrai si une connexion est ouverte. */
-    bool is_open() const { return db_ != nullptr; }
-
 private:
-    struct sqlite3* db_;
+    DatabaseConnection& connection_;
 };
-
-/** Crée les 4 tables (phases, milestones, tasks, task_deps).
- * Retourne false en cas d'erreur (stderr déjà écrit par exec). */
-bool init_schema(Database& db);
 
 } // namespace taskman
 
-#endif /* TASKMAN_DB_HPP */
+#endif /* TASKMAN_QUERY_EXECUTOR_HPP */

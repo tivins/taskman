@@ -11,7 +11,7 @@ Launch the HTTP server to access the web interface from your browser.
 ```bash
 taskman web # default: 127.0.0.1:8080
 taskman web --host 0.0.0.0 --port 3000
-taskman web --serve-assets-from src/web   # dev: serve CSS/JS from disk, edit and refresh without recompile
+taskman web --serve-assets-from embed/web   # dev: serve CSS/JS from disk, edit and refresh without recompile
 ```
 
 | Option                 | Description                               | Default      |
@@ -25,10 +25,10 @@ taskman web --serve-assets-from src/web   # dev: serve CSS/JS from disk, edit an
 Use `--serve-assets-from <dir>` so the server reads CSS and JS from the given directory instead of the embedded build. Example from the project root:
 
 ```bash
-taskman web --serve-assets-from src/web
+taskman web --serve-assets-from embed/web
 ```
 
-Edit `src/web/style.css`, `src/web/main.js`, etc., then refresh the browser — no recompile needed. The binary still embeds assets; this option only changes how they are served at runtime.
+Edit `embed/web/style.css`, `embed/web/main.js`, etc., then refresh the browser — no recompile needed. The binary still embeds assets; this option only changes how they are served at runtime.
 
 ---
 
@@ -73,6 +73,12 @@ Returns a single task in JSON format. Returns 404 if the task is not found.
 Returns the dependencies for a specific task.
 
 **Response:** JSON array of objects with `task_id` and `depends_on` fields. Returns 404 if the task is not found.
+
+### GET /task/:id/notes
+
+Returns the notes history for a specific task (notes added by the agent during execution).
+
+**Response:** JSON array of objects with `id`, `task_id`, `content`, `kind`, `role`, `created_at`. Ordered by `created_at`. Returns 404 if the task is not found. The task detail view uses this endpoint to display the "Historique des notes" section.
 
 ### GET /tasks
 

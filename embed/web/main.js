@@ -293,10 +293,11 @@ function getPhaseName(id) {
 async function loadTask(id) {
     app.innerHTML = '';
     try {
-        const [taskRes, depsRes, allDepsRes] = await Promise.all([
+        const [taskRes, depsRes, allDepsRes, notesRes] = await Promise.all([
             fetch(`/task/${id}`),
             fetch(`/task/${id}/deps`),
-            fetch(`/task_deps?limit=500`)
+            fetch(`/task_deps?limit=500`),
+            fetch(`/task/${id}/notes`)
         ]);
         if (!taskRes.ok) {
             app.innerHTML = taskRes.status === 404 ? '<p class="error">Tâche introuvable.</p>' : `<p class="error">Erreur ${taskRes.status}</p>`;
@@ -313,6 +314,10 @@ async function loadTask(id) {
         try { if (allDepsRes.ok) allDeps = await allDepsRes.json(); } catch (_) {}
         allDeps = Array.isArray(allDeps) ? allDeps : [];
         const childIds = allDeps.filter((d) => d.depends_on === id).map((d) => d.task_id);
+
+        let taskNotes = [];
+        try { if (notesRes.ok) taskNotes = await notesRes.json(); } catch (_) {}
+        taskNotes = Array.isArray(taskNotes) ? taskNotes : [];
 
         const parentTasks = [];
         const childTasks = [];
@@ -382,6 +387,27 @@ async function loadTask(id) {
 
 
         div.appendChild(el('div', {class: 'card'}, meta));
+
+        div.appendChild(el('h3', {style:"margin:2rem 0 0;"}, 'Historique des notes'));
+        if (taskNotes.length === 0) {
+            div.appendChild(el('p', { class: 'muted' }, 'Aucune note pour cette tâche.'));
+        } else {
+            const notesList = document.createElement('div');
+            notesList.className = 'task-notes-history';
+            for (const n of taskNotes) {
+                const noteCard = document.createElement('div');
+                noteCard.className = 'task-note-card';
+                const metaLine = [];
+                if (n.kind) metaLine.push(escapeHtml(n.kind));
+                if (n.role) metaLine.push(escapeHtml(n.role));
+                if (n.created_at) metaLine.push(escapeHtml(n.created_at));
+                const metaStr = metaLine.length ? metaLine.join(' · ') : '';
+                noteCard.appendChild(el('div', { class: 'task-note-meta muted' }, metaStr));
+                noteCard.appendChild(el('div', { class: 'task-note-content' }, escapeHtml(n.content || '')));
+                notesList.appendChild(noteCard);
+            }
+            div.appendChild(notesList);
+        }
 
         div.appendChild(el('h3', {style:"margin:2rem 0 0;"}, 'Tâches parentes (dont dépend cette tâche)'));
         if (parentTasks.length === 0) {

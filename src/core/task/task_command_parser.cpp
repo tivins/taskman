@@ -1,33 +1,15 @@
 /**
- * Implémentation task:add, task:get, task:list, task:edit.
+ * Implémentation de TaskCommandParser.
  */
 
-#include "task.hpp"
-#include "db.hpp"
-#include "formats.hpp"
-#include "roles.hpp"
+#include "task_command_parser.hpp"
 #include <cxxopts.hpp>
-#include <nlohmann/json.hpp>
-#include <uuid.h>
-#include <random>
 #include <cstring>
 #include <iostream>
-#include <optional>
-#include <string>
-#include <vector>
 
-namespace {
+namespace taskman {
 
-const char* const STATUS_VALUES[] = {"to_do", "in_progress", "done"};
-
-bool is_valid_status(const std::string& s) {
-    for (const char* v : STATUS_VALUES) {
-        if (s == v) return true;
-    }
-    return false;
-}
-
-bool parse_int(const std::string& s, int& out) {
+bool TaskCommandParser::parse_int(const std::string& s, int& out) {
     try {
         size_t pos = 0;
         out = std::stoi(s, &pos);
@@ -37,76 +19,7 @@ bool parse_int(const std::string& s, int& out) {
     }
 }
 
-std::string generate_uuid_v4() {
-    std::random_device rd;
-    std::mt19937 rng(rd());
-    uuids::uuid_random_generator gen(rng);
-    uuids::uuid u = gen();
-    return uuids::to_string(u);
-}
-
-} // namespace
-
-namespace taskman {
-
-bool task_add(Database& db,
-              const std::string& id,
-              const std::string& phase_id,
-              const std::optional<std::string>& milestone_id,
-              const std::string& title,
-              const std::optional<std::string>& description,
-              const std::string& status,
-              std::optional<int> sort_order,
-              const std::optional<std::string>& role) {
-    if (!is_valid_status(status)) {
-        std::cerr << "taskman: invalid status\n";
-        return false;
-    }
-    if (role.has_value() && !is_valid_role(*role)) {
-        std::cerr << get_roles_error_message();
-        return false;
-    }
-    const char* sql = "INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) "
-                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    std::vector<std::optional<std::string>> params;
-    params.push_back(id);
-    params.push_back(phase_id);
-    params.push_back(milestone_id);
-    params.push_back(title);
-    params.push_back(description);
-    params.push_back(status);
-    params.push_back(sort_order.has_value()
-                     ? std::optional<std::string>(std::to_string(*sort_order))
-                     : std::nullopt);
-    params.push_back(role);
-    return db.run(sql, params);
-}
-
-bool task_dep_add(Database& db, const std::string& task_id, const std::string& depends_on) {
-    if (task_id == depends_on) {
-        std::cerr << "taskman: a task cannot depend on itself\n";
-        return false;
-    }
-    auto rows_task = db.query("SELECT 1 FROM tasks WHERE id = ?", {task_id});
-    if (rows_task.empty()) {
-        std::cerr << "taskman: task not found: " << task_id << "\n";
-        return false;
-    }
-    auto rows_dep = db.query("SELECT 1 FROM tasks WHERE id = ?", {depends_on});
-    if (rows_dep.empty()) {
-        std::cerr << "taskman: task not found: " << depends_on << "\n";
-        return false;
-    }
-    auto rows_exist = db.query("SELECT 1 FROM task_deps WHERE task_id = ? AND depends_on = ?",
-                               {task_id, depends_on});
-    if (!rows_exist.empty()) {
-        std::cerr << "taskman: dependency already exists\n";
-        return false;
-    }
-    return db.run("INSERT INTO task_deps (task_id, depends_on) VALUES (?, ?)", {task_id, depends_on});
-}
-
-int cmd_task_add(int argc, char* argv[], Database& db) {
+int TaskCommandParser::parse_add(int argc, char* argv[]) {
     cxxopts::Options opts("taskman task:add", "Add a task");
     opts.add_options()
         ("title", "Task title", cxxopts::value<std::string>())
@@ -146,13 +59,7 @@ int cmd_task_add(int argc, char* argv[], Database& db) {
         phase = result["phase"].as<std::string>();
         format = result["format"].as<std::string>();
         if (result.count("description")) description = result["description"].as<std::string>();
-        if (result.count("role")) {
-            role = result["role"].as<std::string>();
-            if (!is_valid_role(role)) {
-                std::cerr << get_roles_error_message();
-                return 1;
-            }
-        }
+        if (result.count("role")) role = result["role"].as<std::string>();
         if (result.count("milestone")) milestone = result["milestone"].as<std::string>();
         if (result.count("sort-order")) sort_order_str = result["sort-order"].as<std::string>();
     } catch (const cxxopts::exceptions::exception& e) {
@@ -160,7 +67,7 @@ int cmd_task_add(int argc, char* argv[], Database& db) {
         return 1;
     }
 
-    if (format != "json" && format != "text") {
+    if (!TaskFormatter::is_valid_format(format)) {
         std::cerr << "taskman: --format must be json or text\n";
         return 1;
     }
@@ -173,31 +80,34 @@ int cmd_task_add(int argc, char* argv[], Database& db) {
         }
         sort_order_opt = n;
     }
-    std::string id = generate_uuid_v4();
-    if (!task_add(db, id, phase,
-                  milestone.empty() ? std::nullopt : std::optional<std::string>(milestone),
-                  title,
-                  description.empty() ? std::nullopt : std::optional<std::string>(description),
-                  "to_do", sort_order_opt,
-                  role.empty() ? std::nullopt : std::optional<std::string>(role))) return 1;
 
-    auto rows = db.query("SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at FROM tasks WHERE id = ?",
-                         {id});
-    if (rows.empty()) {
+    auto id = service_.create_task(
+        phase,
+        milestone.empty() ? std::nullopt : std::optional<std::string>(milestone),
+        title,
+        description.empty() ? std::nullopt : std::optional<std::string>(description),
+        "to_do",
+        sort_order_opt,
+        role.empty() ? std::nullopt : std::optional<std::string>(role));
+    if (!id.has_value()) {
+        return 1;
+    }
+
+    auto task = service_.get_task(*id);
+    if (task.empty()) {
         std::cerr << "taskman: failed to read created task\n";
         return 1;
     }
+
     if (format == "text") {
-        print_task_text(rows[0]);
+        formatter_.format_text(task, std::cout);
     } else {
-        nlohmann::json obj;
-        task_to_json(obj, rows[0]);
-        std::cout << obj.dump() << "\n";
+        formatter_.format_json(task, std::cout);
     }
     return 0;
 }
 
-int cmd_task_get(int argc, char* argv[], Database& db) {
+int TaskCommandParser::parse_get(int argc, char* argv[]) {
     cxxopts::Options opts("taskman task:get", "Get a task by ID");
     opts.add_options()
         ("id", "Task ID", cxxopts::value<std::string>())
@@ -230,28 +140,26 @@ int cmd_task_get(int argc, char* argv[], Database& db) {
     }
 
     std::string format = result["format"].as<std::string>();
-    if (format != "json" && format != "text") {
+    if (!TaskFormatter::is_valid_format(format)) {
         std::cerr << "taskman: --format must be json or text\n";
         return 1;
     }
 
-    auto rows = db.query("SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at FROM tasks WHERE id = ?",
-                         {id});
-    if (rows.empty()) {
+    auto task = service_.get_task(id);
+    if (task.empty()) {
         std::cerr << "taskman: task not found: " << id << "\n";
         return 1;
     }
+
     if (format == "text") {
-        print_task_text(rows[0]);
+        formatter_.format_text(task, std::cout);
     } else {
-        nlohmann::json obj;
-        task_to_json(obj, rows[0]);
-        std::cout << obj.dump() << "\n";
+        formatter_.format_json(task, std::cout);
     }
     return 0;
 }
 
-int cmd_task_list(int argc, char* argv[], Database& db) {
+int TaskCommandParser::parse_list(int argc, char* argv[]) {
     cxxopts::Options opts("taskman task:list", "List tasks");
     opts.add_options()
         ("phase", "Filter by phase ID", cxxopts::value<std::string>())
@@ -274,73 +182,33 @@ int cmd_task_list(int argc, char* argv[], Database& db) {
     }
 
     std::string format = result["format"].as<std::string>();
-    if (format != "json" && format != "text") {
+    if (!TaskFormatter::is_valid_format(format)) {
         std::cerr << "taskman: --format must be json or text\n";
         return 1;
     }
     if (result.count("status")) {
-        if (!is_valid_status(result["status"].as<std::string>())) {
+        if (!TaskService::is_valid_status(result["status"].as<std::string>())) {
             std::cerr << "taskman: --status must be one of: to_do, in_progress, done\n";
             return 1;
         }
     }
-    if (result.count("role")) {
-        if (!is_valid_role(result["role"].as<std::string>())) {
-            std::cerr << get_roles_error_message();
-            return 1;
-        }
-    }
 
-    std::string sql = "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at FROM tasks";
-    std::vector<std::string> where_parts;
-    std::vector<std::optional<std::string>> params;
+    std::optional<std::string> phase_id, status, role;
+    if (result.count("phase")) phase_id = result["phase"].as<std::string>();
+    if (result.count("status")) status = result["status"].as<std::string>();
+    if (result.count("role")) role = result["role"].as<std::string>();
 
-    if (result.count("phase")) {
-        where_parts.push_back("phase_id = ?");
-        params.push_back(result["phase"].as<std::string>());
-    }
-    if (result.count("status")) {
-        where_parts.push_back("status = ?");
-        params.push_back(result["status"].as<std::string>());
-    }
-    if (result.count("role")) {
-        where_parts.push_back("role = ?");
-        params.push_back(result["role"].as<std::string>());
-    }
-    if (!where_parts.empty()) {
-        sql += " WHERE ";
-        for (size_t i = 0; i < where_parts.size(); ++i) {
-            if (i) sql += " AND ";
-            sql += where_parts[i];
-        }
-    }
-    sql += " ORDER BY phase_id, milestone_id, sort_order, id";
-
-    std::vector<std::map<std::string, std::optional<std::string>>> rows;
-    if (params.empty()) {
-        rows = db.query(sql.c_str());
-    } else {
-        rows = db.query(sql.c_str(), params);
-    }
+    auto tasks = service_.list_tasks(phase_id, status, role);
 
     if (format == "json") {
-        nlohmann::json arr = nlohmann::json::array();
-        for (const auto& row : rows) {
-            nlohmann::json obj;
-            task_to_json(obj, row);
-            arr.push_back(obj);
-        }
-        std::cout << arr.dump() << "\n";
+        formatter_.format_json_list(tasks, std::cout);
     } else {
-        for (size_t i = 0; i < rows.size(); ++i) {
-            if (i) std::cout << "---\n";
-            print_task_text(rows[i]);
-        }
+        formatter_.format_text_list(tasks, std::cout);
     }
     return 0;
 }
 
-int cmd_task_edit(int argc, char* argv[], Database& db) {
+int TaskCommandParser::parse_edit(int argc, char* argv[]) {
     cxxopts::Options opts("taskman task:edit", "Edit a task");
     opts.add_options()
         ("id", "Task ID", cxxopts::value<std::string>())
@@ -377,39 +245,14 @@ int cmd_task_edit(int argc, char* argv[], Database& db) {
         return 1;
     }
 
-    std::vector<std::string> set_parts;
-    std::vector<std::optional<std::string>> params;
+    std::optional<std::string> title, description, status, role, milestone;
+    std::optional<int> sort_order;
 
-    if (result.count("title")) {
-        set_parts.push_back("title = ?");
-        params.push_back(result["title"].as<std::string>());
-    }
-    if (result.count("description")) {
-        set_parts.push_back("description = ?");
-        params.push_back(result["description"].as<std::string>());
-    }
-    if (result.count("status")) {
-        std::string s = result["status"].as<std::string>();
-        if (!is_valid_status(s)) {
-            std::cerr << "taskman: --status must be one of: to_do, in_progress, done\n";
-            return 1;
-        }
-        set_parts.push_back("status = ?");
-        params.push_back(s);
-    }
-    if (result.count("role")) {
-        std::string r = result["role"].as<std::string>();
-        if (!is_valid_role(r)) {
-            std::cerr << get_roles_error_message();
-            return 1;
-        }
-        set_parts.push_back("role = ?");
-        params.push_back(r);
-    }
-    if (result.count("milestone")) {
-        set_parts.push_back("milestone_id = ?");
-        params.push_back(result["milestone"].as<std::string>());
-    }
+    if (result.count("title")) title = result["title"].as<std::string>();
+    if (result.count("description")) description = result["description"].as<std::string>();
+    if (result.count("status")) status = result["status"].as<std::string>();
+    if (result.count("role")) role = result["role"].as<std::string>();
+    if (result.count("milestone")) milestone = result["milestone"].as<std::string>();
     if (result.count("sort-order")) {
         std::string so = result["sort-order"].as<std::string>();
         int n = 0;
@@ -417,29 +260,16 @@ int cmd_task_edit(int argc, char* argv[], Database& db) {
             std::cerr << "taskman: --sort-order must be an integer\n";
             return 1;
         }
-        set_parts.push_back("sort_order = ?");
-        params.push_back(so);
+        sort_order = n;
     }
 
-    if (set_parts.empty()) {
-        return 0;
+    if (!service_.update_task(id, title, description, status, role, milestone, sort_order)) {
+        return 1;
     }
-
-    set_parts.push_back("updated_at = datetime('now')");
-
-    std::string sql = "UPDATE tasks SET ";
-    for (size_t i = 0; i < set_parts.size(); ++i) {
-        if (i) sql += ", ";
-        sql += set_parts[i];
-    }
-    sql += " WHERE id = ?";
-    params.push_back(id);
-
-    if (!db.run(sql.c_str(), params)) return 1;
     return 0;
 }
 
-int cmd_task_dep_add(int argc, char* argv[], Database& db) {
+int TaskCommandParser::parse_dep_add(int argc, char* argv[]) {
     cxxopts::Options opts("taskman task:dep:add", "Add a task dependency: task-id depends on dep-id");
     opts.add_options()
         ("task-id", "Task ID (the task that depends on another)", cxxopts::value<std::string>())
@@ -472,11 +302,13 @@ int cmd_task_dep_add(int argc, char* argv[], Database& db) {
         std::cerr << "taskman: task:dep:add requires <task-id> and <dep-id>\n";
         return 1;
     }
-    if (!task_dep_add(db, task_id, dep_id)) return 1;
+    if (!service_.add_task_dependency(task_id, dep_id)) {
+        return 1;
+    }
     return 0;
 }
 
-int cmd_task_dep_remove(int argc, char* argv[], Database& db) {
+int TaskCommandParser::parse_dep_remove(int argc, char* argv[]) {
     cxxopts::Options opts("taskman task:dep:remove", "Remove a task dependency");
     opts.add_options()
         ("task-id", "Task ID", cxxopts::value<std::string>())
@@ -510,7 +342,7 @@ int cmd_task_dep_remove(int argc, char* argv[], Database& db) {
         return 1;
     }
 
-    if (!db.run("DELETE FROM task_deps WHERE task_id = ? AND depends_on = ?", {task_id, dep_id})) {
+    if (!service_.remove_task_dependency(task_id, dep_id)) {
         return 1;
     }
     return 0;

@@ -78,48 +78,106 @@ set(WEB_ASSETS_HEADER "${CMAKE_BINARY_DIR}/web_assets.generated.h")
 add_custom_command(
   OUTPUT "${WEB_ASSETS_HEADER}"
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/embed_assets.py
-    --css ${CMAKE_SOURCE_DIR}/src/web/style.css
-    --js ${CMAKE_SOURCE_DIR}/src/web/dom.js
-    --js ${CMAKE_SOURCE_DIR}/src/web/filters.js
-    --js ${CMAKE_SOURCE_DIR}/src/web/pagination.js
-    --js ${CMAKE_SOURCE_DIR}/src/web/main.js
+    --css ${CMAKE_SOURCE_DIR}/embed/web/style.css
+    --js ${CMAKE_SOURCE_DIR}/embed/web/dom.js
+    --js ${CMAKE_SOURCE_DIR}/embed/web/filters.js
+    --js ${CMAKE_SOURCE_DIR}/embed/web/pagination.js
+    --js ${CMAKE_SOURCE_DIR}/embed/web/main.js
     -o "${WEB_ASSETS_HEADER}"
   DEPENDS ${CMAKE_SOURCE_DIR}/scripts/embed_assets.py
-          ${CMAKE_SOURCE_DIR}/src/web/style.css
-          ${CMAKE_SOURCE_DIR}/src/web/dom.js
-          ${CMAKE_SOURCE_DIR}/src/web/filters.js
-          ${CMAKE_SOURCE_DIR}/src/web/pagination.js
-          ${CMAKE_SOURCE_DIR}/src/web/main.js
+          ${CMAKE_SOURCE_DIR}/embed/web/style.css
+          ${CMAKE_SOURCE_DIR}/embed/web/dom.js
+          ${CMAKE_SOURCE_DIR}/embed/web/filters.js
+          ${CMAKE_SOURCE_DIR}/embed/web/pagination.js
+          ${CMAKE_SOURCE_DIR}/embed/web/main.js
   COMMENT "Embedding web assets (style.css, dom.js, filters.js, pagination.js, main.js) into header"
 )
 
 # -----------------------------------------------------------------------------
-# Agent files: docs/roles_agents/*.md -> agents.generated.h (embedded in binary)
+# Agent files: embed/roles_agents/*.md -> agents.generated.h (embedded in binary)
 # -----------------------------------------------------------------------------
-file(GLOB AGENT_MD_FILES "${CMAKE_SOURCE_DIR}/docs/roles_agents/*.md")
+file(GLOB AGENT_MD_FILES "${CMAKE_SOURCE_DIR}/embed/roles_agents/*.md")
 set(AGENTS_HEADER "${CMAKE_BINARY_DIR}/agents.generated.h")
 add_custom_command(
   OUTPUT "${AGENTS_HEADER}"
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/embed_agents.py
-    --agents-dir ${CMAKE_SOURCE_DIR}/docs/roles_agents
+    --agents-dir ${CMAKE_SOURCE_DIR}/embed/roles_agents
     -o "${AGENTS_HEADER}"
   DEPENDS ${CMAKE_SOURCE_DIR}/scripts/embed_agents.py
           ${AGENT_MD_FILES}
-  COMMENT "Embedding agent files (docs/roles_agents/*.md) into header"
+  COMMENT "Embedding agent files (embed/roles_agents/*.md) into header"
 )
 
 # -----------------------------------------------------------------------------
 # Exécutable taskman
 # -----------------------------------------------------------------------------
 add_executable(taskman
-  src/main.cpp src/agents.cpp src/db.cpp src/demo.cpp src/formats.cpp src/mcp.cpp src/mcp_config.cpp src/milestone.cpp src/note.cpp src/phase.cpp src/roles.cpp src/task.cpp src/web.cpp
+  # Point d'entrée
+  src/main.cpp
+  
+  # Core - Task
+  src/core/task/task.cpp
+  src/core/task/task_repository.cpp
+  src/core/task/task_service.cpp
+  src/core/task/task_formatter.cpp
+  src/core/task/task_command_parser.cpp
+  
+  # Core - Phase
+  src/core/phase/phase.cpp
+  src/core/phase/phase_repository.cpp
+  src/core/phase/phase_service.cpp
+  src/core/phase/phase_formatter.cpp
+  src/core/phase/phase_command_parser.cpp
+  
+  # Core - Milestone
+  src/core/milestone/milestone.cpp
+  src/core/milestone/milestone_repository.cpp
+  src/core/milestone/milestone_service.cpp
+  src/core/milestone/milestone_formatter.cpp
+  src/core/milestone/milestone_command_parser.cpp
+  
+  # Core - Note
+  src/core/note/note.cpp
+  src/core/note/note_repository.cpp
+  src/core/note/note_service.cpp
+  src/core/note/note_formatter.cpp
+  src/core/note/note_command_parser.cpp
+  
+  # Infrastructure - Database
+  src/infrastructure/db/db_connection.cpp
+  src/infrastructure/db/query_executor.cpp
+  src/infrastructure/db/schema_manager.cpp
+  
+  # CLI
+  src/cli/command.cpp
+  src/cli/commands.cpp
+  
+  # Web
+  src/web/web.cpp
+  src/web/web_server.cpp
+  src/web/web_controllers.cpp
+  
+  # MCP
+  src/mcp/mcp.cpp
+  src/mcp/mcp_config.cpp
+  src/mcp/mcp_protocol_handler.cpp
+  src/mcp/mcp_tool_registry.cpp
+  src/mcp/mcp_tool_executor.cpp
+  
+  # Util
+  src/util/agents.cpp
+  src/util/demo.cpp
+  src/util/formats.cpp
+  src/util/roles.cpp
+  
+  # Assets générés
   "${WEB_ASSETS_HEADER}"
   "${AGENTS_HEADER}"
 )
 if(MSVC)
   target_compile_definitions(taskman PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
-target_include_directories(taskman PRIVATE ${CMAKE_BINARY_DIR} ${SQLITE_AMALGAMATION_SOURCE_DIR})
+target_include_directories(taskman PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR} ${SQLITE_AMALGAMATION_SOURCE_DIR})
 target_link_libraries(taskman PRIVATE
   nlohmann_json::nlohmann_json
   cxxopts::cxxopts
@@ -140,16 +198,47 @@ add_executable(tests
   tests/test_note.cpp
   tests/test_phase.cpp
   tests/test_task.cpp
-  src/db.cpp
-  src/formats.cpp
-  src/milestone.cpp
-  src/note.cpp
-  src/phase.cpp
-  src/roles.cpp
-  src/task.cpp
+  
+  # Core - Task
+  src/core/task/task.cpp
+  src/core/task/task_repository.cpp
+  src/core/task/task_service.cpp
+  src/core/task/task_formatter.cpp
+  src/core/task/task_command_parser.cpp
+  
+  # Core - Phase
+  src/core/phase/phase.cpp
+  src/core/phase/phase_repository.cpp
+  src/core/phase/phase_service.cpp
+  src/core/phase/phase_formatter.cpp
+  src/core/phase/phase_command_parser.cpp
+  
+  # Core - Milestone
+  src/core/milestone/milestone.cpp
+  src/core/milestone/milestone_repository.cpp
+  src/core/milestone/milestone_service.cpp
+  src/core/milestone/milestone_formatter.cpp
+  src/core/milestone/milestone_command_parser.cpp
+  
+  # Core - Note
+  src/core/note/note.cpp
+  src/core/note/note_repository.cpp
+  src/core/note/note_service.cpp
+  src/core/note/note_formatter.cpp
+  src/core/note/note_command_parser.cpp
+  
+  # Infrastructure - Database
+  src/infrastructure/db/db_connection.cpp
+  src/infrastructure/db/query_executor.cpp
+  src/infrastructure/db/schema_manager.cpp
+  
+  # Util
+  src/util/formats.cpp
+  src/util/roles.cpp
 )
 target_include_directories(tests PRIVATE
   ${CMAKE_SOURCE_DIR}/src
+  ${CMAKE_BINARY_DIR}
   ${SQLITE_AMALGAMATION_SOURCE_DIR}
 )
 target_link_libraries(tests PRIVATE

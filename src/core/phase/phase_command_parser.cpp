@@ -1,31 +1,15 @@
 /**
- * Implémentation phase:add, phase:edit, phase:list.
+ * Implémentation de PhaseCommandParser.
  */
 
-#include "phase.hpp"
-#include "db.hpp"
-#include "formats.hpp"
+#include "phase_command_parser.hpp"
 #include <cxxopts.hpp>
-#include <nlohmann/json.hpp>
-#include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <optional>
-#include <string>
-#include <vector>
 
-namespace {
+namespace taskman {
 
-const char* const STATUS_VALUES[] = {"to_do", "in_progress", "done"};
-
-bool is_valid_status(const std::string& s) {
-    for (const char* v : STATUS_VALUES) {
-        if (s == v) return true;
-    }
-    return false;
-}
-
-bool parse_int(const std::string& s, int& out) {
+bool PhaseCommandParser::parse_int(const std::string& s, int& out) {
     try {
         size_t pos = 0;
         out = std::stoi(s, &pos);
@@ -35,37 +19,14 @@ bool parse_int(const std::string& s, int& out) {
     }
 }
 
-} // namespace
-
-namespace taskman {
-
-bool phase_add(Database& db,
-               const std::string& id,
-               const std::string& name,
-               const std::string& status,
-               std::optional<int> sort_order) {
-    if (!is_valid_status(status)) {
-        std::cerr << "taskman: invalid status\n";
-        return false;
-    }
-    const char* sql = "INSERT INTO phases (id, name, status, sort_order) VALUES (?, ?, ?, ?)";
-    std::vector<std::optional<std::string>> params;
-    params.push_back(id);
-    params.push_back(name);
-    params.push_back(status);
-    params.push_back(sort_order.has_value()
-                     ? std::optional<std::string>(std::to_string(*sort_order))
-                     : std::nullopt);
-    return db.run(sql, params);
-}
-
-int cmd_phase_add(int argc, char* argv[], Database& db) {
+int PhaseCommandParser::parse_add(int argc, char* argv[]) {
     cxxopts::Options opts("taskman phase:add", "Add a phase");
     opts.add_options()
         ("id", "Phase ID", cxxopts::value<std::string>())
         ("name", "Phase name", cxxopts::value<std::string>())
         ("status", "Status: to_do, in_progress, done", cxxopts::value<std::string>()->default_value("to_do"))
-        ("sort-order", "Sort order (integer)", cxxopts::value<std::string>());
+        ("sort-order", "Sort order (integer)", cxxopts::value<std::string>())
+        ("format", "Output: json or text", cxxopts::value<std::string>()->default_value("json"));
 
     for (int i = 0; i < argc; ++i) {
         if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
@@ -90,18 +51,23 @@ int cmd_phase_add(int argc, char* argv[], Database& db) {
         return 1;
     }
 
-    std::string id, name, status, sort_order_str;
+    std::string id, name, status, sort_order_str, format;
     try {
         id = result["id"].as<std::string>();
         name = result["name"].as<std::string>();
         status = result["status"].as<std::string>();
+        format = result["format"].as<std::string>();
         if (result.count("sort-order")) sort_order_str = result["sort-order"].as<std::string>();
     } catch (const cxxopts::exceptions::exception& e) {
         std::cerr << "taskman: " << e.what() << "\n";
         return 1;
     }
-    if (!is_valid_status(status)) {
+    if (!PhaseService::is_valid_status(status)) {
         std::cerr << "taskman: --status must be one of: to_do, in_progress, done\n";
+        return 1;
+    }
+    if (!PhaseFormatter::is_valid_format(format)) {
+        std::cerr << "taskman: --format must be json or text\n";
         return 1;
     }
     std::optional<int> sort_order_opt;
@@ -113,11 +79,23 @@ int cmd_phase_add(int argc, char* argv[], Database& db) {
         }
         sort_order_opt = n;
     }
-    if (!phase_add(db, id, name, status, sort_order_opt)) return 1;
+    if (!service_.create_phase(id, name, status, sort_order_opt)) return 1;
+
+    auto phase = service_.get_phase(id);
+    if (phase.empty()) {
+        std::cerr << "taskman: failed to read created phase\n";
+        return 1;
+    }
+
+    if (format == "text") {
+        formatter_.format_text(phase, std::cout);
+    } else {
+        formatter_.format_json(phase, std::cout);
+    }
     return 0;
 }
 
-int cmd_phase_edit(int argc, char* argv[], Database& db) {
+int PhaseCommandParser::parse_edit(int argc, char* argv[]) {
     cxxopts::Options opts("taskman phase:edit", "Edit a phase");
     opts.add_options()
         ("id", "Phase ID", cxxopts::value<std::string>())
@@ -151,21 +129,17 @@ int cmd_phase_edit(int argc, char* argv[], Database& db) {
         return 1;
     }
 
-    std::vector<std::string> set_parts;
-    std::vector<std::optional<std::string>> params;
+    std::optional<std::string> name, status;
+    std::optional<int> sort_order;
 
-    if (result.count("name")) {
-        set_parts.push_back("name = ?");
-        params.push_back(result["name"].as<std::string>());
-    }
+    if (result.count("name")) name = result["name"].as<std::string>();
     if (result.count("status")) {
         std::string s = result["status"].as<std::string>();
-        if (!is_valid_status(s)) {
+        if (!PhaseService::is_valid_status(s)) {
             std::cerr << "taskman: --status must be one of: to_do, in_progress, done\n";
             return 1;
         }
-        set_parts.push_back("status = ?");
-        params.push_back(s);
+        status = s;
     }
     if (result.count("sort-order")) {
         std::string so = result["sort-order"].as<std::string>();
@@ -174,44 +148,50 @@ int cmd_phase_edit(int argc, char* argv[], Database& db) {
             std::cerr << "taskman: --sort-order must be an integer\n";
             return 1;
         }
-        set_parts.push_back("sort_order = ?");
-        params.push_back(so);
+        sort_order = n;
     }
 
-    if (set_parts.empty()) {
-        return 0; // rien à mettre à jour
+    if (!service_.update_phase(id, name, status, sort_order)) {
+        return 1;
     }
-
-    set_parts.push_back("updated_at = datetime('now')");
-
-    std::string sql = "UPDATE phases SET ";
-    for (size_t i = 0; i < set_parts.size(); ++i) {
-        if (i) sql += ", ";
-        sql += set_parts[i];
-    }
-    sql += " WHERE id = ?";
-    params.push_back(id);
-
-    if (!db.run(sql.c_str(), params)) return 1;
     return 0;
 }
 
-int cmd_phase_list(int argc, char* argv[], Database& db) {
+int PhaseCommandParser::parse_list(int argc, char* argv[]) {
+    cxxopts::Options opts("taskman phase:list", "List phases");
+    opts.add_options()
+        ("format", "Output: json or text", cxxopts::value<std::string>()->default_value("json"));
+
     for (int i = 0; i < argc; ++i) {
         if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
             std::cout << "taskman phase:list\n\n"
-                         "List all phases as a JSON array, ordered by sort_order.\nNo options.\n\n";
+                         "List all phases as a JSON array, ordered by sort_order.\n"
+                         "Options:\n"
+                         "  --format json|text  Output format (default: json)\n\n";
             return 0;
         }
     }
-    auto rows = db.query("SELECT id, name, status, sort_order, created_at, updated_at FROM phases ORDER BY sort_order");
-    nlohmann::json arr = nlohmann::json::array();
-    for (const auto& row : rows) {
-        nlohmann::json obj;
-        phase_to_json(obj, row);
-        arr.push_back(obj);
+    cxxopts::ParseResult result;
+    try {
+        result = opts.parse(argc, argv);
+    } catch (const cxxopts::exceptions::exception& e) {
+        std::cerr << "taskman: " << e.what() << "\n";
+        return 1;
     }
-    std::cout << arr.dump() << "\n";
+
+    std::string format = result["format"].as<std::string>();
+    if (!PhaseFormatter::is_valid_format(format)) {
+        std::cerr << "taskman: --format must be json or text\n";
+        return 1;
+    }
+
+    auto phases = service_.list_phases();
+
+    if (format == "json") {
+        formatter_.format_json_list(phases, std::cout);
+    } else {
+        formatter_.format_text_list(phases, std::cout);
+    }
     return 0;
 }
 

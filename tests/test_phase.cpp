@@ -3,8 +3,8 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
-#include "db.hpp"
-#include "phase.hpp"
+#include "infrastructure/db/db.hpp"
+#include "core/phase/phase.hpp"
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <optional>
@@ -24,7 +24,7 @@ struct CoutRedirect {
 
 static void setup_db(taskman::Database& db) {
     REQUIRE(db.open(":memory:"));
-    REQUIRE(taskman::init_schema(db));
+    REQUIRE(db.init_schema());
 }
 
 // Construire argv pour éviter les avertissements literal -> char*.

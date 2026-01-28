@@ -3,7 +3,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
-#include "db.hpp"
+#include "infrastructure/db/db.hpp"
 
 using namespace taskman;
 
@@ -123,7 +123,7 @@ TEST_CASE("Database::query avec paramètres", "[db]") {
 TEST_CASE("init_schema crée les 4 tables", "[db]") {
     Database db;
     REQUIRE(db.open(":memory:"));
-    REQUIRE(init_schema(db));
+    REQUIRE(db.init_schema());
 
     // Vérifier que les tables existent en interrogeant sqlite_master ou en insérant
     REQUIRE(db.exec("INSERT INTO phases (id, name) VALUES ('p1', 'Phase 1')"));
@@ -137,5 +137,5 @@ TEST_CASE("init_schema crée les 4 tables", "[db]") {
 
 TEST_CASE("init_schema échoue si DB non ouverte", "[db]") {
     Database db;
-    REQUIRE(!init_schema(db));
+    REQUIRE(!db.init_schema());
 }

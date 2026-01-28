@@ -3,11 +3,11 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
-#include "db.hpp"
-#include "milestone.hpp"
-#include "note.hpp"
-#include "phase.hpp"
-#include "task.hpp"
+#include "infrastructure/db/db.hpp"
+#include "core/milestone/milestone.hpp"
+#include "core/note/note.hpp"
+#include "core/phase/phase.hpp"
+#include "core/task/task.hpp"
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <optional>
@@ -27,7 +27,7 @@ struct CoutRedirect {
 
 static void setup_db(Database& db) {
     REQUIRE(db.open(":memory:"));
-    REQUIRE(init_schema(db));
+    REQUIRE(db.init_schema());
     std::vector<std::string> phase_args = {"phase:add", "--id", "p1", "--name", "Conception"};
     std::vector<char*> ptrs;
     for (auto& s : phase_args) ptrs.push_back(s.data());

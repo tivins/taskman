@@ -1,6 +1,6 @@
 /**
  * Commande taskman web — serveur HTTP pour consultation de la base.
- * GET / : page HTML (CSS + JS module), GET /task/:id, GET /tasks?limit=&page= → JSON.
+ * GET / : page HTML (CSS + JS module), GET /task/:id, GET /task/:id/notes, GET /tasks?limit=&page= → JSON.
  */
 
 #ifndef TASKMAN_WEB_HPP
