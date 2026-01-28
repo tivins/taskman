@@ -77,6 +77,91 @@ std::vector<std::map<std::string, std::optional<std::string>>> TaskRepository::l
     }
 }
 
+std::vector<std::map<std::string, std::optional<std::string>>> TaskRepository::list_paginated(
+    const std::optional<std::string>& phase_id,
+    const std::optional<std::string>& milestone_id,
+    const std::optional<std::string>& status,
+    const std::optional<std::string>& role,
+    int limit,
+    int offset) {
+    std::string sql = "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at FROM tasks";
+    std::vector<std::string> where_parts;
+    std::vector<std::optional<std::string>> params;
+
+    if (phase_id.has_value()) {
+        where_parts.push_back("phase_id = ?");
+        params.push_back(*phase_id);
+    }
+    if (milestone_id.has_value()) {
+        where_parts.push_back("milestone_id = ?");
+        params.push_back(*milestone_id);
+    }
+    if (status.has_value()) {
+        where_parts.push_back("status = ?");
+        params.push_back(*status);
+    }
+    if (role.has_value()) {
+        where_parts.push_back("role = ?");
+        params.push_back(*role);
+    }
+    if (!where_parts.empty()) {
+        sql += " WHERE ";
+        for (size_t i = 0; i < where_parts.size(); ++i) {
+            if (i) sql += " AND ";
+            sql += where_parts[i];
+        }
+    }
+    sql += " ORDER BY phase_id, milestone_id, sort_order, id LIMIT ? OFFSET ?";
+    params.push_back(std::to_string(limit));
+    params.push_back(std::to_string(offset));
+
+    return executor_.query(sql.c_str(), params);
+}
+
+int TaskRepository::count(
+    const std::optional<std::string>& phase_id,
+    const std::optional<std::string>& milestone_id,
+    const std::optional<std::string>& status,
+    const std::optional<std::string>& role) {
+    std::string sql = "SELECT COUNT(*) as count FROM tasks";
+    std::vector<std::string> where_parts;
+    std::vector<std::optional<std::string>> params;
+
+    if (phase_id.has_value()) {
+        where_parts.push_back("phase_id = ?");
+        params.push_back(*phase_id);
+    }
+    if (milestone_id.has_value()) {
+        where_parts.push_back("milestone_id = ?");
+        params.push_back(*milestone_id);
+    }
+    if (status.has_value()) {
+        where_parts.push_back("status = ?");
+        params.push_back(*status);
+    }
+    if (role.has_value()) {
+        where_parts.push_back("role = ?");
+        params.push_back(*role);
+    }
+    if (!where_parts.empty()) {
+        sql += " WHERE ";
+        for (size_t i = 0; i < where_parts.size(); ++i) {
+            if (i) sql += " AND ";
+            sql += where_parts[i];
+        }
+    }
+
+    auto rows = executor_.query(sql.c_str(), params);
+    if (rows.empty() || !rows[0].count("count")) {
+        return 0;
+    }
+    try {
+        return std::stoi(rows[0].at("count").value_or("0"));
+    } catch (...) {
+        return 0;
+    }
+}
+
 bool TaskRepository::update(const std::string& id,
                             const std::optional<std::string>& title,
                             const std::optional<std::string>& description,
@@ -148,6 +233,31 @@ bool TaskRepository::remove_dependency(const std::string& task_id, const std::st
 bool TaskRepository::exists(const std::string& id) {
     auto rows = executor_.query("SELECT 1 FROM tasks WHERE id = ?", {id});
     return !rows.empty();
+}
+
+std::vector<std::map<std::string, std::optional<std::string>>> TaskRepository::get_dependencies(const std::string& task_id) {
+    return executor_.query(
+        "SELECT task_id, depends_on FROM task_deps WHERE task_id = ? ORDER BY depends_on",
+        {task_id});
+}
+
+std::vector<std::map<std::string, std::optional<std::string>>> TaskRepository::list_dependencies(
+    const std::optional<std::string>& task_id,
+    int limit,
+    int offset) {
+    std::string sql = "SELECT task_id, depends_on FROM task_deps";
+    std::vector<std::optional<std::string>> params;
+    
+    if (task_id.has_value()) {
+        sql += " WHERE task_id = ?";
+        params.push_back(*task_id);
+    }
+    
+    sql += " ORDER BY task_id, depends_on LIMIT ? OFFSET ?";
+    params.push_back(std::to_string(limit));
+    params.push_back(std::to_string(offset));
+    
+    return executor_.query(sql.c_str(), params);
 }
 
 } // namespace taskman

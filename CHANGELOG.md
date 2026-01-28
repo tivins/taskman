@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.23.0] - 2026-01-28
+
+### Changed
+
+- **Refactoring SOLID - web.cpp (point 1.4)** : séparation des responsabilités selon le principe SRP (Single Responsibility Principle). Le fichier `web.cpp` a été refactorisé pour séparer l'infrastructure HTTP de la logique métier :
+  - `WebServer` : gestion exclusive de l'infrastructure HTTP (démarrage, configuration, routage de base, gestion des assets statiques)
+  - `TaskController` : gestion exclusive des endpoints REST pour les tâches (`/task/:id`, `/tasks`, `/task/:id/deps`, `/task/:id/notes`, `/tasks/count`, `/task_deps`)
+  - `PhaseController` : gestion exclusive des endpoints REST pour les phases (`/phase/:id`, `/phases`)
+  - `MilestoneController` : gestion exclusive des endpoints REST pour les milestones (`/milestone/:id`, `/milestones`)
+  - `PhaseRepository`, `MilestoneRepository`, `NoteRepository` : repositories pour l'accès aux données des phases, milestones et notes
+- Les contrôleurs réutilisent les services métier existants (`TaskService`, `TaskRepository`) et les nouveaux repositories créés
+- `TaskRepository` a été étendu avec des méthodes pour la pagination et le comptage (`list_paginated()`, `count()`, `get_dependencies()`, `list_dependencies()`)
+- Le code respecte maintenant le principe SRP : chaque classe a une seule responsabilité claire
+
+### Added
+
+- **Nouveaux fichiers** : `web_server.hpp`/`web_server.cpp` (infrastructure HTTP), `web_controllers.hpp`/`web_controllers.cpp` (contrôleurs REST), `phase_repository.hpp`/`phase_repository.cpp`, `milestone_repository.hpp`/`milestone_repository.cpp`, `note_repository.hpp`/`note_repository.cpp`
+
 ## [0.22.0] - 2026-01-28
 
 ### Changed

@@ -45,6 +45,24 @@ public:
         const std::optional<std::string>& status = std::nullopt,
         const std::optional<std::string>& role = std::nullopt);
 
+    /** Liste les tâches avec filtres optionnels et pagination.
+     * Retourne un vecteur de maps représentant les tâches. */
+    std::vector<std::map<std::string, std::optional<std::string>>> list_paginated(
+        const std::optional<std::string>& phase_id = std::nullopt,
+        const std::optional<std::string>& milestone_id = std::nullopt,
+        const std::optional<std::string>& status = std::nullopt,
+        const std::optional<std::string>& role = std::nullopt,
+        int limit = 50,
+        int offset = 0);
+
+    /** Compte les tâches avec filtres optionnels.
+     * Retourne le nombre de tâches correspondant aux filtres. */
+    int count(
+        const std::optional<std::string>& phase_id = std::nullopt,
+        const std::optional<std::string>& milestone_id = std::nullopt,
+        const std::optional<std::string>& status = std::nullopt,
+        const std::optional<std::string>& role = std::nullopt);
+
     /** Met à jour une tâche existante.
      * Retourne true en cas de succès, false en cas d'erreur. */
     bool update(const std::string& id,
@@ -66,6 +84,17 @@ public:
     /** Vérifie si une tâche existe.
      * Retourne true si la tâche existe, false sinon. */
     bool exists(const std::string& id);
+
+    /** Récupère les dépendances d'une tâche.
+     * Retourne un vecteur de maps avec task_id et depends_on. */
+    std::vector<std::map<std::string, std::optional<std::string>>> get_dependencies(const std::string& task_id);
+
+    /** Liste toutes les dépendances avec pagination.
+     * Retourne un vecteur de maps avec task_id et depends_on. */
+    std::vector<std::map<std::string, std::optional<std::string>>> list_dependencies(
+        const std::optional<std::string>& task_id = std::nullopt,
+        int limit = 100,
+        int offset = 0);
 
 private:
     QueryExecutor& executor_;
