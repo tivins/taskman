@@ -88,7 +88,7 @@ int cmd_web(int argc, char* argv[], Database& db) {
                       << "Examples:\n"
                       << "  taskman web\n"
                       << "  taskman web --host 127.0.0.1 --port 8080\n"
-                      << "  taskman web --serve-assets-from src/web   # dev: edit CSS/JS and refresh\n\n";
+                      << "  taskman web --serve-assets-from embed/web   # dev: edit CSS/JS and refresh\n\n";
             return 0;
         }
     }

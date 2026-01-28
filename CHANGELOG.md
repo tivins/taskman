@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.20.0] - 2026-01-28
+
+### Changed
+
+- **Réorganisation de la structure du projet** : déplacement des fichiers intégrés dans le binaire vers un dossier dédié `embed/` pour permettre l'utilisation de namespaces dans `src/` :
+  - `src/web/` → `embed/web/` (assets web : CSS et fichiers JavaScript)
+  - `docs/roles_agents/` → `embed/roles_agents/` (fichiers markdown des agents)
+- Mise à jour de `CMakeLists.txt`, `scripts/embed_assets.py`, `scripts/embed_agents.py`, `src/web.cpp` et `docs/USAGE_WEB.md` pour utiliser les nouveaux chemins.
+
 ## [0.19.0] - 2026-01-28
 
 ### Changed

@@ -78,34 +78,34 @@ set(WEB_ASSETS_HEADER "${CMAKE_BINARY_DIR}/web_assets.generated.h")
 add_custom_command(
   OUTPUT "${WEB_ASSETS_HEADER}"
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/embed_assets.py
-    --css ${CMAKE_SOURCE_DIR}/src/web/style.css
-    --js ${CMAKE_SOURCE_DIR}/src/web/dom.js
-    --js ${CMAKE_SOURCE_DIR}/src/web/filters.js
-    --js ${CMAKE_SOURCE_DIR}/src/web/pagination.js
-    --js ${CMAKE_SOURCE_DIR}/src/web/main.js
+    --css ${CMAKE_SOURCE_DIR}/embed/web/style.css
+    --js ${CMAKE_SOURCE_DIR}/embed/web/dom.js
+    --js ${CMAKE_SOURCE_DIR}/embed/web/filters.js
+    --js ${CMAKE_SOURCE_DIR}/embed/web/pagination.js
+    --js ${CMAKE_SOURCE_DIR}/embed/web/main.js
     -o "${WEB_ASSETS_HEADER}"
   DEPENDS ${CMAKE_SOURCE_DIR}/scripts/embed_assets.py
-          ${CMAKE_SOURCE_DIR}/src/web/style.css
-          ${CMAKE_SOURCE_DIR}/src/web/dom.js
-          ${CMAKE_SOURCE_DIR}/src/web/filters.js
-          ${CMAKE_SOURCE_DIR}/src/web/pagination.js
-          ${CMAKE_SOURCE_DIR}/src/web/main.js
+          ${CMAKE_SOURCE_DIR}/embed/web/style.css
+          ${CMAKE_SOURCE_DIR}/embed/web/dom.js
+          ${CMAKE_SOURCE_DIR}/embed/web/filters.js
+          ${CMAKE_SOURCE_DIR}/embed/web/pagination.js
+          ${CMAKE_SOURCE_DIR}/embed/web/main.js
   COMMENT "Embedding web assets (style.css, dom.js, filters.js, pagination.js, main.js) into header"
 )
 
 # -----------------------------------------------------------------------------
-# Agent files: docs/roles_agents/*.md -> agents.generated.h (embedded in binary)
+# Agent files: embed/roles_agents/*.md -> agents.generated.h (embedded in binary)
 # -----------------------------------------------------------------------------
-file(GLOB AGENT_MD_FILES "${CMAKE_SOURCE_DIR}/docs/roles_agents/*.md")
+file(GLOB AGENT_MD_FILES "${CMAKE_SOURCE_DIR}/embed/roles_agents/*.md")
 set(AGENTS_HEADER "${CMAKE_BINARY_DIR}/agents.generated.h")
 add_custom_command(
   OUTPUT "${AGENTS_HEADER}"
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/embed_agents.py
-    --agents-dir ${CMAKE_SOURCE_DIR}/docs/roles_agents
+    --agents-dir ${CMAKE_SOURCE_DIR}/embed/roles_agents
     -o "${AGENTS_HEADER}"
   DEPENDS ${CMAKE_SOURCE_DIR}/scripts/embed_agents.py
           ${AGENT_MD_FILES}
-  COMMENT "Embedding agent files (docs/roles_agents/*.md) into header"
+  COMMENT "Embedding agent files (embed/roles_agents/*.md) into header"
 )
 
 # -----------------------------------------------------------------------------
