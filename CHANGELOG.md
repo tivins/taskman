@@ -1,220 +1,237 @@
 # Changelog
 
+## [0.24.0] - 2026-01-28
+
+### Changed
+
+- **SOLID Refactoring - mcp.cpp (item 1.5)**: separation of responsibilities following the SRP (Single Responsibility Principle). The `mcp.cpp` file has been refactored to separate the JSON-RPC protocol from business logic and tool execution:
+  - `McpProtocolHandler`: dedicated handling of the JSON-RPC protocol (parsing, validation, response construction, JSON-RPC error handling)
+  - `McpToolRegistry`: dedicated definition of MCP tools (JSON schemas, descriptions, mapping to CLI commands)
+  - `McpToolExecutor`: dedicated execution of MCP tools (JSON → argv conversion, execution via CommandRegistry, capture of stdout/stderr)
+- Significant reduction in `mcp.cpp` size: from ~710 lines to ~100 lines (initialization + main loop)
+- Reuse of the existing `CommandRegistry` for CLI command execution, avoiding code duplication
+- The code now complies with the SRP principle: each class has a single, clear responsibility
+- Fixed error handling for unknown tools: sends an appropriate JSON-RPC error (code -32602) instead of a normal response with `isError = true`
+
+### Added
+
+- **New files**: `mcp_protocol_handler.hpp`/`mcp_protocol_handler.cpp` (JSON-RPC protocol handler), `mcp_tool_registry.hpp`/`mcp_tool_registry.cpp` (MCP tools registry), `mcp_tool_executor.hpp`/`mcp_tool_executor.cpp` (MCP tools executor)
+
 ## [0.23.0] - 2026-01-28
 
 ### Changed
 
-- **Refactoring SOLID - web.cpp (point 1.4)** : séparation des responsabilités selon le principe SRP (Single Responsibility Principle). Le fichier `web.cpp` a été refactorisé pour séparer l'infrastructure HTTP de la logique métier :
-  - `WebServer` : gestion exclusive de l'infrastructure HTTP (démarrage, configuration, routage de base, gestion des assets statiques)
-  - `TaskController` : gestion exclusive des endpoints REST pour les tâches (`/task/:id`, `/tasks`, `/task/:id/deps`, `/task/:id/notes`, `/tasks/count`, `/task_deps`)
-  - `PhaseController` : gestion exclusive des endpoints REST pour les phases (`/phase/:id`, `/phases`)
-  - `MilestoneController` : gestion exclusive des endpoints REST pour les milestones (`/milestone/:id`, `/milestones`)
-  - `PhaseRepository`, `MilestoneRepository`, `NoteRepository` : repositories pour l'accès aux données des phases, milestones et notes
-- Les contrôleurs réutilisent les services métier existants (`TaskService`, `TaskRepository`) et les nouveaux repositories créés
-- `TaskRepository` a été étendu avec des méthodes pour la pagination et le comptage (`list_paginated()`, `count()`, `get_dependencies()`, `list_dependencies()`)
-- Le code respecte maintenant le principe SRP : chaque classe a une seule responsabilité claire
+- **SOLID Refactoring - web.cpp (item 1.4)**: separation of responsibilities following the SRP (Single Responsibility Principle). The `web.cpp` file has been refactored to separate HTTP infrastructure from business logic:
+  - `WebServer`: dedicated HTTP infrastructure (startup, configuration, basic routing, static assets)
+  - `TaskController`: dedicated REST endpoints for tasks (`/task/:id`, `/tasks`, `/task/:id/deps`, `/task/:id/notes`, `/tasks/count`, `/task_deps`)
+  - `PhaseController`: dedicated REST endpoints for phases (`/phase/:id`, `/phases`)
+  - `MilestoneController`: dedicated REST endpoints for milestones (`/milestone/:id`, `/milestones`)
+  - `PhaseRepository`, `MilestoneRepository`, `NoteRepository`: repositories for accessing phase, milestone, and note data
+- Controllers reuse existing business services (`TaskService`, `TaskRepository`) and newly created repositories
+- `TaskRepository` has been extended with methods for pagination and counting (`list_paginated()`, `count()`, `get_dependencies()`, `list_dependencies()`)
+- The code now complies with the SRP principle: each class has a single, clear responsibility
 
 ### Added
 
-- **Nouveaux fichiers** : `web_server.hpp`/`web_server.cpp` (infrastructure HTTP), `web_controllers.hpp`/`web_controllers.cpp` (contrôleurs REST), `phase_repository.hpp`/`phase_repository.cpp`, `milestone_repository.hpp`/`milestone_repository.cpp`, `note_repository.hpp`/`note_repository.cpp`
+- **New files**: `web_server.hpp`/`web_server.cpp` (HTTP infrastructure), `web_controllers.hpp`/`web_controllers.cpp` (REST controllers), `phase_repository.hpp`/`phase_repository.cpp`, `milestone_repository.hpp`/`milestone_repository.cpp`, `note_repository.hpp`/`note_repository.cpp`
 
 ## [0.22.0] - 2026-01-28
 
 ### Changed
 
-- **Refactoring SOLID - main.cpp (point 1.3)** : implémentation du pattern Command pour le routage des commandes CLI, respectant les principes SRP (Single Responsibility Principle) et OCP (Open/Closed Principle). Le fichier `main.cpp` a été refactorisé pour utiliser un `CommandRegistry` au lieu d'une longue chaîne de if/else :
-  - `Command` : interface abstraite pour toutes les commandes CLI (`execute()`, `name()`, `summary()`, `requires_database()`)
-  - `CommandRegistry` : registre centralisé des commandes permettant d'enregistrer et d'exécuter des commandes par nom
-  - Classes de commandes concrètes : wrappers pour chaque commande existante (`InitCommand`, `PhaseAddCommand`, `TaskAddCommand`, etc.)
-  - `register_all_commands()` : fonction centralisée qui enregistre toutes les commandes disponibles
-- Les nouvelles commandes peuvent maintenant être ajoutées sans modifier `main.cpp` : il suffit de créer une classe héritant de `Command` et de l'enregistrer dans `register_all_commands()`
-- La génération de l'aide (`taskman -h`) utilise maintenant le registre de commandes pour lister dynamiquement toutes les commandes disponibles
-- Gestion optimisée de la base de données : ouverture uniquement pour les commandes qui en ont besoin (via `requires_database()`)
+- **SOLID Refactoring - main.cpp (item 1.3)**: implementation of the Command pattern for CLI command routing, respecting SRP (Single Responsibility Principle) and OCP (Open/Closed Principle). The `main.cpp` file has been refactored to use a `CommandRegistry` instead of a long if/else chain:
+  - `Command`: abstract interface for all CLI commands (`execute()`, `name()`, `summary()`, `requires_database()`)
+  - `CommandRegistry`: centralized registry allowing registration and execution of commands by name
+  - Concrete command classes: wrappers for each existing command (`InitCommand`, `PhaseAddCommand`, `TaskAddCommand`, etc.)
+  - `register_all_commands()`: centralized function registering all available commands
+- New commands can now be added without modifying `main.cpp`: just create a class inheriting from `Command` and register it in `register_all_commands()`
+- Help generation (`taskman -h`) now uses the command registry to dynamically list all available commands
+- Optimized database management: opened only for commands that need it (via `requires_database()`)
 
 ### Added
 
-- **Nouveaux fichiers** : `command.hpp`/`command.cpp` (interface Command et CommandRegistry), `commands.cpp` (implémentations concrètes de toutes les commandes)
+- **New files**: `command.hpp`/`command.cpp` (Command interface and CommandRegistry), `commands.cpp` (implementations for all command classes)
 
 ## [0.21.0] - 2026-01-28
 
 ### Changed
 
-- **Refactoring SOLID - Module Task (point 1.2)** : séparation des responsabilités selon le principe SRP (Single Responsibility Principle). Le module `task.cpp` a été refactorisé en quatre classes spécialisées :
-  - `TaskRepository` : accès exclusif à la base de données pour les tâches (CRUD, dépendances)
-  - `TaskService` : logique métier exclusive (validation, génération UUID, règles métier)
-  - `TaskFormatter` : formatage de sortie exclusif (JSON, text)
-  - `TaskCommandParser` : parsing CLI exclusif (cxxopts)
-- Les fonctions `cmd_task_*` sont maintenant des wrappers qui utilisent les nouvelles classes, maintenant la compatibilité avec le code existant (`main.cpp`, `mcp.cpp`).
-- Ajout de `Database::get_executor()` pour permettre aux repositories d'accéder à QueryExecutor.
+- **SOLID Refactoring - Task Module (item 1.2)**: separation of responsibilities following the SRP (Single Responsibility Principle). The `task.cpp` module has been refactored into four specialized classes:
+  - `TaskRepository`: exclusive database access for tasks (CRUD, dependencies)
+  - `TaskService`: exclusive business logic (validation, UUID generation, business rules)
+  - `TaskFormatter`: exclusive output formatting (JSON, text)
+  - `TaskCommandParser`: exclusive CLI parsing (cxxopts)
+- The `cmd_task_*` functions are now wrappers using the new classes, maintaining compatibility with the existing code (`main.cpp`, `mcp.cpp`)
+- Added `Database::get_executor()` to allow repositories to access QueryExecutor
 
 ### Added
 
-- **Nouveaux fichiers** : `task_repository.hpp`/`task_repository.cpp`, `task_service.hpp`/`task_service.cpp`, `task_formatter.hpp`/`task_formatter.cpp`, `task_command_parser.hpp`/`task_command_parser.cpp`
+- **New files**: `task_repository.hpp`/`task_repository.cpp`, `task_service.hpp`/`task_service.cpp`, `task_formatter.hpp`/`task_formatter.cpp`, `task_command_parser.hpp`/`task_command_parser.cpp`
 
 ## [0.20.0] - 2026-01-28
 
 ### Changed
 
-- **Réorganisation de la structure du projet** : déplacement des fichiers intégrés dans le binaire vers un dossier dédié `embed/` pour permettre l'utilisation de namespaces dans `src/` :
-  - `src/web/` → `embed/web/` (assets web : CSS et fichiers JavaScript)
-  - `docs/roles_agents/` → `embed/roles_agents/` (fichiers markdown des agents)
-- Mise à jour de `CMakeLists.txt`, `scripts/embed_assets.py`, `scripts/embed_agents.py`, `src/web.cpp` et `docs/USAGE_WEB.md` pour utiliser les nouveaux chemins.
+- **Project structure reorganization**: moved files embedded in the binary into a dedicated `embed/` folder to enable use of namespaces in `src/`:
+  - `src/web/` → `embed/web/` (web assets: CSS and JavaScript files)
+  - `docs/roles_agents/` → `embed/roles_agents/` (markdown files for agents)
+- Updated `CMakeLists.txt`, `scripts/embed_assets.py`, `scripts/embed_agents.py`, `src/web.cpp` and `docs/USAGE_WEB.md` to use the new paths
 
 ## [0.19.0] - 2026-01-28
 
 ### Changed
 
-- **Refactoring SOLID - Classe Database** : séparation des responsabilités selon le principe SRP (Single Responsibility Principle). La classe `Database` a été refactorisée en trois classes spécialisées :
-  - `DatabaseConnection` : gestion exclusive de la connexion SQLite (open, close, is_open)
-  - `QueryExecutor` : exécution exclusive des requêtes SQL (exec, run, query)
-  - `SchemaManager` : gestion exclusive du schéma et des migrations (init_schema, table_has_column, ensure_timestamps)
-- La classe `Database` devient une façade qui délègue aux trois classes spécialisées, maintenant la compatibilité avec le code existant tout en respectant les principes SOLID.
+- **SOLID Refactoring - Database class**: separation of responsibilities following the SRP (Single Responsibility Principle). The `Database` class has been refactored into three specialized classes:
+  - `DatabaseConnection`: dedicated SQLite connection management (open, close, is_open)
+  - `QueryExecutor`: dedicated SQL query execution (exec, run, query)
+  - `SchemaManager`: dedicated schema and migration management (init_schema, table_has_column, ensure_timestamps)
+- The `Database` class is now a facade that delegates to the three specialized classes, maintaining compatibility with existing code while respecting SOLID principles
 
 ### Added
 
-- **Nouveaux fichiers** : `db_connection.hpp`/`db_connection.cpp`, `query_executor.hpp`/`query_executor.cpp`, `schema_manager.hpp`/`schema_manager.cpp`
+- **New files**: `db_connection.hpp`/`db_connection.cpp`, `query_executor.hpp`/`query_executor.cpp`, `schema_manager.hpp`/`schema_manager.cpp`
 
 ## [0.18.1] - 2026-01-28
 
 ### Added
 
-- **Vue web** : route GET `/task/:id/notes` et section « Historique des notes » dans la vue détail d’une tâche, pour consulter les notes ajoutées par l’agent pendant la réalisation (id, content, kind, role, created_at).
+- **Web view**: GET route `/task/:id/notes` and a "Note history" section in the task detail view, to consult notes added by the agent during execution (id, content, kind, role, created_at)
 
 ## [0.18.0] - 2026-01-27
 
 ### Added
 
-- **Notes sur les tâches** : table `task_notes` (id, task_id, content, kind, role, created_at), créée par `init_schema`. Fonction réutilisable `note_add()` et commandes CLI `task:note:add <task-id> --content "..." [--kind completion|progress|issue] [--role <role>] [--format json|text]` et `task:note:list <task-id> [--format json|text]`. Outils MCP `taskman_task_note_add` et `taskman_task_note_list`. La tâche doit exister ; `kind` et `role` sont optionnels. Sortie : note créée (add) ou liste ordonnée par `created_at` (list).
-- **demo:generate** : ajout de 7 notes (completion / progress) sur des tâches de la démo (t1, t2, t3, t4, t5, t7, t15).
+- **Task notes**: table `task_notes` (id, task_id, content, kind, role, created_at), created by `init_schema`. Reusable `note_add()` function and CLI commands `task:note:add <task-id> --content "..." [--kind completion|progress|issue] [--role <role>] [--format json|text]` and `task:note:list <task-id> [--format json|text]`. MCP tools `taskman_task_note_add` and `taskman_task_note_list`. Task must exist; `kind` and `role` are optional. Output: created note (add) or list ordered by `created_at` (list).
+- **demo:generate**: adds 7 notes (completion / progress) to demo tasks (t1, t2, t3, t4, t5, t7, t15)
 
 ### Changed
 
-- **note_add** : à l'ajout d'une note, mise à jour de `updated_at` sur la tâche liée (`UPDATE tasks SET updated_at = datetime('now') WHERE id = ?`).
+- **note_add**: when adding a note, the `updated_at` of the linked task is updated (`UPDATE tasks SET updated_at = datetime('now') WHERE id = ?`)
 
 ## [0.17.1] - 2026-01-27
 
 ### Fixed
 
-- **Build (MSVC)** : `scripts/embed_assets.py` découpe désormais les littéraux de chaîne (CSS/JS) en blocs d’au plus 16 000 caractères pour rester sous la limite MSVC (~16 380, erreur C2026). Les blocs sont émis comme littéraux concaténés. Corrige la compilation sur Windows avec MSVC.
+- **Build (MSVC)**: `scripts/embed_assets.py` now splits string literals (CSS/JS) into blocks of at most 16,000 characters to stay within the MSVC limit (~16,380, error C2026). Blocks are emitted as concatenated literals. Fixes Windows/MSVC compilation.
 
 ## [0.17.0] - 2026-01-27
 
 ### Added
 
-- **created_at, updated_at** sur les tables `phases`, `milestones`, `tasks` : colonnes automatiques (non modifiables par l’utilisateur). `created_at` et `updated_at` sont définies à l’insertion via `DEFAULT (datetime('now'))`. À chaque mise à jour (phase:edit, milestone:edit, task:edit), `updated_at` est rafraîchi. Migration automatique pour les bases existantes (ajout des colonnes si absentes). Ces champs sont exposés en JSON et en format text sur tous les canaux (CLI, WEB, MCP).
+- **created_at, updated_at** on the tables `phases`, `milestones`, `tasks`: automatic columns (user not allowed to modify). `created_at` and `updated_at` are set during insertion via `DEFAULT (datetime('now'))`. On every update (phase:edit, milestone:edit, task:edit), `updated_at` is refreshed. Automatic migration for existing DBs (adds the columns if absent). These fields are exposed in JSON and text format on all channels (CLI, WEB, MCP).
 
 ### Changed
 
-- **Schéma** : `init_schema` crée les tables avec `created_at` et `updated_at` ; une migration ajoute ces colonnes aux tables existantes via `pragma_table_info` et `ALTER TABLE ... ADD COLUMN`.
-- **Formats** : `phase_to_json`, `milestone_to_json`, `task_to_json` et `print_task_text` incluent `created_at` et `updated_at`.
+- **Schema**: `init_schema` creates tables with `created_at` and `updated_at`; a migration adds these columns to existing tables via `pragma_table_info` and `ALTER TABLE ... ADD COLUMN`
+- **Formats**: `phase_to_json`, `milestone_to_json`, `task_to_json`, and `print_task_text` include `created_at` and `updated_at`
 
 ## [0.16.0] - 2026-01-27
 
 ### Changed
 
-- **Refactorisation utilitaires phase/milestone/task** : les commandes `phase:add`, `milestone:add`, `task:add`, `task:dep:add` et `demo:generate` s'appuient désormais sur des fonctions utilitaires réutilisables (`phase_add`, `milestone_add`, `task_add`, `task_dep_add`) déclarées dans les headers. Cela évite la duplication de logique SQL et de validation, centralise les règles (status, reached, roles) et permet un usage programmatique sans construire artificiellement des `argv`. Voir `docs/REFACTORING.md`.
-- **demo:generate** utilise `phase_add`, `milestone_add`, `task_add` et `task_dep_add` au lieu de requêtes SQL directes.
+- **Phase/milestone/task utilities refactoring**: The commands `phase:add`, `milestone:add`, `task:add`, `task:dep:add`, and `demo:generate` now rely on reusable utility functions (`phase_add`, `milestone_add`, `task_add`, `task_dep_add`) declared in headers. This avoids duplication of SQL and validation logic, centralizes rules (status, reached, roles), and allows programmatic usage without artificially constructing `argv`. See `docs/REFACTORING.md`.
+- **demo:generate** uses `phase_add`, `milestone_add`, `task_add`, and `task_dep_add` instead of direct SQL queries.
 
 ### Added
 
-- **phase_add(Database&, id, name, status?, sort_order?)** dans `phase.hpp` : ajout d'une phase avec validation du status.
-- **milestone_add(Database&, id, phase_id, name?, criterion?, reached)** dans `milestone.hpp` : ajout d'un milestone.
-- **task_add(Database&, id, phase_id, milestone_id?, title, description?, status?, sort_order?, role?)** dans `task.hpp` : ajout d'une tâche avec validation status et role.
-- **task_dep_add(Database&, task_id, depends_on)** dans `task.hpp` : ajout d'une dépendance entre tâches (vérification existence et non auto-dépendance).
-- Tests unitaires directs pour ces fonctions dans `tests/test_phase.cpp`, `tests/test_milestone.cpp`, `tests/test_task.cpp`.
+- **phase_add(Database&, id, name, status?, sort_order?)** in `phase.hpp`: adds a phase with status validation
+- **milestone_add(Database&, id, phase_id, name?, criterion?, reached)** in `milestone.hpp`: adds a milestone
+- **task_add(Database&, id, phase_id, milestone_id?, title, description?, status?, sort_order?, role?)** in `task.hpp`: adds a task with status and role validation
+- **task_dep_add(Database&, task_id, depends_on)** in `task.hpp`: adds a dependency between tasks (checks existence and no self-dependency)
+- Direct unit tests for these functions in `tests/test_phase.cpp`, `tests/test_milestone.cpp`, `tests/test_task.cpp`
 
 ## [0.15.0] - 2026-01-27
 
 ### Added
 
-- **taskman demo:generate**: commande intégrée pour créer une base de données de démonstration remplie avec un exemple réaliste (projet MVP de site e-commerce). Remplace le script Python `scripts/create_demo.py` et permet d'utiliser directement les fonctions du codebase C++ sans avoir à fournir le chemin de l'exécutable. La commande supprime automatiquement la base de données existante (et ses fichiers journal) avant de créer la nouvelle, garantissant un résultat reproductible. Crée 4 phases (Design, Development, Acceptance, Delivery), 4 milestones, 9 tâches avec priorités (sort_order), et leurs dépendances.
-- **src/demo.cpp**, **src/demo.hpp**: module implémentant la commande `demo:generate` avec création directe des données via SQL.
+- **taskman demo:generate**: built-in command to create a demonstration database filled with a realistic example (e-commerce MVP project). Replaces the Python script `scripts/create_demo.py` and allows direct use of functions from the C++ codebase without providing the path of the executable. The command automatically deletes the existing database (and its journal files) before creating the new one, ensuring a reproducible result. Creates 4 phases (Design, Development, Acceptance, Delivery), 4 milestones, 9 tasks with priorities (sort_order), and their dependencies.
+- **src/demo.cpp**, **src/demo.hpp**: module implementing the `demo:generate` command with direct data creation through SQL
 
 ## [0.14.0] - 2026-01-27
 
 ### Added
 
-- **taskman mcp:config** [--executable <path>] [--output <file>]: génère ou met à jour le fichier `.cursor/mcp.json` avec la configuration du serveur MCP taskman. Prend en paramètre le chemin absolu de l'exécutable taskman (ou taskman.exe). Pour `TASKMAN_DB_NAME`, utilise le répertoire courant + "project_tasks.db". Fusionne avec les serveurs MCP existants dans le fichier. Similaire à `agents:generate` pour la configuration MCP.
-- **src/mcp_config.cpp**, **src/mcp_config.hpp**: module implémentant la commande `mcp:config` avec gestion des fichiers JSON (lecture, fusion, écriture).
+- **taskman mcp:config** [--executable <path>] [--output <file>]: generates or updates the `.cursor/mcp.json` file with the taskman MCP server configuration. Takes the absolute path of the taskman executable (or taskman.exe) as parameter. For `TASKMAN_DB_NAME`, uses current directory + "project_tasks.db". Merges with existing MCP servers in the file. Similar to `agents:generate` for MCP configuration.
+- **src/mcp_config.cpp**, **src/mcp_config.hpp**: module implementing the `mcp:config` command with JSON file manipulation (read, merge, write)
 
 ## [0.13.0] - 2026-01-27
 
 ### Added
 
-- **taskman agents:generate** [--output <dir>]: génère les fichiers agents dans `.cursor/agents/` (ou le répertoire spécifié) à partir des fichiers markdown intégrés dans le binaire. Les fichiers sources sont dans `docs/roles_agents/*.md` et sont intégrés dans le binaire lors de la compilation via `scripts/embed_agents.py`. La commande extrait ces fichiers et les écrit dans le répertoire de sortie.
-- **scripts/embed_agents.py**: script Python qui génère `agents.generated.h` à partir des fichiers markdown dans `docs/roles_agents/`. Les fichiers sont intégrés comme raw string literals dans le header généré.
-- **src/agents.cpp**, **src/agents.hpp**: module implémentant la commande `agents:generate` avec gestion des fichiers système (création de répertoires, écriture de fichiers).
-- **CMakeLists.txt**: ajout de la génération de `agents.generated.h` via `add_custom_command` avec dépendances sur tous les fichiers `.md` dans `docs/roles_agents/`.
+- **taskman agents:generate** [--output <dir>]: generates agent files in `.cursor/agents/` (or the specified directory) from markdown files embedded in the binary. Source files are located in `docs/roles_agents/*.md` and are embedded in the binary during compilation via `scripts/embed_agents.py`. The command extracts these files and writes them into the output directory.
+- **scripts/embed_agents.py**: Python script that generates `agents.generated.h` from markdown files in `docs/roles_agents/`. Files are embedded as raw string literals in the generated header.
+- **src/agents.cpp**, **src/agents.hpp**: module implementing the `agents:generate` command with filesystem handling (directory creation, file writing)
+- **CMakeLists.txt**: added generation of `agents.generated.h` via `add_custom_command` with dependencies on all `.md` files in `docs/roles_agents/`
 
 ## [0.12.0] - 2026-01-25
 
 ### Added
 
-- **taskman mcp** : mode serveur MCP (Model Context Protocol) sur stdio. Lit les requêtes JSON-RPC ligne par ligne sur stdin, écrit les réponses sur stdout. Implémentation complète du protocole MCP 2025-11-25 :
-  - Lifecycle : `initialize` (avec validation de `protocolVersion`), `notifications/initialized`
-  - Méthodes : `tools/list` (retourne les 13 outils), `tools/call` (exécute les commandes CLI), `ping`
-  - Table des 13 outils : définitions complètes avec `name`, `description`, `inputSchema` (JSON Schema), `positional_keys`
-  - Conversion `arguments` → `argv` : construction automatique des arguments CLI à partir des paramètres JSON (positionnels puis options `--key value`)
-  - Capture stdout/stderr : redirection via `rdbuf` (RAII avec `CaptureGuard`) pour capturer la sortie des `cmd_*` sans modification
-  - Dispatch : table de correspondance `name` → `cmd_*` avec gestion spéciale pour `taskman_init` (appel direct à `init_schema`)
-  - Erreurs JSON-RPC : -32700 (Parse error), -32600 (Invalid Request), -32601 (Method not found), -32602 (Invalid params / Unknown tool / Unsupported protocol version)
-  - Erreurs métier : retournées dans `result` avec `isError: true` et message dans `content[0].text`
-- Tests : `tests/test_mcp.cpp` avec 11 cas de test couvrant initialize, tools/list, tools/call, ping, erreurs (outil inconnu, arguments invalides, méthode inconnue, parse error)
-- Documentation : section MCP dans USAGE.md (section 9) avec configuration Cursor, exemples, et description des outils
+- **taskman mcp**: MCP server mode (Model Context Protocol) over stdio. Reads JSON-RPC requests line-by-line from stdin, writes responses to stdout. Full MCP protocol implementation as of 2025-11-25:
+  - Lifecycle: `initialize` (with `protocolVersion` validation), `notifications/initialized`
+  - Methods: `tools/list` (returns all 13 tools), `tools/call` (executes CLI commands), `ping`
+  - Table of 13 tools: full definitions with `name`, `description`, `inputSchema` (JSON Schema), `positional_keys`
+  - Arguments conversion → `argv`: automatic CLI argument construction from JSON parameters (positional, then options as `--key value`)
+  - Capture stdout/stderr: redirection via `rdbuf` (RAII with `CaptureGuard`) to capture the output of `cmd_*` without modification
+  - Dispatch: mapping table `name` → `cmd_*` with special handling for `taskman_init` (direct call to `init_schema`)
+  - JSON-RPC errors: -32700 (Parse error), -32600 (Invalid Request), -32601 (Method not found), -32602 (Invalid params / Unknown tool / Unsupported protocol version)
+  - Business errors: returned in `result` with `isError: true` and message in `content[0].text`
+- Tests: `tests/test_mcp.cpp` with 11 test cases covering initialize, tools/list, tools/call, ping, errors (unknown tool, invalid arguments, unknown method, parse error)
+- Documentation: MCP section in USAGE.md (section 9) with Cursor configuration, examples, and tools description
 
 ## [0.11.1] - 2026-01-25
 
 ### Added
 
-- **Vue liste (web)** : à côté du Statut, affichage de « (blocked) » lorsque la tâche dépend d’une tâche non-`done`, en s’appuyant sur `/task_deps` et `/task/:id` pour les statuts des `depends_on`.
+- **List view (web)**: next to Status, display "(blocked)" when the task depends on another non-`done` task, using `/task_deps` and `/task/:id` to get status of dependencies
 
 ## [0.11.0] - 2026-01-25
 
 ### Added
 
-- **GET /milestone/:id** : API JSON d'un jalon (404 si absent).
-- **GET /milestones?limit=30&page=2** : API JSON listant les jalons avec pagination (limit 1–100, défaut 30 ; page ≥ 1).
-- **GET /phase/:id** : API JSON d'une phase (404 si absente).
-- **GET /phases?limit=30&page=2** : API JSON listant les phases avec pagination (limit 1–100, défaut 30 ; page ≥ 1).
-- **GET /task_deps** : API JSON listant les dépendances entre tâches (task_id, depends_on), pagination limit 1–500 (défaut 100), page ≥ 1, filtre optionnel `?task_id=`.
-- **GET /task/:id/deps** : API JSON des dépendances d’une tâche donnée (404 si la tâche n’existe pas).
+- **GET /milestone/:id**: JSON API for a milestone (404 if missing)
+- **GET /milestones?limit=30&page=2**: JSON API listing milestones with pagination (limit 1–100, default 30; page ≥ 1)
+- **GET /phase/:id**: JSON API for a phase (404 if missing)
+- **GET /phases?limit=30&page=2**: JSON API listing phases with pagination (limit 1–100, default 30; page ≥ 1)
+- **GET /task_deps**: JSON API listing task dependencies (task_id, depends_on), pagination limit 1–500 (default 100), page ≥ 1, optional filter `?task_id=`
+- **GET /task/:id/deps**: JSON API for dependencies of a given task (404 if the task does not exist)
 
 ## [0.10.0] - 2026-01-25
 
 ### Added
 
-- **taskman web** [--host \<addr\>] [--port \<n\>]: serveur HTTP pour consultation de la base (défaut 127.0.0.1:8080).
-- **GET /** : page HTML minimale avec inclusion de `style.css` et `main.js` (type=module).
-- **GET /style.css**, **GET /main.js** : feuille de style et script embarqués.
-- **GET /task/:id** : API JSON d’une tâche (404 si absente).
-- **GET /tasks?limit=20&page=1** : API JSON listant les tâches avec pagination (limit 1–100, page ≥ 1) et filtres optionnels `phase`, `status`, `role`.
-- Dépendance **cpp-httplib** (FetchContent, v0.14.3) ; options HTTPLIB_USE_*_IF_AVAILABLE=OFF pour éviter OpenSSL/ZLIB/Brotli/zstd.
+- **taskman web** [--host <addr>] [--port <n>]: HTTP server for database consultation (default 127.0.0.1:8080)
+- **GET /**: minimal HTML page including `style.css` and `main.js` (type=module)
+- **GET /style.css**, **GET /main.js**: embedded stylesheet and script
+- **GET /task/:id**: JSON API for a task (404 if missing)
+- **GET /tasks?limit=20&page=1**: JSON API listing tasks with pagination (limit 1–100, page ≥ 1) and optional filters `phase`, `status`, `role`
+- Dependency: **cpp-httplib** (FetchContent, v0.14.3); HTTPLIB_USE_*_IF_AVAILABLE=OFF options to avoid OpenSSL/ZLIB/Brotli/zstd
 
 ## [0.9.6] - 2026-01-25
 
 ### Added
 
 - **TASKMAN_JOURNAL_MEMORY=1** and **CURSOR_AGENT**: when set, `PRAGMA journal_mode=MEMORY` is applied after opening the DB so SQLite does not create a `-journal` file on disk. Avoids "disk I/O error" in sandboxed environments (e.g. Cursor’s agent) where the journal file is blocked. Help (`taskman -h`) and docs/BUILD.md document these variables.
-- **docs/BUILD.md**: "disk I/O error when using taskman from Cursor’s agent" section (Options A/B/C: env inline, agent rules, CURSOR_AGENT auto).
-- **USAGE.md**: `TASKMAN_JOURNAL_MEMORY`, `CURSOR_AGENT` in the env table; tip for Cursor agent.
-- **Tests**: integration test with `TASKMAN_JOURNAL_MEMORY=1` (init, phase:add, phase:list).
+- **docs/BUILD.md**: "disk I/O error when using taskman from Cursor’s agent" section (Options A/B/C: env inline, agent rules, CURSOR_AGENT auto)
+- **USAGE.md**: `TASKMAN_JOURNAL_MEMORY`, `CURSOR_AGENT` in the env table; tip for Cursor agent
+- **Tests**: integration test with `TASKMAN_JOURNAL_MEMORY=1` (init, phase:add, phase:list)
 
 ## [0.9.5] - 2026-01-25
 
 ### Added
 
-- **taskman \<command\> --help** (or **-h**): detailed per-command help. Commands using cxxopts (phase:add/edit, milestone:add/edit/list, task:add/get/list/edit, task:dep:add/remove) show options via `opts.help()`. `init` and `phase:list` have dedicated help strings. The main help (`taskman -h`) now includes: *Use 'taskman \<command\> --help' for command-specific options.*
+- **taskman <command> --help** (or **-h**): detailed per-command help. Commands using cxxopts (phase:add/edit, milestone:add/edit/list, task:add/get/list/edit, task:dep:add/remove) show options via `opts.help()`. `init` and `phase:list` have dedicated help strings. The main help (`taskman -h`) now includes: *Use 'taskman <command> --help' for command-specific options.*
 
 ## [0.9.4] - 2026-01-25
 
 ### Added
 
-- **scripts/create_demo.py**: Python script that creates a populated demo database (phases, milestones, tasks, dependencies, sample statuses) by invoking the taskman CLI. Arguments: taskman executable path (required), DB path (optional, default `./demo.db`). Overwrites the DB if it exists; removes `-journal`, `-wal`, `-shm` sidecars. Demo scenario: e‑commerce site MVP (Design, Development, Acceptance, Delivery).
+- **scripts/create_demo.py**: Python script that creates a populated demo database (phases, milestones, tasks, dependencies, sample statuses) by invoking the taskman CLI. Arguments: taskman executable path (required), DB path (optional, default `./demo.db`). Overwrites the DB if it exists; removes `-journal`, `-wal`, `-shm` sidecars. Demo scenario: e-commerce site MVP (Design, Development, Acceptance, Delivery).
 
 ### Changed
 
-- **print_usage()**: command list is now built from a `CmdInfo[]` table and printed in a loop; adding a command only requires one new table entry.
-- **Version**: `TASKMAN_VERSION` is generated at configure time from the `VERSION` file via `version.h`; `project(taskman VERSION …)` and `version.h` both use `VERSION` as the single source of truth.
+- **print_usage()**: command list is now built from a `CmdInfo[]` table and printed in a loop; adding a command only requires one new table entry
+- **Version**: `TASKMAN_VERSION` is generated at configure time from the `VERSION` file via `version.h`; `project(taskman VERSION …)` and `version.h` both use `VERSION` as the single source of truth
 
 ## [0.9.3] - 2026-01-25
 
@@ -237,7 +254,7 @@
 
 ### Added
 
-- USAGE.md : user guide
+- USAGE.md: user guide
 
 ## [0.9.0] — 2026-01-25
 
@@ -262,8 +279,8 @@
 ### Added
 
 - Phase 6 — Task dependencies:
-  - `task:dep:add`: \<task-id\> \<dep-id\> → INSERT into task_deps; existence check for both tasks; reject self-dependency and duplicates
-  - `task:dep:remove`: \<task-id\> \<dep-id\> → DELETE
+  - `task:dep:add`: <task-id> <dep-id> → INSERT into task_deps; existence check for both tasks; reject self-dependency and duplicates
+  - `task:dep:remove`: <task-id> <dep-id> → DELETE
 - Unit tests: task:dep:add (success, non-existent task, self-dependency, duplicate), task:dep:remove (success, idempotent)
 
 ## [0.6.0] — 2026-01-25

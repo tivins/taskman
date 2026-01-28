@@ -112,7 +112,7 @@ add_custom_command(
 # Exécutable taskman
 # -----------------------------------------------------------------------------
 add_executable(taskman
-  src/main.cpp src/agents.cpp src/command.cpp src/commands.cpp src/db_connection.cpp src/query_executor.cpp src/schema_manager.cpp src/demo.cpp src/formats.cpp src/mcp.cpp src/mcp_config.cpp src/milestone.cpp src/note.cpp src/phase.cpp src/roles.cpp src/task.cpp src/task_repository.cpp src/task_service.cpp src/task_formatter.cpp src/task_command_parser.cpp src/web.cpp src/web_server.cpp src/web_controllers.cpp src/phase_repository.cpp src/milestone_repository.cpp src/note_repository.cpp
+  src/main.cpp src/agents.cpp src/command.cpp src/commands.cpp src/db_connection.cpp src/query_executor.cpp src/schema_manager.cpp src/demo.cpp src/formats.cpp src/mcp.cpp src/mcp_config.cpp src/mcp_protocol_handler.cpp src/mcp_tool_registry.cpp src/mcp_tool_executor.cpp src/milestone.cpp src/note.cpp src/phase.cpp src/roles.cpp src/task.cpp src/task_repository.cpp src/task_service.cpp src/task_formatter.cpp src/task_command_parser.cpp src/web.cpp src/web_server.cpp src/web_controllers.cpp src/phase_repository.cpp src/milestone_repository.cpp src/note_repository.cpp
   "${WEB_ASSETS_HEADER}"
   "${AGENTS_HEADER}"
 )
