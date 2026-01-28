@@ -5,15 +5,15 @@
 
 #include "command.hpp"
 #include "infrastructure/db/db.hpp"
-#include "task.hpp"
-#include "phase.hpp"
-#include "milestone.hpp"
-#include "note.hpp"
-#include "demo.hpp"
-#include "agents.hpp"
-#include "mcp_config.hpp"
-#include "web.hpp"
-#include "mcp.hpp"
+#include "core/task/task.hpp"
+#include "core/phase/phase.hpp"
+#include "core/milestone/milestone.hpp"
+#include "core/note/note.hpp"
+#include "util/demo.hpp"
+#include "util/agents.hpp"
+#include "mcp/mcp_config.hpp"
+#include "web/web.hpp"
+#include "mcp/mcp.hpp"
 #include <iostream>
 #include <cstring>
 

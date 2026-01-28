@@ -5,7 +5,7 @@
  * Codes de sortie : 0 = succès, 1 = erreur (parsing, DB, validation des args).
  */
 
-#include "command.hpp"
+#include "cli/command.hpp"
 #include "infrastructure/db/db.hpp"
 #include "version.h"
 #include <cstdlib>
