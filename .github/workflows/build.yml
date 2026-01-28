@@ -3,11 +3,11 @@ name: Build
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, solid]
     tags:
       - 'v*'
   pull_request:
-    branches: [main, master]
+    branches: [main, master, solid]
 
 jobs:
   build:
