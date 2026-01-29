@@ -321,9 +321,9 @@ void McpToolRegistry::initialize_tools() {
         McpToolDefinition t;
         t.name = "taskman_project_init";
         t.cli_command = "project:init";
-        t.description = "Bootstrap a new project: writes .cursor/mcp.json (if executable given), creates database tables, generates .cursor/rules/ and .cursor/agents/. User should reload Cursor afterward to use Taskman via the agent.";
+        t.description = "Bootstrap a new project: writes .cursor/mcp.json (using current executable path by default), creates database tables, generates .cursor/rules/ and .cursor/agents/. User should reload Cursor afterward to use Taskman via the agent.";
         std::map<std::string, nlohmann::json> props;
-        props["executable"] = nlohmann::json{{"type", "string"}, {"description", "Absolute path to taskman executable (for MCP config); optional. If omitted, mcp:config is skipped."}};
+        props["executable"] = nlohmann::json{{"type", "string"}, {"description", "Override path to taskman executable (for MCP config); optional. If omitted, the running executable path is used."}};
         t.inputSchema = make_schema(props);
         t.positional_keys = {};
         tools_.push_back(t);

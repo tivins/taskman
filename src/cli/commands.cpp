@@ -11,6 +11,7 @@
 #include "core/note/note.hpp"
 #include "util/demo.hpp"
 #include "util/agents.hpp"
+#include "util/executable_path.hpp"
 #include "util/rules.hpp"
 #include "mcp/mcp_config.hpp"
 #include "web/web.hpp"
@@ -275,12 +276,12 @@ public:
             if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
                 std::cout << "taskman project:init [--executable <path>]\n\n"
                              "Bootstrap a new project in order:\n"
-                             "  1. mcp:config (if --executable is given) — write .cursor/mcp.json\n"
+                             "  1. mcp:config — write .cursor/mcp.json (uses current executable path by default)\n"
                              "  2. init — create database tables\n"
                              "  3. rules:generate — write .cursor/rules/\n"
                              "  4. agents:generate — write .cursor/agents/\n\n"
                              "Then reload Cursor so the MCP server is loaded and use Taskman via the agent.\n\n"
-                             "  --executable   Absolute path to taskman executable (for MCP config); optional.\n";
+                             "  --executable   Override path to taskman executable (for MCP config); optional.\n";
                 return 0;
             }
             if (std::strcmp(argv[i], "--executable") == 0 && i + 1 < argc) {
@@ -288,8 +289,11 @@ public:
                 ++i;
             }
         }
+        if (executable_path.empty()) {
+            executable_path = get_executable_path();
+        }
 
-        // 1. mcp:config (if --executable provided)
+        // 1. mcp:config (with detected or provided executable path)
         if (!executable_path.empty()) {
             std::vector<std::string> mcp_args = {"mcp:config", "--executable", executable_path};
             std::vector<char*> mcp_argv;
@@ -297,7 +301,7 @@ public:
             int ret = cmd_mcp_config(static_cast<int>(mcp_argv.size()), mcp_argv.data());
             if (ret != 0) return ret;
         } else {
-            std::cout << "Skipping mcp:config (no --executable). Run 'taskman mcp:config --executable <path>' to configure MCP.\n";
+            std::cout << "Skipping mcp:config (could not determine executable path). Run 'taskman mcp:config --executable <path>' to configure MCP.\n";
         }
 
         // 2. init (database schema)

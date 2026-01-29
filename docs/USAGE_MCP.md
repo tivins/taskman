@@ -59,11 +59,11 @@ Each tool accepts the same parameters as its CLI counterpart, passed as JSON in 
 ## Quick start (new project)
 
 1. **Download taskman** — [Latest release](https://github.com/tivins/taskman/releases).
-2. **Bootstrap** — From your project root:
+2. **Bootstrap** — From your project root, run taskman by its full path (not installed on the system nor in PATH):
    ```bash
-   taskman project:init --executable /path/to/taskman
+   /path/to/taskman project:init
    ```
-   This runs (in order): `mcp:config`, `init`, `rules:generate`, `agents:generate`.
+   On Windows: `C:\path\to\taskman.exe project:init`. This runs (in order): `mcp:config`, `init`, `rules:generate`, `agents:generate`.
 3. **Reload Cursor** — So the MCP server is loaded.
 4. **Use Taskman via the agent** — Phases, milestones, tasks, notes.
 

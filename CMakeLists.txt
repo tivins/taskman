@@ -182,6 +182,7 @@ add_executable(taskman
   # Util
   src/util/agents.cpp
   src/util/demo.cpp
+  src/util/executable_path.cpp
   src/util/formats.cpp
   src/util/roles.cpp
   src/util/rules.cpp

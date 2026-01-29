@@ -43,7 +43,7 @@ Taskman is a project management tool (phases, milestones, tasks with dependencie
 ### 2.4 Database
 
 - **File**: By default `project_tasks.db` in the current directory; configurable via `TASKMAN_DB_NAME`.
-- **Initialization**: `taskman init` (or MCP tool `taskman_init`) creates the tables if needed. For a full bootstrap (MCP config, DB, rules, agents), use `taskman project:init --executable <path>` (or `taskman_project_init` via MCP).
+- **Initialization**: `taskman init` (or MCP tool `taskman_init`) creates the tables if needed. For a full bootstrap (MCP config, DB, rules, agents), use `taskman project:init` (or `taskman_project_init` via MCP); the executable path for MCP is detected automatically.
 - **Demo**: `taskman demo:generate` (or `taskman_demo_generate`) recreates a sample database (phases, milestones, tasks, dependencies, notes).
 
 ---
@@ -79,7 +79,7 @@ Taskman is a project management tool (phases, milestones, tasks with dependencie
 ### 4.1 First use (bootstrap a new project)
 
 1. Download taskman from the [latest release](https://github.com/tivins/taskman/releases).
-2. From the project root, run: `taskman project:init --executable <path-to-taskman>`. This writes `.cursor/mcp.json`, creates the database, and generates `.cursor/rules/` and `.cursor/agents/`.
+2. From the project root, run: `/path/to/taskman project:init` (or on Windows `C:\path\to\taskman.exe project:init`). Taskman is not installed on the system nor in PATH — use the path where you extracted it. This writes `.cursor/mcp.json`, creates the database, and generates `.cursor/rules/` and `.cursor/agents/`.
 3. Reload Cursor so the MCP server is loaded.
 4. Use Taskman via the agent (phases, milestones, tasks).
 

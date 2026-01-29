@@ -42,13 +42,15 @@ If errors occur (e.g. corrupted database or orphan `.db-journal`), see [BUILD.md
 
 ### Bootstrap a new project (`project:init`)
 
-Runs in order: `mcp:config` (if `--executable` is given), `init`, `rules:generate`, `agents:generate`. Use this to set up a new project for use with Cursor and the agent. Then reload Cursor so the MCP server is loaded.
+Runs in order: `mcp:config` (using the current executable path by default), `init`, `rules:generate`, `agents:generate`. Use this to set up a new project for use with Cursor and the agent. Then reload Cursor so the MCP server is loaded.
+
+If taskman is not in PATH, run it by its full path:
 
 ```bash
-taskman project:init --executable /path/to/taskman
+/path/to/taskman project:init
 ```
 
-Without `--executable`, MCP config is skipped; run `taskman mcp:config --executable <path>` separately to configure Cursor.
+On Windows: `C:\path\to\taskman.exe project:init`. You can override the executable path for MCP config with `--executable <path>` if needed.
 
 ### Generate a demo database
 
