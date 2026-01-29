@@ -148,4 +148,4 @@ echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"taskman_in
 
 ---
 
-See also: [README](../README.md), [CLI Guide](USAGE_CLI.md), [Web Interface](USAGE_WEB.md). Users: [User changelog](CHANGELOG_USER.md). Developers: [BUILD](BUILD.md), [CHANGELOG](../CHANGELOG.md).
+See also: [README](../README.md), [CLI Guide](usage_cli.md), [Web Interface](usage_web.md). Users: [User changelog](changelog_user.md). Developers: [build](build.md), [CHANGELOG](../CHANGELOG.md).

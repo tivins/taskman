@@ -2,7 +2,7 @@
 
 **Taskman** is a command-line tool to manage project phases, milestones, and tasks in a SQLite database. It outputs JSON or plain text, suitable for integration with agents (project-manager, developers, writers, etc.).
 
-For build and run instructions, see [BUILD.md](BUILD.md).
+For build and run instructions, see [build.md](build.md).
 
 ---
 
@@ -38,7 +38,7 @@ Creates the `phases`, `milestones`, `tasks`, `task_deps`, and `task_notes` table
 taskman init
 ```
 
-If errors occur (e.g. corrupted database or orphan `.db-journal`), see [BUILD.md](BUILD.md). When using taskman from **Cursor's agent**, `TASKMAN_JOURNAL_MEMORY=1` often fixes "disk I/O error" (see BUILD.md).
+If errors occur (e.g. corrupted database or orphan `.db-journal`), see [build.md](build.md). When using taskman from **Cursor's agent**, `TASKMAN_JOURNAL_MEMORY=1` often fixes "disk I/O error" (see build.md).
 
 ### Bootstrap a new project (`project:init`)
 
@@ -409,4 +409,4 @@ taskman milestone:edit M1 --reached 1
 
 ---
 
-See also: [README](../README.md), [Web Interface](USAGE_WEB.md), [MCP Server](USAGE_MCP.md). Users: [User changelog](CHANGELOG_USER.md). Developers: [BUILD](BUILD.md), [CHANGELOG](../CHANGELOG.md).
+See also: [README](../README.md), [Web Interface](usage_web.md), [MCP Server](usage_mcp.md). Users: [User changelog](changelog_user.md). Developers: [build](build.md), [CHANGELOG](../CHANGELOG.md).

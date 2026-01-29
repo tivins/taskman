@@ -30,7 +30,7 @@ Ce dossier contient les définitions d'agents Cursor pour chaque rôle du systè
 
 Pour utiliser un agent de rôle dans Cursor :
 
-1. **Configurer le MCP taskman** dans votre configuration Cursor (voir [USAGE_MCP.md](../USAGE_MCP.md))
+1. **Configurer le MCP taskman** dans votre configuration Cursor (voir [usage_mcp.md](../../docs/usage_mcp.md))
 
 2. **Activer l'agent** en référençant le fichier correspondant dans votre contexte ou en l'ajoutant comme skill/règle
 

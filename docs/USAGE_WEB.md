@@ -183,4 +183,4 @@ The web interface provides:
 
 ---
 
-See also: [README](../README.md), [CLI Guide](USAGE_CLI.md), [MCP Server](USAGE_MCP.md). Users: [User changelog](CHANGELOG_USER.md). Developers: [BUILD](BUILD.md), [CHANGELOG](../CHANGELOG.md).
+See also: [README](../README.md), [CLI Guide](usage_cli.md), [MCP Server](usage_mcp.md). Users: [User changelog](changelog_user.md). Developers: [build](build.md), [CHANGELOG](../CHANGELOG.md).

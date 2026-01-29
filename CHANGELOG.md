@@ -27,7 +27,7 @@
 
 ### Changed
 
-- **Documentation**: README and docs (USAGE_MCP.md, usage.md, USAGE_CLI.md) updated with a 4-step quick start: download taskman → `/path/to/taskman project:init` → reload Cursor → use Taskman via the agent.
+- **Documentation**: README and docs (usage_mcp.md, usage.md, usage_cli.md) updated with a 4-step quick start: download taskman → `/path/to/taskman project:init` → reload Cursor → use Taskman via the agent.
 
 ---
 
@@ -148,7 +148,7 @@
 - **Project structure reorganization**: moved files embedded in the binary into a dedicated `embed/` folder to enable use of namespaces in `src/`:
   - `src/web/` → `embed/web/` (web assets: CSS and JavaScript files)
   - `docs/roles_agents/` → `embed/roles_agents/` (markdown files for agents)
-- Updated `CMakeLists.txt`, `scripts/embed_assets.py`, `scripts/embed_agents.py`, `src/web.cpp` and `docs/USAGE_WEB.md` to use the new paths
+- Updated `CMakeLists.txt`, `scripts/embed_assets.py`, `scripts/embed_agents.py`, `src/web.cpp` and `docs/usage_web.md` to use the new paths
 
 ## [0.19.0] - 2026-01-28
 
@@ -284,8 +284,8 @@
 
 ### Added
 
-- **TASKMAN_JOURNAL_MEMORY=1** and **CURSOR_AGENT**: when set, `PRAGMA journal_mode=MEMORY` is applied after opening the DB so SQLite does not create a `-journal` file on disk. Avoids "disk I/O error" in sandboxed environments (e.g. Cursor’s agent) where the journal file is blocked. Help (`taskman -h`) and docs/BUILD.md document these variables.
-- **docs/BUILD.md**: "disk I/O error when using taskman from Cursor’s agent" section (Options A/B/C: env inline, agent rules, CURSOR_AGENT auto)
+- **TASKMAN_JOURNAL_MEMORY=1** and **CURSOR_AGENT**: when set, `PRAGMA journal_mode=MEMORY` is applied after opening the DB so SQLite does not create a `-journal` file on disk. Avoids "disk I/O error" in sandboxed environments (e.g. Cursor’s agent) where the journal file is blocked. Help (`taskman -h`) and docs/build.md document these variables.
+- **docs/build.md**: "disk I/O error when using taskman from Cursor’s agent" section (Options A/B/C: env inline, agent rules, CURSOR_AGENT auto)
 - **USAGE.md**: `TASKMAN_JOURNAL_MEMORY`, `CURSOR_AGENT` in the env table; tip for Cursor agent
 - **Tests**: integration test with `TASKMAN_JOURNAL_MEMORY=1` (init, phase:add, phase:list)
 
@@ -316,7 +316,7 @@
 
 ### Added
 
-- docs/CHANGELOG_USER.md: user-facing changelog (commands, options, features; no implementation details)
+- docs/changelog_user.md: user-facing changelog (commands, options, features; no implementation details)
 
 ### Changed
 
@@ -379,7 +379,7 @@
   - `milestone:list`: [--phase <id>] → SELECT (filtered if --phase); JSON output (id, phase_id, name, criterion, reached)
 - DB layer: `Database::query(sql, params)` (parameterized SELECT); `sqlite3_open_v2` + `PRAGMA busy_timeout=3000`; error log if `sqlite3_close` fails
 - Unit tests: `test_milestone.cpp` (milestone:add, milestone:edit, milestone:list); `Database::query` with parameters in `test_db.cpp`
-- docs/docs/BUILD.md: Troubleshooting section (`.db-journal` file, "disk I/O error")
+- docs/build.md: Troubleshooting section (`.db-journal` file, "disk I/O error")
 
 ## [0.4.0] — 2026-01-25
 

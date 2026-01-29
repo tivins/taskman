@@ -1,6 +1,6 @@
 # Taskman Usage — Detailed Overview
 
-This document describes in detail how Taskman is used: data model, interfaces (CLI, MCP, Web), workflows, and task assignment rules. For per-interface user guides, see [USAGE_CLI.md](USAGE_CLI.md), [USAGE_MCP.md](USAGE_MCP.md), and [USAGE_WEB.md](USAGE_WEB.md).
+This document describes in detail how Taskman is used: data model, interfaces (CLI, MCP, Web), workflows, and task assignment rules. For per-interface user guides, see [usage_cli.md](usage_cli.md), [usage_mcp.md](usage_mcp.md), and [usage_web.md](usage_web.md).
 
 ---
 
@@ -53,7 +53,7 @@ Taskman is a project management tool (phases, milestones, tasks with dependencie
 ### 3.1 CLI
 
 - **When**: Scripts, CI, tests, one-off terminal operations.
-- **Commands**: See [USAGE_CLI.md](USAGE_CLI.md) (summary at end of section 7). All operations (init, phases, milestones, tasks, deps, notes, demo) are available.
+- **Commands**: See [usage_cli.md](usage_cli.md) (summary at end of section 7). All operations (init, phases, milestones, tasks, deps, notes, demo) are available.
 - **Formats**: JSON (default for lists/details) or `text` for tasks (human-readable).
 - **Environment variables**: `TASKMAN_DB_NAME`, `TASKMAN_JOURNAL_MEMORY` (recommended `1` in agent/sandbox context), `CURSOR_AGENT` (Cursor sets journal in memory automatically).
 
@@ -62,15 +62,15 @@ Taskman is a project management tool (phases, milestones, tasks with dependencie
 - **When**: Normal use by an AI assistant (e.g. Cursor) on behalf of a human.
 - **Protocol**: MCP in stdio mode; the server reads JSON-RPC from stdin and writes responses to stdout.
 - **Tools**: Each CLI command (except `web`) is exposed as a tool with the `taskman_` prefix (e.g. `taskman_task_list`, `taskman_phase_add`, `taskman_rules_generate`, `taskman_agents_generate`, `taskman_project_init`). Arguments match the CLI and are passed as JSON in `arguments` of `tools/call`.
-- **Cursor configuration**: `taskman mcp:config --executable <path>` or manual configuration in the MCP file (e.g. `~/.cursor/mcp.json`). Details in [USAGE_MCP.md](USAGE_MCP.md).
+- **Cursor configuration**: `taskman mcp:config --executable <path>` or manual configuration in the MCP file (e.g. `~/.cursor/mcp.json`). Details in [usage_mcp.md](usage_mcp.md).
 - **Role agents**: Files in `embed/roles_agents/` describe how each role uses MCP (role filters, common actions, creating assigned or unassigned tasks). See [Agents README](../embed/roles_agents/README.md).
 
 ### 3.3 Web
 
 - **When**: Human browsing (task list, filters, task detail, dependencies, notes).
 - **Starting**: `taskman web` (optionally `--host`, `--port`, `--serve-assets-from` for prod/dev).
-- **Features**: Pagination, filters (phase, milestone, status, role), task detail with deps and notes. No documented editing in USAGE_WEB; editing remains via CLI/MCP.
-- **Endpoint details**: [USAGE_WEB.md](USAGE_WEB.md).
+- **Features**: Pagination, filters (phase, milestone, status, role), task detail with deps and notes. No documented editing in usage_web; editing remains via CLI/MCP.
+- **Endpoint details**: [usage_web.md](usage_web.md).
 
 ---
 
@@ -134,6 +134,6 @@ These rules are carried by the agents in `embed/roles_agents/` (expected behavio
 
 ## 7. References
 
-- **User guides**: [USAGE_CLI.md](USAGE_CLI.md), [USAGE_MCP.md](USAGE_MCP.md), [USAGE_WEB.md](USAGE_WEB.md).
-- **Build**: [BUILD.md](BUILD.md).
+- **User guides**: [usage_cli.md](usage_cli.md), [usage_mcp.md](usage_mcp.md), [usage_web.md](usage_web.md).
+- **Build**: [build.md](build.md).
 - **Human users via agents**: [users.md](users.md).

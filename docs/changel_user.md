@@ -4,14 +4,14 @@ User-facing changes: new commands, options, formats, and behavior.
 
 ## [0.28.1] - 2026-01-29
 
-- **taskman project:init** : le chemin de l’exécutable est détecté automatiquement ; plus besoin de `--executable` pour générer `.cursor/mcp.json`. Une seule commande `/path/to/taskman project:init` suffit.
-- **Windows** : correction quand le chemin de taskman dépasse 260 caractères (mcp:config n’était pas exécuté). Désormais un buffer plus grand est utilisé et mcp.json est bien généré.
+- **taskman project:init** : le chemin de l'exécutable est détecté automatiquement ; plus besoin de `--executable` pour générer `.cursor/mcp.json`. Une seule commande `/path/to/taskman project:init` suffit.
+- **Windows** : correction quand le chemin de taskman dépasse 260 caractères (mcp:config n'était pas exécuté). Désormais un buffer plus grand est utilisé et mcp.json est bien généré.
 
 ## [0.28.0] - 2026-01-29
 
-- **taskman project:init** [--executable \<path\>]: bootstrap d’un nouveau projet. Exécute dans l’ordre : `mcp:config` (si `--executable` fourni), `init`, `rules:generate`, `agents:generate`. Puis recharger Cursor pour utiliser Taskman via l’agent.
-- **Outils MCP** : `taskman_rules_generate`, `taskman_agents_generate` (option `output`), et `taskman_project_init` (option `executable`). L’agent peut désormais « générer les règles » ou « récupérer les agents » via MCP.
-- **Documentation** : démarrage rapide en 4 étapes (README, USAGE_MCP.md, usage.md) : télécharger taskman → `/path/to/taskman project:init` → recharger Cursor → utiliser Taskman via l’agent.
+- **taskman project:init** [--executable \<path\>]: bootstrap d'un nouveau projet. Exécute dans l'ordre : `mcp:config` (si `--executable` fourni), `init`, `rules:generate`, `agents:generate`. Puis recharger Cursor pour utiliser Taskman via l'agent.
+- **Outils MCP** : `taskman_rules_generate`, `taskman_agents_generate` (option `output`), et `taskman_project_init` (option `executable`). L'agent peut désormais « générer les règles » ou « récupérer les agents » via MCP.
+- **Documentation** : démarrage rapide en 4 étapes (README, usage_mcp.md, usage.md) : télécharger taskman → `/path/to/taskman project:init` → recharger Cursor → utiliser Taskman via l'agent.
 
 ## [0.27.0] - 2026-01-29
 
@@ -28,7 +28,7 @@ User-facing changes: new commands, options, formats, and behavior.
 
 ## [0.17.0] - 2026-01-27
 
-- **created_at / updated_at** : chaque phase, milestone et tâche affiche désormais une date de création (`created_at`) et une date de dernière modification (`updated_at`). Ces champs sont remplis et mis à jour automatiquement (non modifiables). Ils apparaissent en CLI (JSON et `--format text`), dans l’API web (GET /phases, /milestones, /tasks, etc.) et dans les réponses des outils MCP.
+- **created_at / updated_at** : chaque phase, milestone et tâche affiche désormais une date de création (`created_at`) et une date de dernière modification (`updated_at`). Ces champs sont remplis et mis à jour automatiquement (non modifiables). Ils apparaissent en CLI (JSON et `--format text`), dans l'API web (GET /phases, /milestones, /tasks, etc.) et dans les réponses des outils MCP.
 
 ## [0.15.0] - 2026-01-27
 
@@ -44,11 +44,11 @@ User-facing changes: new commands, options, formats, and behavior.
 
 ## [0.12.0] - 2026-01-25
 
-- **taskman mcp** : mode serveur MCP (Model Context Protocol) sur stdio. Lit les requêtes JSON-RPC sur stdin, écrit les réponses sur stdout. Implémente le protocole MCP 2025-11-25 avec les méthodes `initialize`, `notifications/initialized`, `tools/list`, `tools/call`, et `ping`. Expose les 14 commandes CLI comme outils MCP (`taskman_init`, `taskman_phase_*`, `taskman_milestone_*`, `taskman_task_*`, `taskman_task_dep_*`, `taskman_demo_generate`). À configurer comme serveur MCP dans Cursor (commande `taskman`, args `mcp`). Voir [USAGE_MCP.md](USAGE_MCP.md) pour la configuration.
+- **taskman mcp** : mode serveur MCP (Model Context Protocol) sur stdio. Lit les requêtes JSON-RPC sur stdin, écrit les réponses sur stdout. Implémente le protocole MCP 2025-11-25 avec les méthodes `initialize`, `notifications/initialized`, `tools/list`, `tools/call`, et `ping`. Expose les 14 commandes CLI comme outils MCP (`taskman_init`, `taskman_phase_*`, `taskman_milestone_*`, `taskman_task_*`, `taskman_task_dep_*`, `taskman_demo_generate`). À configurer comme serveur MCP dans Cursor (commande `taskman`, args `mcp`). Voir [usage_mcp.md](usage_mcp.md) pour la configuration.
 
 ## [0.11.1] - 2026-01-25
 
-- **Vue liste (web)** : à côté du Statut, affichage de « (blocked) » si la tâche dépend d’une tâche non-`done` (utilisation de `/task_deps` et `/task/:id`).
+- **Vue liste (web)** : à côté du Statut, affichage de « (blocked) » si la tâche dépend d'une tâche non-`done` (utilisation de `/task_deps` et `/task/:id`).
 
 ## [0.11.0] - 2026-01-25
 
@@ -56,11 +56,11 @@ User-facing changes: new commands, options, formats, and behavior.
 
 ## [0.10.0] - 2026-01-25
 
-- **taskman web** [--host \<addr\>] [--port \<n\>] : démarre un serveur HTTP (défaut http://127.0.0.1:8080). La page d’accueil charge une interface qui consulte les tâches via l’API JSON (GET /tasks, GET /task/\<id\>).
+- **taskman web** [--host \<addr\>] [--port \<n\>] : démarre un serveur HTTP (défaut http://127.0.0.1:8080). La page d'accueil charge une interface qui consulte les tâches via l'API JSON (GET /tasks, GET /task/\<id\>).
 
 ## [0.9.6] - 2026-01-25
 
-- **Cursor agent / "disk I/O error"**: set `TASKMAN_JOURNAL_MEMORY=1` when running taskman from Cursor’s agent (or ensure `CURSOR_AGENT` is set) to avoid SQLite "disk I/O error" in sandboxed environments. See [BUILD.md](BUILD.md).
+- **Cursor agent / "disk I/O error"**: set `TASKMAN_JOURNAL_MEMORY=1` when running taskman from Cursor's agent (or ensure `CURSOR_AGENT` is set) to avoid SQLite "disk I/O error" in sandboxed environments. See [build.md](build.md).
 
 ## [0.9.5] - 2026-01-25
 
@@ -76,7 +76,7 @@ User-facing changes: new commands, options, formats, and behavior.
 
 ## [0.9.1] - 2026-01-25
 
-- User guide: [USAGE_CLI.md](USAGE_CLI.md), [USAGE_WEB.md](USAGE_WEB.md), [USAGE_MCP.md](USAGE_MCP.md).
+- User guide: [usage_cli.md](usage_cli.md), [usage_web.md](usage_web.md), [usage_mcp.md](usage_mcp.md).
 
 ## [0.9.0] - 2026-01-25
 
@@ -100,7 +100,7 @@ User-facing changes: new commands, options, formats, and behavior.
 ## [0.5.0] - 2026-01-25
 
 - **Milestones**: `milestone:add` (--id, --phase, --name, --criterion, --reached), `milestone:edit`, `milestone:list [--phase]`.
-- [BUILD.md](BUILD.md): troubleshooting for "disk I/O error" and `.db-journal` files.
+- [build.md](build.md): troubleshooting for "disk I/O error" and `.db-journal` files.
 
 ## [0.3.0] - 2026-01-25
 

@@ -17,12 +17,12 @@ Project management for AI-assisted workflows: phases, milestones, and role-assig
 
 * [Human users via agents](docs/users.md): who uses Taskman and which agent roles
 * [Usage overview](docs/usage.md): data model, interfaces, workflows, task assignment
-* [MCP Server](docs/USAGE_MCP.md): integration with AI assistants
-* [CLI Usage](docs/USAGE_CLI.md): command-line interface, commands, options, formats
-* [Web Interface](docs/USAGE_WEB.md): browser-based UI (read-only - edit planned)
-* [Build](docs/BUILD.md): download, build and run instructions
+* [MCP Server](docs/usage_mcp.md): integration with AI assistants
+* [CLI Usage](docs/usage_cli.md): command-line interface, commands, options, formats
+* [Web Interface](docs/usage_web.md): browser-based UI (read-only - edit planned)
+* [Build](docs/build.md): download, build and run instructions
 
 ## Changes
 
-* [User changelog](docs/CHANGELOG_USER.md) (non-developer changes)
+* [User changelog](docs/changelog_user.md) (non-developer changes)
 * [Global Changelog](CHANGELOG.md) (all changes)
