@@ -219,7 +219,7 @@ TEST_CASE("MCP — tools/list", "[mcp][integration]") {
     REQUIRE(resp.contains("result"));
     REQUIRE(resp["result"].contains("tools"));
     REQUIRE(resp["result"]["tools"].is_array());
-    REQUIRE(resp["result"]["tools"].size() == 16u);
+    REQUIRE(resp["result"]["tools"].size() == 19u);
 
     // Vérifier quelques outils
     bool found_init = false, found_phase_add = false, found_task_list = false, found_demo_generate = false;

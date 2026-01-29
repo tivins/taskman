@@ -7,10 +7,7 @@ Project management for AI-assisted workflows: phases, milestones, and role-assig
 1. **Download taskman** — [Latest release](https://github.com/tivins/taskman/releases) (Windows, Linux, macOS).
 2. **Bootstrap the project** — From your project root, run taskman by its full path:
    ```bash
-   # Linux/macOS
    /path/to/taskman project:init
-   # Windows
-   C:\path\to\taskman.exe project:init
    ```
    This writes `.cursor/mcp.json`, creates the database, and generates `.cursor/rules/` and `.cursor/agents/`.
 3. **Reload Cursor** — So the MCP server is loaded.
