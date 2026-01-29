@@ -1,0 +1,63 @@
+---
+description: Formater les messages de commit selon le format standard du projet
+alwaysApply: false
+---
+
+# Format des messages de commit
+
+Respecter la structure suivante pour chaque message de commit. **Le message de commit doit obligatoirement être rédigé en anglais** (teaser et corps).
+
+## Structure
+
+1. **Ligne 1** : `[version]` suivi d’un espace puis d’un teaser très court décrivant les changements (sans guillemets dans le message réel ; le teaser doit tenir en une ligne).
+2. **Ligne 2** : vide.
+3. **Lignes 3 et suivantes** : liste linéaire des changements en markdown, un élément par ligne avec un tiret (`-`).
+
+## Exemple
+
+```
+[1.2.0] Add commit message format rule
+
+- New rule embed/rules/commit-message.mdc
+- Document expected format for commit messages
+- Line 1: version + teaser, blank line 2, then markdown list
+```
+
+## Règles
+
+- **Langue** : rédiger tout le message (teaser et corps) en **anglais**.
+- **Version** : indiquer la version ciblée entre crochets (ex. `[1.0.0]`, `[2.1.3]`). Utiliser le numéro de version qui sera publié ou celui de la release en cours.
+- **Teaser** : une seule ligne, concis, sans point final. Éviter les formulations vagues (« corrections », « fix ») ; privilégier un résumé actionnable (« Add X », « Fix Y in Z »).
+- **Ligne vide** : obligatoire entre le teaser et le corps pour que la première ligne soit bien utilisée comme sujet dans les outils (Git, GitHub, etc.).
+- **Corps** : liste en markdown avec des tirets (`- change`). Un changement par ligne. Rester factuel et lisible. En anglais.
+
+## Mauvais exemples
+
+```
+[1.0.0] fix
+- fixed stuff
+```
+→ Teaser trop vague, pas de ligne vide avant le corps.
+
+```
+[1.0.0] Correction du bug d'affichage
+
+Correction du bug.
+```
+→ Le corps n’est pas une liste en tirets markdown. De plus, le message doit être en anglais.
+
+```
+[1.0.0] Fix display bug
+
+Fixed the bug.
+```
+→ Le corps n’est pas une liste en tirets markdown.
+
+## Bon exemple
+
+```
+[1.0.0] Fix list display bug in detail view
+
+- Correct bullet list rendering in detail view
+- Remove vertical offset on first line
+```
