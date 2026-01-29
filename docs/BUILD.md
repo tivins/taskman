@@ -48,7 +48,7 @@ cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
 
 ```shell
 cmake --build build --config Release --target tests
-cd build && ctest -C Release -V && cd ..
+cd build ; ctest -C Release -V ; cd ..
 ```
 
 #### Build and run taskman

@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.27.0] - 2026-01-29
+
+- **taskman rules:generate** [--output <dir>]: génère les fichiers rules Cursor dans `.cursor/rules/` (ou le répertoire spécifié). Les fichiers sont extraits depuis les assets intégrés dans le binaire (sources dans `embed/rules/*.mdc`). Utile pour synchroniser les règles de code (ex. SOLID, RAII) avec le répertoire Cursor, de la même manière que `agents:generate` pour les agents.
+
 ## [0.18.0] - 2026-01-27
 
 - **Notes sur les tâches** : `task:note:add <task-id> --content "..." [--kind completion|progress|issue] [--role <role>]` ajoute une note à une tâche ; `task:note:list <task-id>` liste les notes (ordre par date). Les outils MCP `taskman_task_note_add` et `taskman_task_note_list` exposent les mêmes actions. À l'ajout d'une note, la date de mise à jour (`updated_at`) de la tâche est rafraîchie.

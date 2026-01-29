@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.27.0] - 2026-01-29
+
+### Added
+
+- **rules:generate**: commande CLI et pipeline d’embed pour les rules Cursor, symétrique à `agents:generate`. Les fichiers dans `embed/rules/` (`.mdc` et `.md`) sont intégrés au binaire via `scripts/embed_rules.py` → `rules.generated.h`, et la commande `taskman rules:generate [--output <dir>]` les écrit dans `.cursor/rules/` (ou le répertoire spécifié). Fichiers ajoutés : `scripts/embed_rules.py`, `src/util/rules.hpp`, `src/util/rules.cpp` ; CMake : génération de `rules.generated.h` et lien avec l’exécutable taskman.
+
 ## [0.26.0] - 2026-01-28
 
 ### Changed

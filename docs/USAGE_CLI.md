@@ -359,6 +359,8 @@ Error messages are written to standard error (`stderr`).
 | `task:note:add`   | Add a note to a task                         |
 | `task:note:list`  | List notes for a task                        |
 | `demo:generate`   | Generate a demo database                     |
+| `agents:generate`| Generate .cursor/agents/ files (from embedded agents) |
+| `rules:generate` | Generate .cursor/rules/ files (from embedded rules)    |
 
 ---
 

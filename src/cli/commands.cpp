@@ -11,6 +11,7 @@
 #include "core/note/note.hpp"
 #include "util/demo.hpp"
 #include "util/agents.hpp"
+#include "util/rules.hpp"
 #include "mcp/mcp_config.hpp"
 #include "web/web.hpp"
 #include "mcp/mcp.hpp"
@@ -234,6 +235,18 @@ public:
     }
 };
 
+class RulesGenerateCommand : public Command {
+public:
+    std::string name() const override { return "rules:generate"; }
+    std::string summary() const override { return "Generate .cursor/rules/ files"; }
+    bool requires_database() const override { return false; }
+    
+    int execute(int argc, char* argv[], Database* db) override {
+        (void)db; // Non utilisé
+        return cmd_rules_generate(argc, argv);
+    }
+};
+
 class McpConfigCommand : public Command {
 public:
     std::string name() const override { return "mcp:config"; }
@@ -282,6 +295,7 @@ void register_all_commands(CommandRegistry& registry) {
     registry.register_command(std::make_unique<TaskNoteListCommand>());
     registry.register_command(std::make_unique<DemoGenerateCommand>());
     registry.register_command(std::make_unique<AgentsGenerateCommand>());
+    registry.register_command(std::make_unique<RulesGenerateCommand>());
     registry.register_command(std::make_unique<McpConfigCommand>());
     registry.register_command(std::make_unique<McpCommand>());
     registry.register_command(std::make_unique<WebCommand>());

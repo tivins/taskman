@@ -109,6 +109,21 @@ add_custom_command(
 )
 
 # -----------------------------------------------------------------------------
+# Rule files: embed/rules/*.mdc -> rules.generated.h (embedded in binary)
+# -----------------------------------------------------------------------------
+file(GLOB RULE_FILES "${CMAKE_SOURCE_DIR}/embed/rules/*.mdc" "${CMAKE_SOURCE_DIR}/embed/rules/*.md")
+set(RULES_HEADER "${CMAKE_BINARY_DIR}/rules.generated.h")
+add_custom_command(
+  OUTPUT "${RULES_HEADER}"
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/embed_rules.py
+    --rules-dir ${CMAKE_SOURCE_DIR}/embed/rules
+    -o "${RULES_HEADER}"
+  DEPENDS ${CMAKE_SOURCE_DIR}/scripts/embed_rules.py
+          ${RULE_FILES}
+  COMMENT "Embedding rule files (embed/rules/*.mdc) into header"
+)
+
+# -----------------------------------------------------------------------------
 # Exécutable taskman
 # -----------------------------------------------------------------------------
 add_executable(taskman
@@ -169,10 +184,12 @@ add_executable(taskman
   src/util/demo.cpp
   src/util/formats.cpp
   src/util/roles.cpp
-  
+  src/util/rules.cpp
+
   # Assets générés
   "${WEB_ASSETS_HEADER}"
   "${AGENTS_HEADER}"
+  "${RULES_HEADER}"
 )
 if(MSVC)
   target_compile_definitions(taskman PRIVATE _CRT_SECURE_NO_WARNINGS)
