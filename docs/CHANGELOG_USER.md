@@ -2,11 +2,16 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.28.1] - 2026-01-29
+
+- **taskman project:init** : le chemin de l’exécutable est détecté automatiquement ; plus besoin de `--executable` pour générer `.cursor/mcp.json`. Une seule commande `/path/to/taskman project:init` suffit.
+- **Windows** : correction quand le chemin de taskman dépasse 260 caractères (mcp:config n’était pas exécuté). Désormais un buffer plus grand est utilisé et mcp.json est bien généré.
+
 ## [0.28.0] - 2026-01-29
 
 - **taskman project:init** [--executable \<path\>]: bootstrap d’un nouveau projet. Exécute dans l’ordre : `mcp:config` (si `--executable` fourni), `init`, `rules:generate`, `agents:generate`. Puis recharger Cursor pour utiliser Taskman via l’agent.
 - **Outils MCP** : `taskman_rules_generate`, `taskman_agents_generate` (option `output`), et `taskman_project_init` (option `executable`). L’agent peut désormais « générer les règles » ou « récupérer les agents » via MCP.
-- **Documentation** : démarrage rapide en 4 étapes (README, USAGE_MCP.md, usage.md) : télécharger taskman → `taskman project:init --executable \<path\>` → recharger Cursor → utiliser Taskman via l’agent.
+- **Documentation** : démarrage rapide en 4 étapes (README, USAGE_MCP.md, usage.md) : télécharger taskman → `/path/to/taskman project:init` → recharger Cursor → utiliser Taskman via l’agent.
 
 ## [0.27.0] - 2026-01-29
 

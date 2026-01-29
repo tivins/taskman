@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.28.1] - 2026-01-29
+
+### Added
+
+- **get_executable_path()**: Utility (Windows/Linux/macOS) to obtain the absolute path of the running executable. Used by `project:init` so `mcp:config` runs without requiring `--executable`.
+
+### Changed
+
+- **project:init**: Now uses the detected executable path by default; `--executable` is only needed to override. A single run of `taskman project:init` (or `/path/to/taskman project:init`) generates `.cursor/mcp.json` automatically.
+- **Documentation**: Quick start shows `/path/to/taskman project:init` to indicate taskman is not in PATH; mcp.json is generated without `--executable`.
+
+### Fixed
+
+- **Windows**: `get_executable_path()` returned empty when the executable path exceeded MAX_PATH (260 characters). Now uses a larger buffer (32768) so long paths (e.g. under `.cursor/projects/...`) are resolved correctly and mcp:config is no longer skipped.
+
+---
+
 ## [0.28.0] - 2026-01-29
 
 ### Added
@@ -10,7 +27,7 @@
 
 ### Changed
 
-- **Documentation**: README and docs (USAGE_MCP.md, usage.md, USAGE_CLI.md) updated with a 4-step quick start: download taskman → `taskman project:init --executable <path>` → reload Cursor → use Taskman via the agent.
+- **Documentation**: README and docs (USAGE_MCP.md, usage.md, USAGE_CLI.md) updated with a 4-step quick start: download taskman → `/path/to/taskman project:init` → reload Cursor → use Taskman via the agent.
 
 ---
 
