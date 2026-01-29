@@ -2,7 +2,7 @@
 
 **Date**: 2026-01-28  
 **Statut**: Accepté  
-**Décideurs**: @Tivins, Équipe de développement  
+**Décideurs**: [@Tivins](https://github.com/tivins), Équipe de développement  
 **Tags**: architecture, SOLID, YAGNI, dépendances
 
 ## Contexte

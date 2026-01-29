@@ -287,6 +287,48 @@ void McpToolRegistry::initialize_tools() {
         tools_.push_back(t);
         name_to_index_[t.name] = tools_.size() - 1;
     }
+
+    // taskman_rules_generate → rules:generate
+    {
+        McpToolDefinition t;
+        t.name = "taskman_rules_generate";
+        t.cli_command = "rules:generate";
+        t.description = "Generate .cursor/rules/ files from embedded rules. Run to install or update Cursor rules in the project.";
+        std::map<std::string, nlohmann::json> props;
+        props["output"] = nlohmann::json{{"type", "string"}, {"description", "Output directory (default: .cursor/rules)"}};
+        t.inputSchema = make_schema(props);
+        t.positional_keys = {};
+        tools_.push_back(t);
+        name_to_index_[t.name] = tools_.size() - 1;
+    }
+
+    // taskman_agents_generate → agents:generate
+    {
+        McpToolDefinition t;
+        t.name = "taskman_agents_generate";
+        t.cli_command = "agents:generate";
+        t.description = "Generate .cursor/agents/ files from embedded agents. Run to install or update Cursor role agents in the project.";
+        std::map<std::string, nlohmann::json> props;
+        props["output"] = nlohmann::json{{"type", "string"}, {"description", "Output directory (default: .cursor/agents)"}};
+        t.inputSchema = make_schema(props);
+        t.positional_keys = {};
+        tools_.push_back(t);
+        name_to_index_[t.name] = tools_.size() - 1;
+    }
+
+    // taskman_project_init → project:init
+    {
+        McpToolDefinition t;
+        t.name = "taskman_project_init";
+        t.cli_command = "project:init";
+        t.description = "Bootstrap a new project: writes .cursor/mcp.json (if executable given), creates database tables, generates .cursor/rules/ and .cursor/agents/. User should reload Cursor afterward to use Taskman via the agent.";
+        std::map<std::string, nlohmann::json> props;
+        props["executable"] = nlohmann::json{{"type", "string"}, {"description", "Absolute path to taskman executable (for MCP config); optional. If omitted, mcp:config is skipped."}};
+        t.inputSchema = make_schema(props);
+        t.positional_keys = {};
+        tools_.push_back(t);
+        name_to_index_[t.name] = tools_.size() - 1;
+    }
 }
 
 std::vector<nlohmann::json> McpToolRegistry::list_tools_json() const {

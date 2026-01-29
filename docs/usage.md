@@ -43,7 +43,7 @@ Taskman is a project management tool (phases, milestones, tasks with dependencie
 ### 2.4 Database
 
 - **File**: By default `project_tasks.db` in the current directory; configurable via `TASKMAN_DB_NAME`.
-- **Initialization**: `taskman init` (or MCP tool `taskman_init`) creates the tables if needed.
+- **Initialization**: `taskman init` (or MCP tool `taskman_init`) creates the tables if needed. For a full bootstrap (MCP config, DB, rules, agents), use `taskman project:init --executable <path>` (or `taskman_project_init` via MCP).
 - **Demo**: `taskman demo:generate` (or `taskman_demo_generate`) recreates a sample database (phases, milestones, tasks, dependencies, notes).
 
 ---
@@ -61,7 +61,7 @@ Taskman is a project management tool (phases, milestones, tasks with dependencie
 
 - **When**: Normal use by an AI assistant (e.g. Cursor) on behalf of a human.
 - **Protocol**: MCP in stdio mode; the server reads JSON-RPC from stdin and writes responses to stdout.
-- **Tools**: Each CLI command (except `web`) is exposed as a tool with the `taskman_` prefix (e.g. `taskman_task_list`, `taskman_phase_add`). Arguments match the CLI and are passed as JSON in `arguments` of `tools/call`.
+- **Tools**: Each CLI command (except `web`) is exposed as a tool with the `taskman_` prefix (e.g. `taskman_task_list`, `taskman_phase_add`, `taskman_rules_generate`, `taskman_agents_generate`, `taskman_project_init`). Arguments match the CLI and are passed as JSON in `arguments` of `tools/call`.
 - **Cursor configuration**: `taskman mcp:config --executable <path>` or manual configuration in the MCP file (e.g. `~/.cursor/mcp.json`). Details in [USAGE_MCP.md](USAGE_MCP.md).
 - **Role agents**: Files in `embed/roles_agents/` describe how each role uses MCP (role filters, common actions, creating assigned or unassigned tasks). See [Agents README](../embed/roles_agents/README.md).
 
@@ -76,26 +76,33 @@ Taskman is a project management tool (phases, milestones, tasks with dependencie
 
 ## 4. Typical Workflows
 
-### 4.1 First use (demo)
+### 4.1 First use (bootstrap a new project)
+
+1. Download taskman from the [latest release](https://github.com/tivins/taskman/releases).
+2. From the project root, run: `taskman project:init --executable <path-to-taskman>`. This writes `.cursor/mcp.json`, creates the database, and generates `.cursor/rules/` and `.cursor/agents/`.
+3. Reload Cursor so the MCP server is loaded.
+4. Use Taskman via the agent (phases, milestones, tasks).
+
+### 4.2 First use (demo)
 
 1. Generate the demo database: `taskman demo:generate` (or `taskman_demo_generate` via MCP).
 2. Browse phases / milestones / tasks: CLI `phase:list`, `milestone:list`, `task:list` or equivalent MCP tools, or Web interface.
 
-### 4.2 New project (empty database)
+### 4.3 New project (empty database, manual setup)
 
 1. `taskman init`.
 2. Create phases (`phase:add` / `taskman_phase_add`).
 3. Create milestones (`milestone:add` / `taskman_milestone_add`).
 4. Create tasks (`task:add` / `taskman_task_add`), optionally add dependencies (`task:dep:add` / `taskman_task_dep_add`).
 
-### 4.3 Use by an agent on behalf of a role
+### 4.4 Use by an agent on behalf of a role
 
 1. The human configures the Taskman MCP and enables the role agent (e.g. developer, project-manager) in Cursor.
 2. The agent lists tasks for that role: `taskman_task_list` with `role: "<role>"` (and optionally `phase`, `status`).
 3. For a given task: `taskman_task_get`, then update status or description via `taskman_task_edit`, add notes via `taskman_task_note_add`.
 4. Creating tasks: either with `role: "<role>"` (assigned to the role) or without `role` (unassigned task, to be validated by the project manager).
 
-### 4.4 Project manager role
+### 4.5 Project manager role
 
 - Create phases and milestones.
 - Create tasks assigned to **any role** (including themselves).

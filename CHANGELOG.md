@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.28.0] - 2026-01-29
+
+### Added
+
+- **project:init**: Bootstrap command that runs in order: `mcp:config` (if `--executable` given), `init`, `rules:generate`, `agents:generate`. Use to set up a new project for Cursor and the agent; then reload Cursor.
+- **MCP tools** for rules and agents: `taskman_rules_generate`, `taskman_agents_generate` (optional `output`), and `taskman_project_init` (optional `executable`). Rules and agents generation is now available via MCP so the agent can "generate rules" or "retrieve agents" on request.
+- **MCP executor**: Opens the database only when the command requires it, so `taskman_rules_generate` and `taskman_agents_generate` work before the project DB exists.
+
+### Changed
+
+- **Documentation**: README and docs (USAGE_MCP.md, usage.md, USAGE_CLI.md) updated with a 4-step quick start: download taskman → `taskman project:init --executable <path>` → reload Cursor → use Taskman via the agent.
+
+---
+
 ## [0.27.0] - 2026-01-29
 
 ### Added

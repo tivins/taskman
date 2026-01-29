@@ -20,7 +20,7 @@ The server implements the MCP specification (version `2025-11-25`):
 
 - **`initialize`**: Handshake with protocol version and server info
 - **`notifications/initialized`**: Notification after initialization
-- **`tools/list`**: Returns the list of 16 available tools
+- **`tools/list`**: Returns the list of 19 available tools
 - **`tools/call`**: Executes a tool with JSON arguments
 - **`ping`**: Health check (returns empty result)
 
@@ -30,26 +30,42 @@ The server implements the MCP specification (version `2025-11-25`):
 
 All CLI commands (except `web`) are exposed as MCP tools with the `taskman_` prefix:
 
-| CLI Command      | MCP Tool Name              |
-|------------------|---------------------------|
-| `init`           | `taskman_init`            |
-| `phase:add`      | `taskman_phase_add`       |
-| `phase:edit`     | `taskman_phase_edit`      |
-| `phase:list`     | `taskman_phase_list`      |
-| `milestone:add`  | `taskman_milestone_add`   |
-| `milestone:edit` | `taskman_milestone_edit`  |
-| `milestone:list` | `taskman_milestone_list`  |
-| `task:add`       | `taskman_task_add`        |
-| `task:get`       | `taskman_task_get`        |
-| `task:list`      | `taskman_task_list`       |
-| `task:edit`      | `taskman_task_edit`       |
-| `task:dep:add`   | `taskman_task_dep_add`    |
-| `task:dep:remove`| `taskman_task_dep_remove` |
-| `task:note:add`  | `taskman_task_note_add`   |
-| `task:note:list` | `taskman_task_note_list`  |
-| `demo:generate`  | `taskman_demo_generate`   |
+| CLI Command       | MCP Tool Name               |
+|-------------------|-----------------------------|
+| `init`            | `taskman_init`              |
+| `project:init`    | `taskman_project_init`      |
+| `phase:add`       | `taskman_phase_add`         |
+| `phase:edit`      | `taskman_phase_edit`       |
+| `phase:list`      | `taskman_phase_list`       |
+| `milestone:add`   | `taskman_milestone_add`    |
+| `milestone:edit`  | `taskman_milestone_edit`   |
+| `milestone:list`  | `taskman_milestone_list`   |
+| `task:add`        | `taskman_task_add`         |
+| `task:get`        | `taskman_task_get`         |
+| `task:list`       | `taskman_task_list`        |
+| `task:edit`       | `taskman_task_edit`        |
+| `task:dep:add`    | `taskman_task_dep_add`     |
+| `task:dep:remove` | `taskman_task_dep_remove`  |
+| `task:note:add`   | `taskman_task_note_add`    |
+| `task:note:list`  | `taskman_task_note_list`   |
+| `demo:generate`   | `taskman_demo_generate`    |
+| `rules:generate`  | `taskman_rules_generate`   |
+| `agents:generate` | `taskman_agents_generate`   |
 
 Each tool accepts the same parameters as its CLI counterpart, passed as JSON in the `arguments` object of `tools/call`.
+
+---
+
+## Quick start (new project)
+
+1. **Download taskman** — [Latest release](https://github.com/tivins/taskman/releases).
+2. **Bootstrap** — From your project root:
+   ```bash
+   taskman project:init --executable /path/to/taskman
+   ```
+   This runs (in order): `mcp:config`, `init`, `rules:generate`, `agents:generate`.
+3. **Reload Cursor** — So the MCP server is loaded.
+4. **Use Taskman via the agent** — Phases, milestones, tasks, notes.
 
 ---
 

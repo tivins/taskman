@@ -40,6 +40,16 @@ taskman init
 
 If errors occur (e.g. corrupted database or orphan `.db-journal`), see [BUILD.md](BUILD.md). When using taskman from **Cursor's agent**, `TASKMAN_JOURNAL_MEMORY=1` often fixes "disk I/O error" (see BUILD.md).
 
+### Bootstrap a new project (`project:init`)
+
+Runs in order: `mcp:config` (if `--executable` is given), `init`, `rules:generate`, `agents:generate`. Use this to set up a new project for use with Cursor and the agent. Then reload Cursor so the MCP server is loaded.
+
+```bash
+taskman project:init --executable /path/to/taskman
+```
+
+Without `--executable`, MCP config is skipped; run `taskman mcp:config --executable <path>` separately to configure Cursor.
+
 ### Generate a demo database
 
 Creates a database filled with a realistic example (e-commerce site MVP project) for demonstration or testing purposes. The command automatically removes any existing database file (and related journal files) before creating the new one.
@@ -344,6 +354,7 @@ Error messages are written to standard error (`stderr`).
 | Command           | Description                                  |
 |-------------------|----------------------------------------------|
 | `init`            | Create / initialize tables                   |
+| `project:init`    | Bootstrap: mcp:config, init, rules:generate, agents:generate |
 | `phase:add`       | Add a phase                                  |
 | `phase:edit`      | Edit a phase                                 |
 | `phase:list`      | List phases                                  |

@@ -2,6 +2,17 @@
 
 Project management for AI-assisted workflows: phases, milestones, and role-assigned tasks with dependencies, stored in SQLite. Agents (via MCP) create and update work; humans interact through Cursor or other MCP clients. The CLI is for scripts and automation, the web UI for read-only browsing; output is JSON or plain text. It runs as a standalone C++ binary on Windows, Linux, and macOS.
 
+## Quick start
+
+1. **Download taskman** — [Latest release](https://github.com/tivins/taskman/releases) (Windows, Linux, macOS).
+2. **Bootstrap the project** — From your project root, run:
+   ```bash
+   taskman project:init --executable /path/to/taskman
+   ```
+   This writes `.cursor/mcp.json`, creates the database, and generates `.cursor/rules/` and `.cursor/agents/`.
+3. **Reload Cursor** — So the MCP server is loaded.
+4. **Use Taskman via the agent** — Ask the agent to manage phases, milestones, and tasks.
+
 ## Documentation
 
 * [Human users via agents](docs/users.md): who uses Taskman and which agent roles

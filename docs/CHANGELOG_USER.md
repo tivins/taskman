@@ -2,6 +2,12 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.28.0] - 2026-01-29
+
+- **taskman project:init** [--executable \<path\>]: bootstrap d’un nouveau projet. Exécute dans l’ordre : `mcp:config` (si `--executable` fourni), `init`, `rules:generate`, `agents:generate`. Puis recharger Cursor pour utiliser Taskman via l’agent.
+- **Outils MCP** : `taskman_rules_generate`, `taskman_agents_generate` (option `output`), et `taskman_project_init` (option `executable`). L’agent peut désormais « générer les règles » ou « récupérer les agents » via MCP.
+- **Documentation** : démarrage rapide en 4 étapes (README, USAGE_MCP.md, usage.md) : télécharger taskman → `taskman project:init --executable \<path\>` → recharger Cursor → utiliser Taskman via l’agent.
+
 ## [0.27.0] - 2026-01-29
 
 - **taskman rules:generate** [--output <dir>]: génère les fichiers rules Cursor dans `.cursor/rules/` (ou le répertoire spécifié). Les fichiers sont extraits depuis les assets intégrés dans le binaire (sources dans `embed/rules/*.mdc`). Utile pour synchroniser les règles de code (ex. SOLID, RAII) avec le répertoire Cursor, de la même manière que `agents:generate` pour les agents.

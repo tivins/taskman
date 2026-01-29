@@ -123,12 +123,16 @@ int McpToolExecutor::execute_tool(const std::string& mcp_tool_name, const nlohma
         argv_ptrs.push_back(const_cast<char*>(s.c_str()));
     }
 
-    // Ouvrir la DB
+    // Ouvrir la DB seulement si la commande en a besoin (évite de créer une DB vide pour rules/agents:generate)
     Database db;
-    if (!db.open(db_path_.c_str())) {
-        output = "Failed to open database";
-        is_error = true;
-        return 1;
+    Database* db_ptr = nullptr;
+    if (command_registry_.command_requires_database(cli_command)) {
+        if (!db.open(db_path_.c_str())) {
+            output = "Failed to open database";
+            is_error = true;
+            return 1;
+        }
+        db_ptr = &db;
     }
 
     // Cas spécial pour demo:generate qui doit fermer la DB avant de supprimer le fichier
@@ -139,13 +143,13 @@ int McpToolExecutor::execute_tool(const std::string& mcp_tool_name, const nlohma
     int exit_code = 0;
 
     try {
-        if (needs_db_close) {
+        if (needs_db_close && db_ptr) {
             db.close();
         }
 
         // Exécuter via CommandRegistry
         exit_code = command_registry_.execute(cli_command, static_cast<int>(argv_ptrs.size()),
-                                              argv_ptrs.data(), &db);
+                                              argv_ptrs.data(), db_ptr);
 
         if (exit_code == -1) {
             // Commande non trouvée dans le registre
