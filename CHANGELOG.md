@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.28.2] - 2026-01-30
+
+### Added
+
+- **embed/rules/design-patterns.mdc**: Règle à l’intention des développeurs pour utiliser des design patterns lorsque cela est justifié (Strategy, Repository, Factory, etc.), avec critères d’usage et exemples à éviter sans justification.
+
+---
+
 ## [0.28.1] - 2026-01-29
 
 ### Added

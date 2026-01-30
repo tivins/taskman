@@ -1,0 +1,112 @@
+---
+description: Utiliser des design patterns lorsque cela est justifié
+alwaysApply: true
+---
+
+# Design patterns
+
+Utiliser des design patterns lorsque le contexte le justifie : ils doivent résoudre un problème concret et améliorer la maintenabilité, pas être appliqués par principe.
+
+## Principe
+
+Un design pattern est une solution éprouvée à un problème récurrent de conception. L’utiliser **quand il apporte une vraie valeur** (extensibilité, testabilité, clarté, réduction de duplication) ; l’éviter quand il ajoute de la complexité inutile.
+
+## Quand utiliser un design pattern
+
+- Le problème correspond clairement au problème que le pattern résout (création d’objets variés, découplage, réutilisation d’algorithme, etc.).
+- L’évolution prévisible du code (nouveaux types, nouveaux comportements) bénéficie de la structure du pattern.
+- Le coût d’abstraction (classes/interfaces supplémentaires) est compensé par un gain en lisibilité, testabilité ou évolution.
+
+## Quand s’en abstenir
+
+- Aucune évolution prévisible : une solution simple suffit.
+- Le pattern est introduit « au cas où » sans besoin actuel.
+- La solution directe (quelques `if`, une fonction) reste lisible et stable.
+
+## Exemples de patterns justifiés
+
+### Strategy (comportement interchangeable)
+
+Utile quand plusieurs algorithmes ou politiques sont interchangeables et que le choix peut varier à l’exécution ou selon le contexte.
+
+```java
+// JUSTIFIÉ : plusieurs stratégies de formatage, ajout possible sans modifier le code existant
+interface ExportStrategy {
+    String export(Data data);
+}
+
+class JsonExport implements ExportStrategy { ... }
+class CsvExport implements ExportStrategy { ... }
+
+class ReportService {
+    private final ExportStrategy exportStrategy;
+    ReportService(ExportStrategy exportStrategy) { this.exportStrategy = exportStrategy; }
+    String generate(Data data) { return exportStrategy.export(data); }
+}
+```
+
+### Repository (accès aux données)
+
+Utile pour centraliser l’accès aux données et permettre des tests avec des implémentations en mémoire.
+
+```java
+// JUSTIFIÉ : abstraction de la persistance, tests sans base réelle
+interface TaskRepository {
+    Optional<Task> findById(String id);
+    boolean save(Task task);
+}
+
+class SqlTaskRepository implements TaskRepository { ... }
+class InMemoryTaskRepository implements TaskRepository { ... }
+```
+
+### Factory (création d’objets)
+
+Utile quand la création est complexe, dépend du contexte ou doit être centralisée pour garantir des invariants.
+
+```java
+// JUSTIFIÉ : construction d’objets avec règles métier, plusieurs types de commandes
+interface Command {
+    boolean execute();
+}
+
+class CommandFactory {
+    Command create(String type, Map<String, String> params) {
+        return switch (type) {
+            case "create" -> new CreateCommand(params);
+            case "update" -> new UpdateCommand(params);
+            default -> throw new IllegalArgumentException("Unknown: " + type);
+        };
+    }
+}
+```
+
+## À éviter sans justification
+
+```java
+// INJUSTIFIÉ : un seul type de format, pas d’évolution prévue
+interface Formatter { String format(String s); }
+class UpperFormatter implements Formatter { ... }
+// Une simple fonction suffirait : String format(String s) { return s.toUpperCase(); }
+```
+
+```java
+// INJUSTIFIÉ : Factory pour un seul type, pas de logique de création complexe
+class UserFactory {
+    User create(String name) { return new User(name); }
+}
+// Création directe : new User(name)
+```
+
+## Bonnes pratiques
+
+- Nommer les classes et interfaces selon leur rôle métier (ex. `TaskRepository`, `ExportStrategy`) plutôt que par le nom du pattern.
+- Documenter brièvement pourquoi un pattern est utilisé (ex. commentaire ou ADR) si ce n’est pas évident.
+- Préférer la simplicité : en cas de doute, commencer simple et introduire un pattern au moment où le besoin apparaît (refactoring).
+
+## Checklist
+
+- [ ] Le pattern correspond à un problème réel du domaine ou de l’architecture
+- [ ] Une solution plus simple ne suffit pas (évolution, testabilité, duplication)
+- [ ] Le nom reflète le rôle métier, pas uniquement le pattern
+- [ ] L’usage du pattern est compréhensible par un autre développeur (ou documenté)
