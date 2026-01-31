@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.32.1] - 2026-02-01
+
+### Changed
+
+- **UI web — Étape 1 (corrections et cohérence)** : liste des rôles du filtre alignée sur le backend (14 rôles, `src/util/roles.cpp`) ; filtre « Blocage » exposé dans la zone filtres (`blocked_filter=blocked|unblocked`) ; bouton « Réinitialiser » les filtres réactivé (`embed/web/filters.js`).
+
+---
+
 ## [0.32.0] - 2026-01-31
 
 ### Added

@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.32.1] - 2026-02-01
+
+- **Interface web** : filtres alignés sur le backend — 14 rôles dans le filtre « Rôle » ; nouveau filtre « Blocage » (toutes / blockées / non blockées) ; bouton « Réinitialiser » pour remettre tous les filtres à zéro.
+
 ## [0.32.0] - 2026-01-31
 
 - **Filtre tâches bloquées** : `task:list --blocked-filter blocked|unblocked` pour n'afficher que les tâches bloquées (au moins une dépendance non-`done`) ou uniquement les non-bloquées. API web : paramètre `blocked_filter` sur GET /tasks et GET /tasks/count. MCP : paramètre `blocked-filter` sur `taskman_task_list`.

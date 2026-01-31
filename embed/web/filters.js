@@ -1,14 +1,35 @@
 /**
- * Gestion des filtres pour les tâches (milestone, phase, role, status)
+ * Gestion des filtres pour les tâches (milestone, phase, role, status, blocked_filter).
+ * Liste des rôles alignée sur le backend (src/util/roles.cpp) — source de vérité = backend.
  */
-const allOpt = '— All —' ;
+const allOpt = '— All —';
+
+/** 14 rôles du backend (roles.cpp), ordre et valeurs identiques */
+const ROLE_OPTIONS = [
+    { value: 'project-manager', label: 'Project Manager' },
+    { value: 'project-designer', label: 'Project Designer' },
+    { value: 'software-architect', label: 'Software Architect' },
+    { value: 'developer', label: 'Developer' },
+    { value: 'summary-writer', label: 'Summary Writer' },
+    { value: 'documentation-writer', label: 'Documentation Writer' },
+    { value: 'art-director', label: 'Art Director' },
+    { value: 'ui-designer', label: 'UI Designer' },
+    { value: 'community-manager', label: 'Community Manager' },
+    { value: 'ux-designer', label: 'UX Designer' },
+    { value: 'qa-engineer', label: 'QA Engineer' },
+    { value: 'devops-engineer', label: 'DevOps Engineer' },
+    { value: 'product-owner', label: 'Product Owner' },
+    { value: 'security-engineer', label: 'Security Engineer' }
+];
+
 export class Filters {
     constructor() {
         this.filters = {
             milestone: '',
             phase: '',
             role: '',
-            status: ''
+            status: '',
+            blocked_filter: ''
         };
         this.onChangeCallback = null;
     }
@@ -67,16 +88,8 @@ export class Filters {
         const milestoneGroup = this.createSelectGroup('milestone', 'Milestone', []);
         filtersDiv.appendChild(milestoneGroup);
 
-        // Filtre Role
-        const roleGroup = this.createSelectGroup('role', 'Rôle', [
-            { value: '', label:allOpt },
-            { value: 'project-manager', label: 'Project Manager' },
-            { value: 'project-designer', label: 'Project Designer' },
-            { value: 'software-architect', label: 'Software Architect' },
-            { value: 'developer', label: 'Developer' },
-            { value: 'summary-writer', label: 'Summary Writer' },
-            { value: 'documentation-writer', label: 'Documentation Writer' }
-        ]);
+        // Filtre Role (14 rôles = reflet backend)
+        const roleGroup = this.createSelectGroup('role', 'Rôle', [{ value: '', label: allOpt }, ...ROLE_OPTIONS]);
         filtersDiv.appendChild(roleGroup);
 
         // Filtre Status
@@ -88,13 +101,27 @@ export class Filters {
         ]);
         filtersDiv.appendChild(statusGroup);
 
+        // Filtre Blocked (API: blocked_filter=blocked|unblocked)
+        const blockedGroup = this.createSelectGroup('blocked_filter', 'Blocage', [
+            { value: '', label: allOpt },
+            { value: 'blocked', label: 'Blockées' },
+            { value: 'unblocked', label: 'Non blockées' }
+        ]);
+        filtersDiv.appendChild(blockedGroup);
+
         // Bouton réinitialiser
-        /* // Temporary disabled: reset button is not used anymore
         const resetBtn = document.createElement('button');
         resetBtn.className = 'filter-reset';
         resetBtn.textContent = 'Réinitialiser';
+        resetBtn.type = 'button';
         resetBtn.addEventListener('click', () => {
-            this.filters = { milestone: '', phase: '', role: '', status: '' };
+            this.filters = {
+                milestone: '',
+                phase: '',
+                role: '',
+                status: '',
+                blocked_filter: ''
+            };
             filtersDiv.querySelectorAll('select').forEach(select => {
                 select.value = '';
             });
@@ -103,7 +130,6 @@ export class Filters {
             }
         });
         filtersDiv.appendChild(resetBtn);
-        */
 
         container.appendChild(filtersDiv);
         return filtersDiv;
