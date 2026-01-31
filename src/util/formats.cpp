@@ -4,6 +4,7 @@
 
 #include "formats.hpp"
 #include <iostream>
+#include <vector>
 
 namespace {
 
@@ -65,6 +66,26 @@ void milestone_to_json(nlohmann::json& out, const Row& row) {
     set_or_null(out, "updated_at", get("updated_at"));
 }
 
+namespace {
+
+std::vector<std::string> split_note_ids(const std::string& s) {
+    std::vector<std::string> ids;
+    if (s.empty()) return ids;
+    std::string acc;
+    for (char c : s) {
+        if (c == ',') {
+            if (!acc.empty()) ids.push_back(acc);
+            acc.clear();
+        } else {
+            acc += c;
+        }
+    }
+    if (!acc.empty()) ids.push_back(acc);
+    return ids;
+}
+
+} // namespace
+
 void task_to_json(nlohmann::json& out, const Row& row) {
     auto get = [&row](const char* k) { return row.count(k) ? row.at(k) : std::nullopt; };
     set_or_null(out, "id", get("id"));
@@ -77,6 +98,15 @@ void task_to_json(nlohmann::json& out, const Row& row) {
     set_or_null(out, "role", get("role"));
     set_or_null(out, "created_at", get("created_at"));
     set_or_null(out, "updated_at", get("updated_at"));
+    // note_ids : liste des UID des notes liées (stockée en comma-separated dans la row)
+    nlohmann::json arr = nlohmann::json::array();
+    auto note_ids_opt = get("note_ids");
+    if (note_ids_opt.has_value() && !note_ids_opt->empty()) {
+        for (const auto& id : split_note_ids(*note_ids_opt)) {
+            arr.push_back(id);
+        }
+    }
+    out["note_ids"] = std::move(arr);
 }
 
 void print_task_text(const Row& row) {
@@ -85,7 +115,7 @@ void print_task_text(const Row& row) {
         if (it == row.end() || !it->second.has_value()) return "";
         return *it->second;
     };
-    // Spec : titre, description, status, role sur lignes distinctes ; puis id, phase_id, … ; created_at, updated_at
+    // Spec : titre, description, status, role sur lignes distinctes ; puis id, phase_id, … ; created_at, updated_at ; note_ids
     std::cout << "title: " << get("title") << "\n";
     std::cout << "description: " << get("description") << "\n";
     std::cout << "status: " << get("status") << "\n";
@@ -99,6 +129,10 @@ void print_task_text(const Row& row) {
     if (!ca.empty()) std::cout << "created_at: " << ca << "\n";
     std::string ua = get("updated_at");
     if (!ua.empty()) std::cout << "updated_at: " << ua << "\n";
+    std::string note_ids = get("note_ids");
+    if (!note_ids.empty()) {
+        std::cout << "note_ids: " << note_ids << "\n";
+    }
 }
 
 } // namespace taskman

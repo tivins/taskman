@@ -51,7 +51,22 @@ bool TaskService::add_task_with_id(
 }
 
 std::map<std::string, std::optional<std::string>> TaskService::get_task(const std::string& id) {
-    return repository_.get_by_id(id);
+    auto task = repository_.get_by_id(id);
+    if (task.empty()) {
+        return task;
+    }
+    std::vector<std::string> note_ids = repository_.get_note_ids_by_task_id(id);
+    if (note_ids.empty()) {
+        task["note_ids"] = std::optional<std::string>(std::string{});
+    } else {
+        std::string joined;
+        for (size_t i = 0; i < note_ids.size(); ++i) {
+            if (i) joined += ',';
+            joined += note_ids[i];
+        }
+        task["note_ids"] = joined;
+    }
+    return task;
 }
 
 std::vector<std::map<std::string, std::optional<std::string>>> TaskService::list_tasks(

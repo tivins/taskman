@@ -241,6 +241,20 @@ std::vector<std::map<std::string, std::optional<std::string>>> TaskRepository::g
         {task_id});
 }
 
+std::vector<std::string> TaskRepository::get_note_ids_by_task_id(const std::string& task_id) {
+    auto rows = executor_.query(
+        "SELECT id FROM task_notes WHERE task_id = ? ORDER BY created_at, id",
+        {task_id});
+    std::vector<std::string> ids;
+    for (const auto& row : rows) {
+        auto it = row.find("id");
+        if (it != row.end() && it->second.has_value() && !it->second->empty()) {
+            ids.push_back(*it->second);
+        }
+    }
+    return ids;
+}
+
 std::vector<std::map<std::string, std::optional<std::string>>> TaskRepository::list_dependencies(
     const std::optional<std::string>& task_id,
     int limit,

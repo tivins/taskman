@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.29.0] - 2026-01-31
+
+### Added
+
+- **task:get** : la récupération d'une tâche inclut désormais la liste des UID des notes liées (`note_ids`). En JSON : tableau `note_ids` ; en `--format text` : ligne `note_ids: id1,id2,...`. Prérequis pour afficher une tâche avec ses notes sans appel séparé (CLI, MCP, web).
+
+---
+
 ## [0.28.2] - 2026-01-30
 
 ### Added

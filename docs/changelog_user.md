@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.29.0] - 2026-01-31
+
+- **task:get** : la sortie inclut désormais la liste des UID des notes liées à la tâche (`note_ids`). En JSON : tableau ; en `--format text` : ligne `note_ids: id1,id2,...`. Permet d'afficher une tâche avec ses notes sans appel séparé.
+
 ## [0.28.2] - 2026-01-30
 
 - **Règles** : nouvelle règle `design-patterns` (utilisation des design patterns quand justifié). Disponible via `taskman rules:generate` avec les autres règles (SOLID, RAII, commit-message).

@@ -22,7 +22,7 @@ void phase_to_json(nlohmann::json& out, const Row& row);
 /** Milestone → JSON : id, phase_id, name, criterion, reached, created_at, updated_at (reached en int). */
 void milestone_to_json(nlohmann::json& out, const Row& row);
 
-/** Task → JSON : id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at. */
+/** Task → JSON : id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at, note_ids (liste des UID des notes liées). */
 void task_to_json(nlohmann::json& out, const Row& row);
 
 /** Task → format text lisible (titre, description, status, role, puis id, phase_id, …). */

@@ -89,6 +89,10 @@ public:
      * Retourne un vecteur de maps avec task_id et depends_on. */
     std::vector<std::map<std::string, std::optional<std::string>>> get_dependencies(const std::string& task_id);
 
+    /** Récupère les UID des notes liées à une tâche (table task_notes).
+     * Retourne un vecteur d'IDs de notes, ordonné par created_at puis id. */
+    std::vector<std::string> get_note_ids_by_task_id(const std::string& task_id);
+
     /** Liste toutes les dépendances avec pagination.
      * Retourne un vecteur de maps avec task_id et depends_on. */
     std::vector<std::map<std::string, std::optional<std::string>>> list_dependencies(

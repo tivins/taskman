@@ -5,6 +5,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include "infrastructure/db/db.hpp"
 #include "core/milestone/milestone.hpp"
+#include "core/note/note.hpp"
 #include "core/phase/phase.hpp"
 #include "core/task/task.hpp"
 #include <iostream>
@@ -218,6 +219,34 @@ TEST_CASE("cmd_task_get — trouvée, format JSON", "[task]") {
     auto j2 = nlohmann::json::parse(get_out);
     REQUIRE(j2["id"] == id);
     REQUIRE(j2["title"] == "T1");
+}
+
+TEST_CASE("cmd_task_get — contient note_ids (UID des notes liées)", "[task]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(task_add(db, "t1", "p1", std::nullopt, "Tâche 1", std::nullopt, "to_do", std::nullopt, std::nullopt));
+    REQUIRE(note_add(db, "n1", "t1", "Contenu note", std::nullopt, std::nullopt));
+    REQUIRE(note_add(db, "n2", "t1", "Autre note", std::optional<std::string>("progress"), std::nullopt));
+    std::string get_out = run_task_get_capture(db, {"task:get", "t1"});
+    auto j = nlohmann::json::parse(get_out);
+    REQUIRE(j.contains("note_ids"));
+    REQUIRE(j["note_ids"].is_array());
+    REQUIRE(j["note_ids"].size() == 2u);
+    REQUIRE(j["note_ids"][0] == "n1");
+    REQUIRE(j["note_ids"][1] == "n2");
+}
+
+TEST_CASE("cmd_task_get — note_ids vide si aucune note", "[task]") {
+    Database db;
+    setup_db(db);
+    std::string out = run_task_add_capture(db, {"task:add", "--title", "T1", "--phase", "p1"});
+    auto j = nlohmann::json::parse(out);
+    std::string id = j["id"].get<std::string>();
+    std::string get_out = run_task_get_capture(db, {"task:get", id});
+    auto j2 = nlohmann::json::parse(get_out);
+    REQUIRE(j2.contains("note_ids"));
+    REQUIRE(j2["note_ids"].is_array());
+    REQUIRE(j2["note_ids"].empty());
 }
 
 TEST_CASE("cmd_task_get — non trouvée", "[task]") {
