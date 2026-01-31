@@ -54,4 +54,14 @@ int cmd_note_list(int argc, char* argv[], Database& db) {
     return parser.parse_list(argc, argv);
 }
 
+int cmd_note_list_by_ids(int argc, char* argv[], Database& db) {
+    (void)db;
+    QueryExecutor& executor = db.get_executor();
+    NoteRepository repository(executor);
+    NoteService service(repository);
+    NoteFormatter formatter;
+    NoteCommandParser parser(service, formatter);
+    return parser.parse_list_by_ids(argc, argv);
+}
+
 } // namespace taskman

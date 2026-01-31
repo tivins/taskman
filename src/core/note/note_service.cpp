@@ -51,6 +51,10 @@ std::vector<std::map<std::string, std::optional<std::string>>> NoteService::list
     return repository_.list_by_task_id(task_id);
 }
 
+std::vector<std::map<std::string, std::optional<std::string>>> NoteService::list_notes_by_ids(const std::vector<std::string>& ids) {
+    return repository_.list_by_ids(ids);
+}
+
 std::string NoteService::generate_uuid_v4() {
     std::random_device rd;
     std::mt19937 rng(rd());

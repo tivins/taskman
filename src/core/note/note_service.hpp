@@ -52,6 +52,10 @@ public:
      * Retourne un vecteur de maps représentant les notes. */
     std::vector<std::map<std::string, std::optional<std::string>>> list_notes(const std::string& task_id);
 
+    /** Liste les notes dont les ID sont dans la liste fournie.
+     * Retourne un vecteur de maps (ordre par created_at). Les IDs inexistants sont ignorés. */
+    std::vector<std::map<std::string, std::optional<std::string>>> list_notes_by_ids(const std::vector<std::string>& ids);
+
     /** Génère un UUID v4.
      * Retourne une chaîne représentant l'UUID. */
     static std::string generate_uuid_v4();

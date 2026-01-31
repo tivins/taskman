@@ -31,6 +31,10 @@ public:
      * Retourne 0 en cas de succès, 1 en cas d'erreur. */
     int parse_list(int argc, char* argv[]);
 
+    /** Parse et exécute la commande task:note:list-by-ids.
+     * Retourne 0 en cas de succès, 1 en cas d'erreur. */
+    int parse_list_by_ids(int argc, char* argv[]);
+
 private:
     NoteService& service_;
     NoteFormatter& formatter_;

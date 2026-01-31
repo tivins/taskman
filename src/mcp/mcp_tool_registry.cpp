@@ -275,6 +275,21 @@ void McpToolRegistry::initialize_tools() {
         name_to_index_[t.name] = tools_.size() - 1;
     }
 
+    // taskman_task_note_list_by_ids → task:note:list-by-ids
+    {
+        McpToolDefinition t;
+        t.name = "taskman_task_note_list_by_ids";
+        t.cli_command = "task:note:list-by-ids";
+        t.description = "List notes by a comma-separated list of note IDs (e.g. from task:get note_ids).";
+        std::map<std::string, nlohmann::json> props;
+        props["ids"] = nlohmann::json{{"type", "string"}, {"description", "Comma-separated note IDs"}};
+        props["format"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"json", "text"})}, {"default", "json"}};
+        t.inputSchema = make_schema(props, {"ids"});
+        t.positional_keys = {};
+        tools_.push_back(t);
+        name_to_index_[t.name] = tools_.size() - 1;
+    }
+
     // taskman_demo_generate → demo:generate
     {
         McpToolDefinition t;

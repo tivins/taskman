@@ -34,6 +34,21 @@ std::vector<std::map<std::string, std::optional<std::string>>> NoteRepository::l
         {task_id});
 }
 
+std::vector<std::map<std::string, std::optional<std::string>>> NoteRepository::list_by_ids(const std::vector<std::string>& ids) {
+    if (ids.empty()) {
+        return {};
+    }
+    std::string placeholders;
+    for (size_t i = 0; i < ids.size(); ++i) {
+        if (i > 0) placeholders += ',';
+        placeholders += '?';
+    }
+    std::vector<std::optional<std::string>> params(ids.begin(), ids.end());
+    std::string sql = "SELECT id, task_id, content, kind, role, created_at FROM task_notes WHERE id IN (" +
+                      placeholders + ") ORDER BY created_at";
+    return executor_.query(sql.c_str(), params);
+}
+
 bool NoteRepository::task_exists(const std::string& task_id) {
     auto rows = executor_.query("SELECT 1 FROM tasks WHERE id = ?", {task_id});
     return !rows.empty();

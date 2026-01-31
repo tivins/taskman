@@ -322,6 +322,19 @@ taskman task:note:list <task-id> [--format json|text]
 
 Notes are ordered by `created_at`. For a non-existent task, returns an empty list.
 
+### `task:note:list-by-ids` — List notes by comma-separated IDs
+
+```bash
+taskman task:note:list-by-ids --ids <id1,id2,...> [--format json|text]
+```
+
+| Option     | Required | Description                         | Default |
+|------------|----------|-------------------------------------|---------|
+| `--ids`    | yes      | Comma-separated note IDs (e.g. from `task:get` `note_ids`) | —       |
+| `--format` | no       | `json` (array) or `text`            | `json`  |
+
+Use this to fetch note details for several IDs in one call (e.g. after getting `note_ids` from `task:get`). Notes are returned in `created_at` order; non-existent IDs are skipped.
+
 ---
 
 ## 5. Output formats
@@ -371,6 +384,7 @@ Error messages are written to standard error (`stderr`).
 | `task:dep:remove` | Remove a dependency                          |
 | `task:note:add`   | Add a note to a task                         |
 | `task:note:list`  | List notes for a task                        |
+| `task:note:list-by-ids` | List notes by comma-separated IDs       |
 | `demo:generate`   | Generate a demo database                     |
 | `agents:generate`| Generate .cursor/agents/ files (from embedded agents) |
 | `rules:generate` | Generate .cursor/rules/ files (from embedded rules)    |

@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.30.0] - 2026-01-31
+
+- **task:note:list-by-ids** : récupération d'une liste de notes par liste d'UID (`--ids id1,id2,...`). Permet d'exploiter les `note_ids` de `task:get` en un seul appel. Commande CLI et outil MCP `taskman_task_note_list_by_ids`.
+
 ## [0.29.0] - 2026-01-31
 
 - **task:get** : la sortie inclut désormais la liste des UID des notes liées à la tâche (`note_ids`). En JSON : tableau ; en `--format text` : ligne `note_ids: id1,id2,...`. Permet d'afficher une tâche avec ses notes sans appel séparé.

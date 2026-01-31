@@ -39,6 +39,10 @@ public:
      * Retourne un vecteur de maps représentant les notes. */
     std::vector<std::map<std::string, std::optional<std::string>>> list_by_task_id(const std::string& task_id);
 
+    /** Liste les notes dont les ID sont dans la liste fournie.
+     * Retourne un vecteur de maps (ordre par created_at). Les IDs inexistants sont ignorés. */
+    std::vector<std::map<std::string, std::optional<std::string>>> list_by_ids(const std::vector<std::string>& ids);
+
     /** Vérifie si une tâche existe (pour validation avant d'ajouter une note).
      * Retourne true si la tâche existe, false sinon. */
     bool task_exists(const std::string& task_id);

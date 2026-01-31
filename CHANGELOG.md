@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.30.0] - 2026-01-31
+
+### Added
+
+- **task:note:list-by-ids** : récupération d'une liste de notes par liste d'UID (`--ids id1,id2,...`). Permet d'exploiter les `note_ids` obtenus via `task:get` en un seul appel au lieu de N appels `get_note(id)`. Commande CLI, outil MCP `taskman_task_note_list_by_ids`, et API service/repository (`list_notes_by_ids` / `list_by_ids`).
+
+---
+
 ## [0.29.0] - 2026-01-31
 
 ### Added

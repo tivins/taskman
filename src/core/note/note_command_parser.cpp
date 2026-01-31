@@ -7,6 +7,7 @@
 #include <cxxopts.hpp>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 
 namespace taskman {
 
@@ -126,6 +127,56 @@ int NoteCommandParser::parse_list(int argc, char* argv[]) {
 
     auto notes = service_.list_notes(task_id);
 
+    if (format == "text") {
+        formatter_.format_text_list(notes, std::cout);
+    } else {
+        formatter_.format_json_list(notes, std::cout);
+    }
+    return 0;
+}
+
+int NoteCommandParser::parse_list_by_ids(int argc, char* argv[]) {
+    cxxopts::Options opts("taskman task:note:list-by-ids", "List notes by a comma-separated list of note IDs");
+    opts.add_options()
+        ("ids", "Comma-separated note IDs", cxxopts::value<std::string>())
+        ("format", "Output: json or text", cxxopts::value<std::string>()->default_value("json"));
+    for (int i = 0; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
+            std::cout << opts.help() << '\n';
+            return 0;
+        }
+    }
+    cxxopts::ParseResult result;
+    try {
+        result = opts.parse(argc, argv);
+    } catch (const cxxopts::exceptions::exception& e) {
+        std::cerr << "taskman: " << e.what() << "\n";
+        return 1;
+    }
+    if (!result.count("ids")) {
+        std::cerr << "taskman: task:note:list-by-ids requires --ids <id1,id2,...>\n";
+        return 1;
+    }
+    std::string ids_str = result["ids"].as<std::string>();
+    std::vector<std::string> ids;
+    std::stringstream ss(ids_str);
+    std::string id;
+    while (std::getline(ss, id, ',')) {
+        // trim leading/trailing spaces
+        auto start = id.find_first_not_of(" \t");
+        if (start != std::string::npos) {
+            auto end = id.find_last_not_of(" \t");
+            ids.push_back(id.substr(start, end - start + 1));
+        } else if (!id.empty()) {
+            ids.push_back(id);
+        }
+    }
+    std::string format = result["format"].as<std::string>();
+    if (!NoteFormatter::is_valid_format(format)) {
+        std::cerr << "taskman: --format must be json or text\n";
+        return 1;
+    }
+    auto notes = service_.list_notes_by_ids(ids);
     if (format == "text") {
         formatter_.format_text_list(notes, std::cout);
     } else {

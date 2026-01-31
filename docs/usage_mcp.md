@@ -48,6 +48,7 @@ All CLI commands (except `web`) are exposed as MCP tools with the `taskman_` pre
 | `task:dep:remove` | `taskman_task_dep_remove`  |
 | `task:note:add`   | `taskman_task_note_add`    |
 | `task:note:list`  | `taskman_task_note_list`   |
+| `task:note:list-by-ids` | `taskman_task_note_list_by_ids` |
 | `demo:generate`   | `taskman_demo_generate`    |
 | `rules:generate`  | `taskman_rules_generate`   |
 | `agents:generate` | `taskman_agents_generate`   |

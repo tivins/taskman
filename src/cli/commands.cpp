@@ -199,6 +199,17 @@ public:
     }
 };
 
+class TaskNoteListByIdsCommand : public Command {
+public:
+    std::string name() const override { return "task:note:list-by-ids"; }
+    std::string summary() const override { return "List notes by comma-separated IDs"; }
+    
+    int execute(int argc, char* argv[], Database* db) override {
+        if (!db) return 1;
+        return cmd_note_list_by_ids(argc, argv, *db);
+    }
+};
+
 class DemoGenerateCommand : public Command {
 public:
     std::string name() const override { return "demo:generate"; }
@@ -364,6 +375,7 @@ void register_all_commands(CommandRegistry& registry) {
     registry.register_command(std::make_unique<TaskDepRemoveCommand>());
     registry.register_command(std::make_unique<TaskNoteAddCommand>());
     registry.register_command(std::make_unique<TaskNoteListCommand>());
+    registry.register_command(std::make_unique<TaskNoteListByIdsCommand>());
     registry.register_command(std::make_unique<DemoGenerateCommand>());
     registry.register_command(std::make_unique<ProjectInitCommand>());
     registry.register_command(std::make_unique<AgentsGenerateCommand>());

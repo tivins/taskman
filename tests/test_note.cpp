@@ -59,6 +59,25 @@ static std::string run_note_list(Database& db, std::vector<std::string> args) {
     return redir.str();
 }
 
+static std::string run_note_list_by_ids(Database& db, std::vector<std::string> args) {
+    CoutRedirect redir;
+    std::vector<std::string> full = {"task:note:list-by-ids"};
+    for (auto& a : args) full.push_back(a);
+    std::vector<char*> ptrs;
+    for (auto& s : full) ptrs.push_back(s.data());
+    int r = cmd_note_list_by_ids(static_cast<int>(ptrs.size()), ptrs.data(), db);
+    REQUIRE(r == 0);
+    return redir.str();
+}
+
+static int run_note_list_by_ids_exit(Database& db, std::vector<std::string> args) {
+    std::vector<std::string> full = {"task:note:list-by-ids"};
+    for (auto& a : args) full.push_back(a);
+    std::vector<char*> ptrs;
+    for (auto& s : full) ptrs.push_back(s.data());
+    return cmd_note_list_by_ids(static_cast<int>(ptrs.size()), ptrs.data(), db);
+}
+
 static bool looks_like_uuid(const std::string& s) {
     if (s.size() != 36) return false;
     int hyphens = 0;
@@ -171,4 +190,58 @@ TEST_CASE("note_add — contrainte FK : suppression tâche supprime pas les note
     auto rows = db.query("SELECT task_id FROM task_notes WHERE id = 'n1'");
     REQUIRE(rows.size() == 1u);
     REQUIRE(rows[0]["task_id"] == "t1");
+}
+
+TEST_CASE("cmd_note_list_by_ids — liste vide pour ids vides ou inexistants", "[note]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(note_add(db, "n1", "t1", "Une note", std::nullopt, std::nullopt));
+    std::string out_empty = run_note_list_by_ids(db, {"--ids", ""});
+    auto arr_empty = nlohmann::json::parse(out_empty);
+    REQUIRE(arr_empty.is_array());
+    REQUIRE(arr_empty.size() == 0u);
+
+    std::string out_missing = run_note_list_by_ids(db, {"--ids", "unknown-id"});
+    auto arr_missing = nlohmann::json::parse(out_missing);
+    REQUIRE(arr_missing.is_array());
+    REQUIRE(arr_missing.size() == 0u);
+}
+
+TEST_CASE("cmd_note_list_by_ids — retourne les notes demandées par UID", "[note]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(note_add(db, "n1", "t1", "Note un", std::nullopt, std::nullopt));
+    REQUIRE(note_add(db, "n2", "t1", "Note deux", std::nullopt, std::nullopt));
+    REQUIRE(note_add(db, "n3", "t1", "Note trois", std::nullopt, std::nullopt));
+
+    std::string out = run_note_list_by_ids(db, {"--ids", "n2,n1,n3"});
+    auto arr = nlohmann::json::parse(out);
+    REQUIRE(arr.is_array());
+    REQUIRE(arr.size() == 3u);
+    REQUIRE(arr[0]["id"] == "n1");
+    REQUIRE(arr[0]["content"] == "Note un");
+    REQUIRE(arr[1]["id"] == "n2");
+    REQUIRE(arr[1]["content"] == "Note deux");
+    REQUIRE(arr[2]["id"] == "n3");
+    REQUIRE(arr[2]["content"] == "Note trois");
+}
+
+TEST_CASE("cmd_note_list_by_ids — mélange d’IDs existants et inexistants", "[note]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(note_add(db, "n1", "t1", "Seule note", std::nullopt, std::nullopt));
+
+    std::string out = run_note_list_by_ids(db, {"--ids", "missing,n1,also-missing"});
+    auto arr = nlohmann::json::parse(out);
+    REQUIRE(arr.is_array());
+    REQUIRE(arr.size() == 1u);
+    REQUIRE(arr[0]["id"] == "n1");
+    REQUIRE(arr[0]["content"] == "Seule note");
+}
+
+TEST_CASE("cmd_note_list_by_ids — --ids manquant retourne erreur", "[note]") {
+    Database db;
+    setup_db(db);
+    int r = run_note_list_by_ids_exit(db, {});
+    REQUIRE(r == 1);
 }

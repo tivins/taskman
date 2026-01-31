@@ -26,6 +26,9 @@ int cmd_note_add(int argc, char* argv[], Database& db);
 /** task:note:list <task-id> [--format json|text] */
 int cmd_note_list(int argc, char* argv[], Database& db);
 
+/** task:note:list-by-ids --ids <id1,id2,...> [--format json|text] */
+int cmd_note_list_by_ids(int argc, char* argv[], Database& db);
+
 } // namespace taskman
 
 #endif /* TASKMAN_NOTE_HPP */
