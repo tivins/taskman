@@ -25,10 +25,7 @@ namespace {
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="box">
-    <h1><span class="task-">task</span><span class="-man">man</span></h1>
-    <div id="app"></div>
-  </div>
+  <div id="app"></div>
   <script src="filters.js" type="module"></script>
   <script src="pagination.js" type="module"></script>
   <script src="main.js" type="module"></script>

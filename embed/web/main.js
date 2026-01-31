@@ -4,6 +4,9 @@ import { Pagination } from './pagination.js';
 
 const app = document.getElementById('app');
 
+/** @type {HTMLElement | null} zone principale du shell (header + main) */
+let appMain = null;
+
 // État global
 let filters = new Filters();
 let pagination = new Pagination();
@@ -31,9 +34,49 @@ async function init() {
         loadTasks();
     });
 
-    // Afficher la vue principale
+    // Shell (header fixe + zone principale) puis vue liste
+    ensureAppShell();
     renderMainView();
     await loadTasks();
+}
+
+/**
+ * Crée le shell commun (header fixe + zone principale) si nécessaire.
+ * À appeler avant toute vue.
+ */
+function ensureAppShell() {
+    if (app.querySelector('.app-shell')) return;
+    app.innerHTML = '';
+
+    const shell = el('div', { class: 'app-shell' });
+
+    const header = el('div', { class: 'app-header' });
+
+    //<h1><span class="task-">task</span><span class="-man">man</span></h1>
+    header.appendChild(el('div', { class: 'app-brand' }, 'Taskman'));
+    const nav = el('nav', { class: 'app-nav' });
+    nav.appendChild(el('a', { href: '#', class: 'app-nav-link app-nav-link-active', 'data-view': 'tasks' }, 'Tâches'));
+    nav.appendChild(el('a', { href: '#overview', class: 'app-nav-link', 'data-view': 'overview' }, 'Vue d\'ensemble'));
+    header.appendChild(nav);
+    const headerActions = el('div', { class: 'app-header-actions' });
+    // Emplacement pour filtres rapides et recherche (étape 4)
+    header.appendChild(headerActions);
+    shell.appendChild(header);
+
+    const main = el('div', { class: 'app-main' });
+    shell.appendChild(main);
+
+    app.appendChild(shell);
+    appMain = main;
+
+    nav.querySelectorAll('.app-nav-link').forEach((link) => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const view = link.getAttribute('data-view');
+            if (view === 'tasks') init();
+            // overview: à brancher en étape 3
+        });
+    });
 }
 
 /**
@@ -61,59 +104,39 @@ async function loadPhasesAndMilestones() {
 }
 
 /**
- * Affiche la vue principale avec filtres et pagination
+ * Affiche la vue principale (liste) avec filtres et pagination dans la zone principale du shell.
  */
 function renderMainView() {
-    const ALL = ''
-    app.innerHTML = '';
-    
-    // En-tête avec vue d'ensemble
-    // const header = el('div', { class: 'main-header' }, el('h1', {}, 'Gestionnaire de Projet'));
-    const header = el('div', {});
-    
-    // Vue d'ensemble des phases
-    /*
-    const overviewDiv = document.createElement('div');
-    overviewDiv.className = 'overview-container';
-    overviewDiv.appendChild(el('h2', {}, 'Vue d\'ensemble'));
-    const overviewContent = document.createElement('div');
-    overviewContent.className = 'overview-content';
-    overviewDiv.appendChild(overviewContent);
-    header.appendChild(overviewDiv);
-    */
-    app.appendChild(header);
-    
+    if (!appMain) ensureAppShell();
+    const main = appMain || app.querySelector('.app-main');
+    if (!main) return;
+    main.innerHTML = '';
+
     // Filtres
     const filtersContainer = document.createElement('div');
     filtersContainer.className = 'filters-wrapper';
     filters.render(filtersContainer);
-    app.appendChild(filtersContainer);
-    
-    // Mettre à jour les options des selects dynamiques
+    main.appendChild(filtersContainer);
+
     const phaseOptions = [].concat(
         Object.values(phases).map(p => ({ value: p.id, label: `${p.id}: ${p.name || p.id}` }))
     );
     filters.updateSelectOptions('phase', phaseOptions);
-    
+
     const milestoneOptions = [].concat(
         Object.values(milestones).map(m => ({ value: m.id, label: `${m.id}: ${m.name || m.id}` }))
     );
     filters.updateSelectOptions('milestone', milestoneOptions);
-    
-    // Zone de contenu pour les tâches
-    const contentDiv = el('div', { class: 'tasks-content' }, 'tasks-content');
-    contentDiv.className = 'tasks-content';
-    contentDiv.id = 'tasks-content';
-    app.appendChild(contentDiv);
-    
+
+    // Zone de contenu pour les tâches (pleine largeur)
+    const contentDiv = el('div', { class: 'tasks-content', id: 'tasks-content' });
+    main.appendChild(contentDiv);
+
     // Pagination
     const paginationContainer = document.createElement('div');
     paginationContainer.className = 'pagination-wrapper';
     paginationContainer.id = 'pagination-container';
-    app.appendChild(paginationContainer);
-    
-    // Charger la vue d'ensemble
-    // updateOverview(overviewContent);
+    main.appendChild(paginationContainer);
 }
 
 /**
@@ -288,10 +311,12 @@ function getPhaseName(id) {
 }
 
 /**
- * Charge les détails d'une tâche
+ * Charge les détails d'une tâche dans la zone principale (shell conservé).
  */
 async function loadTask(id) {
-    app.innerHTML = '';
+    const main = appMain || app.querySelector('.app-main');
+    if (!main) return;
+    main.innerHTML = '';
     try {
         const [taskRes, depsRes, allDepsRes, notesRes] = await Promise.all([
             fetch(`/task/${id}`),
@@ -300,7 +325,7 @@ async function loadTask(id) {
             fetch(`/task/${id}/notes`)
         ]);
         if (!taskRes.ok) {
-            app.innerHTML = taskRes.status === 404 ? '<p class="error">Tâche introuvable.</p>' : `<p class="error">Erreur ${taskRes.status}</p>`;
+            main.innerHTML = taskRes.status === 404 ? '<p class="error">Tâche introuvable.</p>' : `<p class="error">Erreur ${taskRes.status}</p>`;
             return;
         }
         const t = await taskRes.json();
@@ -424,9 +449,9 @@ async function loadTask(id) {
             div.appendChild(createTaskListTable(childTasks, { onTaskClick: (task) => loadTask(task.id) }));
         }
 
-        app.appendChild(div);
+        main.appendChild(div);
     } catch (e) {
-        app.innerHTML = `<p class="error">${e.message}</p>`;
+        main.innerHTML = `<p class="error">${e.message}</p>`;
     }
 }
 
