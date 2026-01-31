@@ -1,134 +1,133 @@
-# ADR-0001: Report de l'implémentation d'interfaces abstraites et d'injection de dépendances
+# ADR-0001: Defer implementation of abstract interfaces and dependency injection
 
 **Date**: 2026-01-28  
-**Statut**: Accepté  
-**Décideurs**: [@Tivins](https://github.com/tivins), Équipe de développement  
-**Tags**: architecture, SOLID, YAGNI, dépendances
+**Status**: Accepted  
+**Deciders**: [@Tivins](https://github.com/tivins), Development team  
+**Tags**: architecture, SOLID, YAGNI, dependencies
 
-## Contexte
+## Context
 
-Lors de l'analyse SOLID du code (voir `docs/internal/analysis-2026-01-28-solid.md`), plusieurs violations du principe de Dependency Inversion (DIP) ont été identifiées :
+During SOLID analysis of the code (see `docs/internal/analysis-2026-01-28-solid.md`), several violations of the Dependency Inversion Principle (DIP) were identified:
 
-1. **Dépendances directes aux implémentations concrètes** :
-   - `Database` est couplé directement à SQLite
-   - Les repositories (`TaskRepository`, `PhaseRepository`, etc.) sont des classes concrètes sans interfaces abstraites
-   - `WebServer` dépend directement de `httplib::Server`
-   - Les command parsers dépendent directement de `cxxopts::Options`
+1. **Direct dependencies on concrete implementations**:
+   - `Database` is directly coupled to SQLite
+   - Repositories (`TaskRepository`, `PhaseRepository`, etc.) are concrete classes without abstract interfaces
+   - `WebServer` depends directly on `httplib::Server`
+   - Command parsers depend directly on `cxxopts::Options`
 
-2. **Instanciation directe dans le code** :
-   - `main.cpp` instancie directement `Database`
-   - `web.cpp` instancie directement `WebServer` et les contrôleurs
-   - `mcp.cpp` instancie directement les handlers
+2. **Direct instantiation in code**:
+   - `main.cpp` directly instantiates `Database`
+   - `web.cpp` directly instantiates `WebServer` and controllers
+   - `mcp.cpp` directly instantiates handlers
 
-3. **Impact sur la testabilité** :
-   - Impossible d'injecter des mocks pour les tests unitaires
-   - Tests limités aux tests d'intégration avec la vraie base de données
+3. **Impact on testability**:
+   - Impossible to inject mocks for unit tests
+   - Tests limited to integration tests with the real database
 
-## Décision
+## Decision
 
-**Nous décidons de reporter l'implémentation d'interfaces abstraites et d'injection de dépendances pour l'instant.**
+**We decide to defer implementation of abstract interfaces and dependency injection for now.**
 
-### Décisions spécifiques
+### Specific decisions
 
-1. **Pas d'interfaces abstraites pour Database** : Ne pas créer `IDatabase` tant qu'il n'y a pas de besoin réel de supporter d'autres SGBD que SQLite.
+1. **No abstract interfaces for Database**: Do not create `IDatabase` until there is a real need to support DBMSs other than SQLite.
 
-2. **Pas d'interfaces abstraites pour les Repositories** : Ne pas créer `ITaskRepository`, `IPhaseRepository`, etc. Les repositories concrets sont suffisants pour les besoins actuels.
+2. **No abstract interfaces for Repositories**: Do not create `ITaskRepository`, `IPhaseRepository`, etc. Concrete repositories are sufficient for current needs.
 
-3. **Pas d'interfaces abstraites pour les dépendances externes** : Ne pas créer d'interfaces pour `httplib::Server` ou `cxxopts::Options` tant qu'il n'y a pas de besoin réel de changer de bibliothèque.
+3. **No abstract interfaces for external dependencies**: Do not create interfaces for `httplib::Server` or `cxxopts::Options` until there is a real need to change libraries.
 
-4. **Pas d'injection de dépendances** : Ne pas implémenter l'injection de dépendances dans `main.cpp`, `web.cpp`, `mcp.cpp` pour l'instant.
+4. **No dependency injection**: Do not implement dependency injection in `main.cpp`, `web.cpp`, `mcp.cpp` for now.
 
 ## Justification
 
-### Principe YAGNI (You Aren't Gonna Need It)
+### YAGNI principle (You Aren't Gonna Need It)
 
 > "The best code is no code at all. But if you must write code, write the simplest code that works. You aren't gonna need those fancy abstractions until you actually need them."  
-> — Adaptation libre de Jeff Atwood et Ron Jeffries
+> — Free adaptation of Jeff Atwood and Ron Jeffries
 
+- **No immediate real need**: No current need to support multiple DBMSs, change HTTP library, or use mocks in tests.
 
-- **Pas de besoin réel immédiat** : Aucun besoin actuel de supporter plusieurs SGBD, de changer de bibliothèque HTTP, ou d'utiliser des mocks dans les tests.
+- **Functional tests**: Existing tests already use in-memory SQLite (`:memory:`) and work correctly. Current integration tests are sufficient to validate system behaviour.
 
-- **Tests fonctionnels** : Les tests existants utilisent déjà SQLite en mémoire (`:memory:`) et fonctionnent correctement. Les tests d'intégration actuels sont suffisants pour valider le comportement du système.
+- **Complexity vs benefit**: Implementing abstract interfaces and dependency injection would add:
+  - ~15–20 new files (interfaces + implementations)
+  - Additional complexity in construction and initialisation
+  - Additional maintenance
+  - With no immediate real benefit
 
-- **Complexité vs bénéfice** : L'implémentation d'interfaces abstraites et d'injection de dépendances ajouterait :
-  - ~15-20 nouveaux fichiers (interfaces + implémentations)
-  - Complexité supplémentaire dans la construction et l'initialisation
-  - Maintenance supplémentaire
-  - Sans bénéfice réel immédiat
+- **Consistency**: This decision is consistent with the earlier decision not to implement the Strategy pattern for formatters (implicit ADR in the SOLID analysis).
 
-- **Cohérence** : Cette décision est cohérente avec la décision précédente de ne pas implémenter le Strategy pattern pour les formatters (ADR implicite dans l'analyse SOLID).
+### Current state of the code
 
-### État actuel du code
+The code already respects several SOLID principles:
+- **SRP**: Responsibilities well separated (repositories, services, formatters, parsers)
+- **OCP**: Extension possible via the Command pattern for new commands
+- **DIP**: Direct dependencies on implementations, but acceptable for now
 
-Le code respecte déjà plusieurs principes SOLID :
-- **SRP** : Responsabilités bien séparées (repositories, services, formatters, parsers)
-- **OCP** : Extension possible via le pattern Command pour les nouvelles commandes
-- **DIP** : Dépendances directes aux implémentations, mais acceptables pour l'instant
+## Consequences
 
-## Conséquences
+### Positive
 
-### Positives
+- **Simplicity**: Code simpler to understand and maintain
+- **Fewer files**: Less complexity in project structure
+- **Faster development**: No time spent on unnecessary abstractions
+- **Functional tests**: Integration tests with in-memory SQLite work correctly
 
-- **Simplicité** : Code plus simple à comprendre et maintenir
-- **Moins de fichiers** : Moins de complexité dans la structure du projet
-- **Développement plus rapide** : Pas de temps passé sur des abstractions non nécessaires
-- **Tests fonctionnels** : Les tests d'intégration avec SQLite en mémoire fonctionnent correctement
+### Negative
 
-### Négatives
-
-- **Couplage fort** : Le code reste couplé à SQLite, httplib, et cxxopts
-- **Testabilité limitée** : Pas de possibilité d'utiliser des mocks pour des tests unitaires isolés
-- **Flexibilité réduite** : Changement de bibliothèque nécessiterait une refactorisation importante
-- **Violation partielle du DIP** : Le principe de Dependency Inversion n'est pas complètement respecté
+- **Tight coupling**: Code remains coupled to SQLite, httplib, and cxxopts
+- **Limited testability**: No possibility to use mocks for isolated unit tests
+- **Reduced flexibility**: Changing libraries would require significant refactoring
+- **Partial DIP violation**: The Dependency Inversion Principle is not fully respected
 
 ### Mitigations
 
-- **Tests d'intégration** : Les tests utilisent SQLite en mémoire, ce qui permet des tests rapides et isolés
-- **Architecture modulaire** : La séparation en repositories, services, formatters facilite les futures refactorisations si nécessaire
-- **Révision future** : Cette décision sera révisée si un besoin réel apparaît (ex: besoin de supporter PostgreSQL, besoin de mocks pour tests unitaires)
+- **Integration tests**: Tests use in-memory SQLite, enabling fast and isolated tests
+- **Modular architecture**: Separation into repositories, services, formatters facilitates future refactoring if needed
+- **Future review**: This decision will be revisited if a real need arises (e.g. need to support PostgreSQL, need for mocks for unit tests)
 
-## Alternatives considérées
+## Alternatives considered
 
-### Alternative 1 : Implémenter toutes les interfaces abstraites maintenant
+### Alternative 1: Implement all abstract interfaces now
 
-**Avantages** :
-- Respect complet du DIP
-- Testabilité maximale avec mocks
-- Flexibilité maximale pour changer d'implémentation
+**Pros**:
+- Full DIP compliance
+- Maximum testability with mocks
+- Maximum flexibility to change implementation
 
-**Inconvénients** :
-- Complexité importante (~20 nouveaux fichiers)
-- Pas de besoin réel immédiat
-- Maintenance supplémentaire
-- Violation du principe YAGNI
+**Cons**:
+- Significant complexity (~20 new files)
+- No immediate real need
+- Additional maintenance
+- Violation of YAGNI principle
 
-**Décision** : Rejeté - trop de complexité pour un bénéfice hypothétique
+**Decision**: Rejected — too much complexity for hypothetical benefit
 
-### Alternative 2 : Implémenter uniquement les interfaces critiques
+### Alternative 2: Implement only critical interfaces
 
-**Avantages** :
-- Compromis entre simplicité et flexibilité
-- Focus sur les dépendances les plus critiques
+**Pros**:
+- Compromise between simplicity and flexibility
+- Focus on the most critical dependencies
 
-**Inconvénients** :
-- Quelles interfaces sont vraiment critiques ?
-- Risque de créer des interfaces qui ne seront jamais utilisées
-- Incohérence dans l'architecture
+**Cons**:
+- Which interfaces are truly critical?
+- Risk of creating interfaces that will never be used
+- Inconsistency in architecture
 
-**Décision** : Rejeté - difficile de déterminer quelles interfaces sont vraiment nécessaires sans besoin concret
+**Decision**: Rejected — hard to determine which interfaces are truly needed without a concrete need
 
-## Références
+## References
 
-- Analyse SOLID complète : `docs/internal/analysis-2026-01-28-solid.md`
-- Principe YAGNI : [Wikipedia - You Aren't Gonna Need It](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it)
-- Principe SOLID - Dependency Inversion : [Wikipedia - Dependency Inversion Principle](https://en.wikipedia.org/wiki/Dependency_inversion_principle)
+- Full SOLID analysis: `docs/internal/analysis-2026-01-28-solid.md`
+- YAGNI principle: [Wikipedia - You Aren't Gonna Need It](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it)
+- SOLID - Dependency Inversion: [Wikipedia - Dependency Inversion Principle](https://en.wikipedia.org/wiki/Dependency_inversion_principle)
 
 ## Notes
 
-Cette décision peut être révisée si :
-- Un besoin réel apparaît de supporter plusieurs SGBD
-- Un besoin réel apparaît de changer de bibliothèque HTTP ou de parsing CLI
-- Un besoin réel apparaît d'utiliser des mocks pour des tests unitaires isolés
-- L'équipe décide d'investir dans une meilleure testabilité
+This decision may be revisited if:
+- A real need arises to support multiple DBMSs
+- A real need arises to change HTTP or CLI parsing library
+- A real need arises to use mocks for isolated unit tests
+- The team decides to invest in better testability
 
-Dans ce cas, une nouvelle ADR sera créée pour documenter le changement de décision.
+In that case, a new ADR will be created to document the change of decision.

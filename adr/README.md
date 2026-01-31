@@ -1,32 +1,34 @@
 # Architecture Decision Records (ADR)
 
-Ce dossier contient les Architecture Decision Records (ADR) du projet taskman.
+This folder contains the Architecture Decision Records (ADR) for the Taskman project.
 
-## Qu'est-ce qu'une ADR ?
+## What is an ADR?
 
-Une Architecture Decision Record est un document qui capture une décision architecturale importante, le contexte qui l'a motivée, et les conséquences de cette décision.
+An Architecture Decision Record is a document that captures an important architectural decision, the context that led to it, and the consequences of that decision.
 
 ## Format
 
-Les ADR suivent le format standard avec les sections suivantes :
+ADRs follow the standard format with the following sections:
 
-- **Titre** : Numéro et titre de la décision
-- **Date** : Date de la décision
-- **Statut** : Accepté, Proposé, Rejeté, Déprécié, etc.
-- **Décideurs** : Personnes impliquées dans la décision
-- **Tags** : Mots-clés pour faciliter la recherche
-- **Contexte** : Situation qui a motivé la décision
-- **Décision** : La décision prise
-- **Justification** : Raisons de la décision
-- **Conséquences** : Impacts positifs et négatifs
-- **Alternatives considérées** : Options évaluées et pourquoi elles ont été rejetées
-- **Références** : Liens vers des documents pertinents
+- **Title**: Number and title of the decision
+- **Date**: Date of the decision
+- **Status**: Accepted, Proposed, Rejected, Deprecated, etc.
+- **Deciders**: People involved in the decision
+- **Tags**: Keywords to facilitate search
+- **Context**: Situation that motivated the decision
+- **Decision**: The decision made
+- **Justification**: Reasons for the decision
+- **Consequences**: Positive and negative impacts
+- **Alternatives considered**: Options evaluated and why they were rejected
+- **References**: Links to relevant documents
 
-## Index des ADR
+## ADR index
 
-- [ADR-0001: Report de l'implémentation d'interfaces abstraites et d'injection de dépendances](0001-defer-abstractions-and-dependency-injection.md) (2026-01-28)
+- [ADR-0001: Defer implementation of abstract interfaces and dependency injection](0001-defer-abstractions-and-dependency-injection.md) (2026-01-28)
+- [ADR-0002: Navigation and state in Taskman web UI](0002-web-ui-navigation-and-state.md) (2026-02-01)
+- [ADR-0003: Global search in Taskman web UI](0003-web-ui-global-search.md) (2026-02-01)
 
-## Références
+## References
 
-- [Documentation ADR par Michael Nygard](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions)
-- [Format ADR standard](https://adr.github.io/)
+- [ADR documentation by Michael Nygard](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions)
+- [Standard ADR format](https://adr.github.io/)
