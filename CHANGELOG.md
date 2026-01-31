@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.31.0] - 2026-01-31
+
+### Added
+
+- **Créateur (rôle) de la tâche** : colonne `creator` en base (migration automatique), propagation dans add/edit/get/list et formatters. Traçabilité : qui a créé la tâche (rôle, utile pour audit et agents). CLI : `task:add --creator <role>`, `task:edit --creator <role>` ; MCP : paramètre `creator` sur `taskman_task_add` et `taskman_task_edit` ; API web : champ `creator` dans les réponses GET /task/:id et GET /tasks. Le créateur est validé comme rôle (même liste que `role`).
+
+---
+
 ## [0.30.0] - 2026-01-31
 
 ### Added

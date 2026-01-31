@@ -133,6 +133,16 @@ TEST_CASE("task_add — avec description, status, sort_order, role (utilitaire)"
     REQUIRE(rows[0]["role"] == "developer");
 }
 
+TEST_CASE("task_add — avec creator (utilitaire)", "[task]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(task_add(db, "t-creator", "p1", std::nullopt, "T Creator", std::nullopt, "to_do", std::nullopt, std::nullopt, "project-manager"));
+    auto rows = db.query("SELECT id, title, creator FROM tasks WHERE id = 't-creator'");
+    REQUIRE(rows.size() == 1u);
+    REQUIRE(rows[0]["title"] == "T Creator");
+    REQUIRE(rows[0]["creator"] == "project-manager");
+}
+
 TEST_CASE("task_add — status invalide (utilitaire)", "[task]") {
     Database db;
     setup_db(db);
@@ -186,6 +196,22 @@ TEST_CASE("cmd_task_add — avec description, role, milestone", "[task]") {
     REQUIRE(j["description"] == "Desc");
     REQUIRE(j["role"] == "developer");
     REQUIRE(j["milestone_id"] == "m1");
+}
+
+TEST_CASE("cmd_task_add — avec --creator", "[task]") {
+    Database db;
+    setup_db(db);
+    std::string out = run_task_add_capture(db, {"task:add", "--title", "T Creator", "--phase", "p1", "--creator", "qa-engineer"});
+    auto j = nlohmann::json::parse(out);
+    REQUIRE(j["title"] == "T Creator");
+    REQUIRE(j["creator"] == "qa-engineer");
+}
+
+TEST_CASE("cmd_task_add — --creator invalide", "[task]") {
+    Database db;
+    setup_db(db);
+    int r = run_task_add(db, {"task:add", "--title", "T", "--phase", "p1", "--creator", "invalid-role"});
+    REQUIRE(r == 1);
 }
 
 TEST_CASE("cmd_task_add — --title manquant", "[task]") {
@@ -295,6 +321,17 @@ TEST_CASE("cmd_task_edit — title, status, role", "[task]") {
     REQUIRE(j["title"] == "T2");
     REQUIRE(j["status"] == "in_progress");
     REQUIRE(j["role"] == "developer");
+}
+
+TEST_CASE("cmd_task_edit — --creator", "[task]") {
+    Database db;
+    setup_db(db);
+    std::string out = run_task_add_capture(db, {"task:add", "--title", "T", "--phase", "p1", "--creator", "developer"});
+    std::string id = nlohmann::json::parse(out)["id"].get<std::string>();
+    REQUIRE(run_task_edit(db, {"task:edit", id, "--creator", "project-manager"}) == 0);
+    std::string get_out = run_task_get_capture(db, {"task:get", id});
+    auto j = nlohmann::json::parse(get_out);
+    REQUIRE(j["creator"] == "project-manager");
 }
 
 TEST_CASE("cmd_task_edit — id manquant", "[task]") {

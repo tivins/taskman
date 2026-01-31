@@ -96,6 +96,7 @@ void task_to_json(nlohmann::json& out, const Row& row) {
     set_or_null(out, "status", get("status"));
     set_or_null_int(out, "sort_order", get("sort_order"));
     set_or_null(out, "role", get("role"));
+    set_or_null(out, "creator", get("creator"));
     set_or_null(out, "created_at", get("created_at"));
     set_or_null(out, "updated_at", get("updated_at"));
     // note_ids : liste des UID des notes liées (stockée en comma-separated dans la row)
@@ -120,6 +121,7 @@ void print_task_text(const Row& row) {
     std::cout << "description: " << get("description") << "\n";
     std::cout << "status: " << get("status") << "\n";
     std::cout << "role: " << get("role") << "\n";
+    std::cout << "creator: " << get("creator") << "\n";
     std::cout << "id: " << get("id") << "\n";
     std::cout << "phase_id: " << get("phase_id") << "\n";
     std::cout << "milestone_id: " << get("milestone_id") << "\n";

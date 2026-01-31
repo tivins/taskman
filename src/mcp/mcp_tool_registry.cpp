@@ -151,6 +151,7 @@ void McpToolRegistry::initialize_tools() {
         props["phase"] = nlohmann::json{{"type", "string"}};
         props["description"] = nlohmann::json{{"type", "string"}};
         props["role"] = nlohmann::json{{"type", "string"}, {"enum", get_roles_json_array()}};
+        props["creator"] = nlohmann::json{{"type", "string"}, {"enum", get_roles_json_array()}, {"description", "Creator role (who created the task)"}};
         props["milestone"] = nlohmann::json{{"type", "string"}};
         props["sort-order"] = nlohmann::json{{"type", nlohmann::json::array({"string", "integer"})}, {"description", "Display order for this task within its phase. Lower values appear first. IMPORTANT: Always set this to control display order. Use increments of 10 (e.g. 10, 20, 30) to allow easy insertion later."}};
         props["format"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"json", "text"})}, {"default", "json"}};
@@ -204,6 +205,7 @@ void McpToolRegistry::initialize_tools() {
         props["description"] = nlohmann::json{{"type", "string"}};
         props["status"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"to_do", "in_progress", "done"})}};
         props["role"] = nlohmann::json{{"type", "string"}, {"enum", get_roles_json_array()}};
+        props["creator"] = nlohmann::json{{"type", "string"}, {"enum", get_roles_json_array()}, {"description", "Creator role (who created the task)"}};
         props["milestone"] = nlohmann::json{{"type", "string"}};
         props["sort-order"] = nlohmann::json{{"type", nlohmann::json::array({"string", "integer"})}, {"description", "Display order for this task within its phase. Lower values appear first."}};
         t.inputSchema = make_schema(props, {"id"});

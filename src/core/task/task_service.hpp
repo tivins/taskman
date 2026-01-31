@@ -34,7 +34,8 @@ public:
         const std::optional<std::string>& description = std::nullopt,
         const std::string& status = "to_do",
         std::optional<int> sort_order = std::nullopt,
-        const std::optional<std::string>& role = std::nullopt);
+        const std::optional<std::string>& role = std::nullopt,
+        const std::optional<std::string>& creator = std::nullopt);
 
     /** Ajoute une tâche avec un ID spécifique (pour compatibilité avec les tests et code existant).
      * Effectue la validation des données avant insertion.
@@ -47,7 +48,8 @@ public:
         const std::optional<std::string>& description = std::nullopt,
         const std::string& status = "to_do",
         std::optional<int> sort_order = std::nullopt,
-        const std::optional<std::string>& role = std::nullopt);
+        const std::optional<std::string>& role = std::nullopt,
+        const std::optional<std::string>& creator = std::nullopt);
 
     /** Récupère une tâche par son ID.
      * Retourne un map vide si la tâche n'existe pas. */
@@ -69,7 +71,8 @@ public:
                      const std::optional<std::string>& status = std::nullopt,
                      const std::optional<std::string>& role = std::nullopt,
                      const std::optional<std::string>& milestone_id = std::nullopt,
-                     const std::optional<int>& sort_order = std::nullopt);
+                     const std::optional<int>& sort_order = std::nullopt,
+                     const std::optional<std::string>& creator = std::nullopt);
 
     /** Ajoute une dépendance entre deux tâches.
      * Effectue la validation (tâches existantes, pas de dépendance circulaire).

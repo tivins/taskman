@@ -191,7 +191,7 @@ Output: JSON array. Fields: `id`, `phase_id`, `name`, `criterion`, `reached` (in
 ### `task:add` — Create a task
 
 ```bash
-taskman task:add --title <title> --phase <phase_id> [--description <text>] [--role <role>] [--milestone <milestone_id>] [--format json|text]
+taskman task:add --title <title> --phase <phase_id> [--description <text>] [--role <role>] [--creator <role>] [--milestone <milestone_id>] [--format json|text]
 ```
 
 | Option         | Required | Description                              | Default |
@@ -199,7 +199,8 @@ taskman task:add --title <title> --phase <phase_id> [--description <text>] [--ro
 | `--title`      | yes      | Task title                               | —       |
 | `--phase`      | yes      | Phase ID                                 | —       |
 | `--description`| no       | Description                              | —       |
-| `--role`       | no       | One of the roles listed above            | —       |
+| `--role`       | no       | One of the roles listed above (assignee)| —       |
+| `--creator`     | no       | Creator role (who created the task)     | —       |
 | `--milestone`  | no       | Associated milestone ID                  | —       |
 | `--format`     | no       | `json` or `text` for the created task   | `json`  |
 
@@ -223,7 +224,7 @@ taskman task:get <id> [--format json|text]
 | `<id>`   | yes      | Task UUID            | —       |
 | `--format`| no      | `json` or `text`     | `json`  |
 
-With `text`, the order is: `title`, `description`, `status`, `role`, then `id`, `phase_id`, `milestone_id`, `sort_order`.
+With `text`, the order is: `title`, `description`, `status`, `role`, `creator`, then `id`, `phase_id`, `milestone_id`, `sort_order`.
 
 ### `task:list` — List tasks
 
@@ -250,7 +251,7 @@ taskman task:list --role documentation-writer --format text
 ### `task:edit` — Edit a task
 
 ```bash
-taskman task:edit <id> [--title <title>] [--description <text>] [--status to_do|in_progress|done] [--role <role>] [--milestone <milestone_id>]
+taskman task:edit <id> [--title <title>] [--description <text>] [--status to_do|in_progress|done] [--role <role>] [--creator <role>] [--milestone <milestone_id>]
 ```
 
 Partial update: only the provided options are changed. At least one option is required for a change to take effect.

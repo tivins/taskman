@@ -30,13 +30,14 @@ bool task_add(Database& db,
               const std::optional<std::string>& description,
               const std::string& status,
               std::optional<int> sort_order,
-              const std::optional<std::string>& role) {
+              const std::optional<std::string>& role,
+              const std::optional<std::string>& creator) {
     // Utilise les nouvelles classes pour respecter le SRP
     // Passe par TaskService pour la validation
     QueryExecutor& executor = db.get_executor();
     TaskRepository repository(executor);
     TaskService service(repository);
-    return service.add_task_with_id(id, phase_id, milestone_id, title, description, status, sort_order, role);
+    return service.add_task_with_id(id, phase_id, milestone_id, title, description, status, sort_order, role, creator);
 }
 
 bool task_dep_add(Database& db, const std::string& task_id, const std::string& depends_on) {

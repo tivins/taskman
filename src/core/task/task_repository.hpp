@@ -32,7 +32,8 @@ public:
              const std::optional<std::string>& description,
              const std::string& status,
              std::optional<int> sort_order,
-             const std::optional<std::string>& role);
+             const std::optional<std::string>& role,
+             const std::optional<std::string>& creator = std::nullopt);
 
     /** Récupère une tâche par son ID.
      * Retourne un map vide si la tâche n'existe pas. */
@@ -71,7 +72,8 @@ public:
                 const std::optional<std::string>& status = std::nullopt,
                 const std::optional<std::string>& role = std::nullopt,
                 const std::optional<std::string>& milestone_id = std::nullopt,
-                const std::optional<int>& sort_order = std::nullopt);
+                const std::optional<int>& sort_order = std::nullopt,
+                const std::optional<std::string>& creator = std::nullopt);
 
     /** Ajoute une dépendance entre deux tâches.
      * Retourne true en cas de succès, false en cas d'erreur. */

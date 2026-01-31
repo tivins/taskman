@@ -99,6 +99,10 @@ bool SchemaManager::init_schema() {
     if (!ensure_timestamps("milestones")) return false;
     if (!ensure_timestamps("tasks")) return false;
 
+    if (!table_has_column("tasks", "creator")) {
+        if (!executor_.exec("ALTER TABLE tasks ADD COLUMN creator TEXT")) return false;
+    }
+
     return true;
 }
 

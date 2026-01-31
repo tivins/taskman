@@ -17,11 +17,12 @@ std::optional<std::string> TaskService::create_task(
     const std::optional<std::string>& description,
     const std::string& status,
     std::optional<int> sort_order,
-    const std::optional<std::string>& role) {
+    const std::optional<std::string>& role,
+    const std::optional<std::string>& creator) {
     // Génération de l'ID
     std::string id = generate_uuid_v4();
     // Utilise la méthode avec ID spécifique
-    if (!add_task_with_id(id, phase_id, milestone_id, title, description, status, sort_order, role)) {
+    if (!add_task_with_id(id, phase_id, milestone_id, title, description, status, sort_order, role, creator)) {
         return std::nullopt;
     }
     return id;
@@ -35,7 +36,8 @@ bool TaskService::add_task_with_id(
     const std::optional<std::string>& description,
     const std::string& status,
     std::optional<int> sort_order,
-    const std::optional<std::string>& role) {
+    const std::optional<std::string>& role,
+    const std::optional<std::string>& creator) {
     // Validation du statut
     if (!is_valid_status(status)) {
         std::cerr << "taskman: invalid status\n";
@@ -46,8 +48,13 @@ bool TaskService::add_task_with_id(
         std::cerr << get_roles_error_message();
         return false;
     }
+    // Validation du créateur (rôle) si fourni
+    if (creator.has_value() && !is_valid_role(*creator)) {
+        std::cerr << get_roles_error_message();
+        return false;
+    }
     // Insertion dans la base
-    return repository_.add(id, phase_id, milestone_id, title, description, status, sort_order, role);
+    return repository_.add(id, phase_id, milestone_id, title, description, status, sort_order, role, creator);
 }
 
 std::map<std::string, std::optional<std::string>> TaskService::get_task(const std::string& id) {
@@ -82,7 +89,8 @@ bool TaskService::update_task(const std::string& id,
                                const std::optional<std::string>& status,
                                const std::optional<std::string>& role,
                                const std::optional<std::string>& milestone_id,
-                               const std::optional<int>& sort_order) {
+                               const std::optional<int>& sort_order,
+                               const std::optional<std::string>& creator) {
     // Validation du statut si fourni
     if (status.has_value() && !is_valid_status(*status)) {
         std::cerr << "taskman: invalid status\n";
@@ -93,7 +101,12 @@ bool TaskService::update_task(const std::string& id,
         std::cerr << get_roles_error_message();
         return false;
     }
-    return repository_.update(id, title, description, status, role, milestone_id, sort_order);
+    // Validation du créateur (rôle) si fourni
+    if (creator.has_value() && !is_valid_role(*creator)) {
+        std::cerr << get_roles_error_message();
+        return false;
+    }
+    return repository_.update(id, title, description, status, role, milestone_id, sort_order, creator);
 }
 
 bool TaskService::add_task_dependency(const std::string& task_id, const std::string& depends_on) {

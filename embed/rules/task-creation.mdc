@@ -1,0 +1,35 @@
+---
+description: Créer les tâches avec le rôle créateur (--creator) pour la traçabilité
+alwaysApply: true
+---
+
+# Création de tâches
+
+Lorsque vous créez des tâches avec taskman (`task:add`), **toujours indiquer le créateur** avec l’option `--creator` en utilisant **votre nom de rôle**.
+
+## Règle
+
+- **Commande** : `task:add --title <titre> --phase <phase_id> [--description ...] [--role ...] --creator <votre_rôle>`
+- **`--creator`** : doit être le rôle sous lequel vous agissez (ex. `developer`, `project-manager`, `documentation-writer`, `qa-engineer`). Utilisez l’un des rôles valides du projet.
+- **Objectif** : traçabilité — savoir qui (quel rôle) a créé chaque tâche (audit, responsabilité, agents).
+
+## Rôles valides
+
+Les valeurs possibles pour `--creator` (et `--role`) sont notamment :  
+`project-manager`, `project-designer`, `software-architect`, `developer`, `summary-writer`, `documentation-writer`, `art-director`, `ui-designer`, `community-manager`, `ux-designer`, `qa-engineer`, `devops-engineer`, `product-owner`, `security-engineer`.
+
+## Exemples
+
+- En tant que développeur :  
+  `task:add --title "Implémenter l’API login" --phase P2 --creator developer`
+- En tant que rédacteur de doc :  
+  `task:add --title "Rédiger USAGE.md" --phase P1 --creator documentation-writer`
+- En tant que chef de projet :  
+  `task:add --title "Valider le périmètre" --phase P1 --creator project-manager`
+
+## Rappel
+
+- **`--role`** : rôle assigné à la tâche (qui doit la faire).
+- **`--creator`** : rôle de celui qui crée la tâche (traçabilité).
+
+Les deux peuvent être identiques ou différents selon le cas.

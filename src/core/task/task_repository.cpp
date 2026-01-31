@@ -14,9 +14,10 @@ bool TaskRepository::add(const std::string& id,
                          const std::optional<std::string>& description,
                          const std::string& status,
                          std::optional<int> sort_order,
-                         const std::optional<std::string>& role) {
-    const char* sql = "INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role) "
-                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                         const std::optional<std::string>& role,
+                         const std::optional<std::string>& creator) {
+    const char* sql = "INSERT INTO tasks (id, phase_id, milestone_id, title, description, status, sort_order, role, creator) "
+                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     std::vector<std::optional<std::string>> params;
     params.push_back(id);
     params.push_back(phase_id);
@@ -28,12 +29,13 @@ bool TaskRepository::add(const std::string& id,
                      ? std::optional<std::string>(std::to_string(*sort_order))
                      : std::nullopt);
     params.push_back(role);
+    params.push_back(creator);
     return executor_.run(sql, params);
 }
 
 std::map<std::string, std::optional<std::string>> TaskRepository::get_by_id(const std::string& id) {
     auto rows = executor_.query(
-        "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at FROM tasks WHERE id = ?",
+        "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, creator, created_at, updated_at FROM tasks WHERE id = ?",
         {id});
     if (rows.empty()) {
         return {};
@@ -45,7 +47,7 @@ std::vector<std::map<std::string, std::optional<std::string>>> TaskRepository::l
     const std::optional<std::string>& phase_id,
     const std::optional<std::string>& status,
     const std::optional<std::string>& role) {
-    std::string sql = "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at FROM tasks";
+    std::string sql = "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, creator, created_at, updated_at FROM tasks";
     std::vector<std::string> where_parts;
     std::vector<std::optional<std::string>> params;
 
@@ -84,7 +86,7 @@ std::vector<std::map<std::string, std::optional<std::string>>> TaskRepository::l
     const std::optional<std::string>& role,
     int limit,
     int offset) {
-    std::string sql = "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, created_at, updated_at FROM tasks";
+    std::string sql = "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, creator, created_at, updated_at FROM tasks";
     std::vector<std::string> where_parts;
     std::vector<std::optional<std::string>> params;
 
@@ -168,7 +170,8 @@ bool TaskRepository::update(const std::string& id,
                             const std::optional<std::string>& status,
                             const std::optional<std::string>& role,
                             const std::optional<std::string>& milestone_id,
-                            const std::optional<int>& sort_order) {
+                            const std::optional<int>& sort_order,
+                            const std::optional<std::string>& creator) {
     std::vector<std::string> set_parts;
     std::vector<std::optional<std::string>> params;
 
@@ -195,6 +198,10 @@ bool TaskRepository::update(const std::string& id,
     if (sort_order.has_value()) {
         set_parts.push_back("sort_order = ?");
         params.push_back(std::to_string(*sort_order));
+    }
+    if (creator.has_value()) {
+        set_parts.push_back("creator = ?");
+        params.push_back(*creator);
     }
 
     if (set_parts.empty()) {

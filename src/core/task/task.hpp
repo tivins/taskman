@@ -21,7 +21,8 @@ bool task_add(Database& db,
               const std::optional<std::string>& description = std::nullopt,
               const std::string& status = "to_do",
               std::optional<int> sort_order = std::nullopt,
-              const std::optional<std::string>& role = std::nullopt);
+              const std::optional<std::string>& role = std::nullopt,
+              const std::optional<std::string>& creator = std::nullopt);
 
 /** Add a task dependency: task_id depends on depends_on. */
 bool task_dep_add(Database& db, const std::string& task_id, const std::string& depends_on);

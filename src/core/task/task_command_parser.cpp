@@ -25,7 +25,8 @@ int TaskCommandParser::parse_add(int argc, char* argv[]) {
         ("title", "Task title", cxxopts::value<std::string>())
         ("phase", "Phase ID", cxxopts::value<std::string>())
         ("description", "Description", cxxopts::value<std::string>())
-        ("role", "Role", cxxopts::value<std::string>())
+        ("role", "Role (assignee)", cxxopts::value<std::string>())
+        ("creator", "Creator role (who created the task)", cxxopts::value<std::string>())
         ("milestone", "Milestone ID", cxxopts::value<std::string>())
         ("sort-order", "Sort order (integer)", cxxopts::value<std::string>())
         ("format", "Output: json or text", cxxopts::value<std::string>()->default_value("json"));
@@ -53,13 +54,14 @@ int TaskCommandParser::parse_add(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string title, phase, description, role, milestone, sort_order_str, format;
+    std::string title, phase, description, role, creator, milestone, sort_order_str, format;
     try {
         title = result["title"].as<std::string>();
         phase = result["phase"].as<std::string>();
         format = result["format"].as<std::string>();
         if (result.count("description")) description = result["description"].as<std::string>();
         if (result.count("role")) role = result["role"].as<std::string>();
+        if (result.count("creator")) creator = result["creator"].as<std::string>();
         if (result.count("milestone")) milestone = result["milestone"].as<std::string>();
         if (result.count("sort-order")) sort_order_str = result["sort-order"].as<std::string>();
     } catch (const cxxopts::exceptions::exception& e) {
@@ -88,7 +90,8 @@ int TaskCommandParser::parse_add(int argc, char* argv[]) {
         description.empty() ? std::nullopt : std::optional<std::string>(description),
         "to_do",
         sort_order_opt,
-        role.empty() ? std::nullopt : std::optional<std::string>(role));
+        role.empty() ? std::nullopt : std::optional<std::string>(role),
+        creator.empty() ? std::nullopt : std::optional<std::string>(creator));
     if (!id.has_value()) {
         return 1;
     }
@@ -215,7 +218,8 @@ int TaskCommandParser::parse_edit(int argc, char* argv[]) {
         ("title", "Title", cxxopts::value<std::string>())
         ("description", "Description", cxxopts::value<std::string>())
         ("status", "Status: to_do, in_progress, done", cxxopts::value<std::string>())
-        ("role", "Role", cxxopts::value<std::string>())
+        ("role", "Role (assignee)", cxxopts::value<std::string>())
+        ("creator", "Creator role (who created the task)", cxxopts::value<std::string>())
         ("milestone", "Milestone ID", cxxopts::value<std::string>())
         ("sort-order", "Sort order (integer)", cxxopts::value<std::string>());
     opts.parse_positional({"id"});
@@ -245,13 +249,14 @@ int TaskCommandParser::parse_edit(int argc, char* argv[]) {
         return 1;
     }
 
-    std::optional<std::string> title, description, status, role, milestone;
+    std::optional<std::string> title, description, status, role, creator, milestone;
     std::optional<int> sort_order;
 
     if (result.count("title")) title = result["title"].as<std::string>();
     if (result.count("description")) description = result["description"].as<std::string>();
     if (result.count("status")) status = result["status"].as<std::string>();
     if (result.count("role")) role = result["role"].as<std::string>();
+    if (result.count("creator")) creator = result["creator"].as<std::string>();
     if (result.count("milestone")) milestone = result["milestone"].as<std::string>();
     if (result.count("sort-order")) {
         std::string so = result["sort-order"].as<std::string>();
@@ -263,7 +268,7 @@ int TaskCommandParser::parse_edit(int argc, char* argv[]) {
         sort_order = n;
     }
 
-    if (!service_.update_task(id, title, description, status, role, milestone, sort_order)) {
+    if (!service_.update_task(id, title, description, status, role, milestone, sort_order, creator)) {
         return 1;
     }
     return 0;
