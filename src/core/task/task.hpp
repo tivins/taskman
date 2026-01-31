@@ -34,7 +34,7 @@ int cmd_task_add(int argc, char* argv[], Database& db);
 /** task:get <id> [--format json|text] ; JSON par défaut. */
 int cmd_task_get(int argc, char* argv[], Database& db);
 
-/** task:list [--phase <id>] [--status <s>] [--role <r>] [--format json|text] */
+/** task:list [--phase <id>] [--status <s>] [--role <r>] [--blocked-filter blocked|unblocked] [--format json|text] */
 int cmd_task_list(int argc, char* argv[], Database& db);
 
 /** task:edit <id> [--title ...] [--description ...] [--status ...] [--role ...] [--milestone <id>] → UPDATE partiel */

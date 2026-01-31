@@ -181,11 +181,12 @@ void McpToolRegistry::initialize_tools() {
         McpToolDefinition t;
         t.name = "taskman_task_list";
         t.cli_command = "task:list";
-        t.description = "List tasks, optionally filtered by phase, status, or role.";
+        t.description = "List tasks, optionally filtered by phase, status, role, or blocked state.";
         std::map<std::string, nlohmann::json> props;
         props["phase"] = nlohmann::json{{"type", "string"}};
         props["status"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"to_do", "in_progress", "done"})}};
         props["role"] = nlohmann::json{{"type", "string"}, {"enum", get_roles_json_array()}};
+        props["blocked-filter"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"blocked", "unblocked"})}, {"description", "Filter by blocked state: blocked = only tasks blocked by a non-done dependency, unblocked = only non-blocked tasks"}};
         props["format"] = nlohmann::json{{"type", "string"}, {"enum", nlohmann::json::array({"json", "text"})}};
         t.inputSchema = make_schema(props);
         t.positional_keys = {};

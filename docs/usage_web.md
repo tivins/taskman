@@ -98,14 +98,15 @@ Returns a paginated list of tasks in JSON format.
 
 **Query parameters:**
 
-| Parameter   | Description                                    | Default | Range      |
-|-------------|------------------------------------------------|---------|------------|
-| `limit`     | Number of tasks per page                       | `50`    | 1–200      |
-| `page`      | Page number (1-based)                          | `1`     | ≥1         |
-| `phase`     | Filter by phase ID (optional)                  | —       | —          |
-| `milestone` | Filter by milestone ID (optional)              | —       | —          |
-| `status`    | Filter by status (optional)                    | —       | See below  |
-| `role`      | Filter by role (optional)                      | —       | See below  |
+| Parameter        | Description                                    | Default | Range      |
+|------------------|------------------------------------------------|---------|------------|
+| `limit`          | Number of tasks per page                       | `50`    | 1–200      |
+| `page`           | Page number (1-based)                          | `1`     | ≥1         |
+| `phase`          | Filter by phase ID (optional)                 | —       | —          |
+| `milestone`      | Filter by milestone ID (optional)              | —       | —          |
+| `status`         | Filter by status (optional)                   | —       | See below  |
+| `role`           | Filter by role (optional)                     | —       | See below  |
+| `blocked_filter` | Filter by blocked state (optional): `blocked` (only tasks blocked by a non-done dependency), `unblocked` (only non-blocked) | — | — |
 
 **Valid status values:** `to_do`, `in_progress`, `done`
 
@@ -117,7 +118,7 @@ Returns a paginated list of tasks in JSON format.
 
 Returns the total count of tasks matching the specified filters.
 
-**Query parameters:** Same as `/tasks` (phase, milestone, status, role).
+**Query parameters:** Same as `/tasks` (phase, milestone, status, role, blocked_filter).
 
 **Response:** JSON object with `count` field.
 

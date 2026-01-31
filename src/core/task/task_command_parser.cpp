@@ -168,6 +168,7 @@ int TaskCommandParser::parse_list(int argc, char* argv[]) {
         ("phase", "Filter by phase ID", cxxopts::value<std::string>())
         ("status", "Filter by status", cxxopts::value<std::string>())
         ("role", "Filter by role", cxxopts::value<std::string>())
+        ("blocked-filter", "Filter by blocked state: blocked (only blocked tasks) or unblocked (only non-blocked)", cxxopts::value<std::string>())
         ("format", "Output: json or text", cxxopts::value<std::string>()->default_value("json"));
 
     for (int i = 0; i < argc; ++i) {
@@ -195,13 +196,21 @@ int TaskCommandParser::parse_list(int argc, char* argv[]) {
             return 1;
         }
     }
+    if (result.count("blocked-filter")) {
+        std::string bf = result["blocked-filter"].as<std::string>();
+        if (bf != "blocked" && bf != "unblocked") {
+            std::cerr << "taskman: --blocked-filter must be blocked or unblocked\n";
+            return 1;
+        }
+    }
 
-    std::optional<std::string> phase_id, status, role;
+    std::optional<std::string> phase_id, status, role, blocked_filter;
     if (result.count("phase")) phase_id = result["phase"].as<std::string>();
     if (result.count("status")) status = result["status"].as<std::string>();
     if (result.count("role")) role = result["role"].as<std::string>();
+    if (result.count("blocked-filter")) blocked_filter = result["blocked-filter"].as<std::string>();
 
-    auto tasks = service_.list_tasks(phase_id, status, role);
+    auto tasks = service_.list_tasks(phase_id, status, role, blocked_filter);
 
     if (format == "json") {
         formatter_.format_json_list(tasks, std::cout);

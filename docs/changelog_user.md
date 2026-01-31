@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.32.0] - 2026-01-31
+
+- **Filtre tâches bloquées** : `task:list --blocked-filter blocked|unblocked` pour n'afficher que les tâches bloquées (au moins une dépendance non-`done`) ou uniquement les non-bloquées. API web : paramètre `blocked_filter` sur GET /tasks et GET /tasks/count. MCP : paramètre `blocked-filter` sur `taskman_task_list`.
+
 ## [0.30.0] - 2026-01-31
 
 - **task:note:list-by-ids** : récupération d'une liste de notes par liste d'UID (`--ids id1,id2,...`). Permet d'exploiter les `note_ids` de `task:get` en un seul appel. Commande CLI, outil MCP `taskman_task_note_list_by_ids`, et API web `GET /notes?ids=...`.

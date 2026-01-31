@@ -473,3 +473,44 @@ TEST_CASE("cmd_task_list — --format text", "[task]") {
     REQUIRE(out.find("title: B") != std::string::npos);
     REQUIRE(out.find("---") != std::string::npos);
 }
+
+TEST_CASE("cmd_task_list — --blocked-filter unblocked (no deps)", "[task]") {
+    Database db;
+    setup_db(db);
+    run_task_add(db, {"task:add", "--title", "T1", "--phase", "p1"});
+    run_task_add(db, {"task:add", "--title", "T2", "--phase", "p1"});
+    std::string out = run_task_list(db, {"--blocked-filter", "unblocked"});
+    auto j = nlohmann::json::parse(out);
+    REQUIRE(j.size() == 2u);
+}
+
+TEST_CASE("cmd_task_list — --blocked-filter blocked vs unblocked", "[task]") {
+    Database db;
+    setup_db(db);
+    REQUIRE(task_add(db, "ta", "p1", std::nullopt, "A", std::nullopt, "to_do", std::nullopt, std::nullopt));
+    REQUIRE(task_add(db, "tb", "p1", std::nullopt, "B", std::nullopt, "to_do", std::nullopt, std::nullopt));
+    REQUIRE(task_dep_add(db, "tb", "ta")); // B depends on A; A not done => B blocked
+    std::string out_all = run_task_list(db, {});
+    auto j_all = nlohmann::json::parse(out_all);
+    REQUIRE(j_all.size() == 2u);
+    std::string out_unblocked = run_task_list(db, {"--blocked-filter", "unblocked"});
+    auto j_unblocked = nlohmann::json::parse(out_unblocked);
+    REQUIRE(j_unblocked.size() == 1u);
+    REQUIRE(j_unblocked[0]["id"] == "ta");
+    std::string out_blocked = run_task_list(db, {"--blocked-filter", "blocked"});
+    auto j_blocked = nlohmann::json::parse(out_blocked);
+    REQUIRE(j_blocked.size() == 1u);
+    REQUIRE(j_blocked[0]["id"] == "tb");
+}
+
+TEST_CASE("cmd_task_list — --blocked-filter invalid", "[task]") {
+    Database db;
+    setup_db(db);
+    std::vector<std::string> args = {"--blocked-filter", "invalid"};
+    std::vector<char*> ptrs;
+    for (auto& s : args) ptrs.push_back(s.data());
+    ptrs.insert(ptrs.begin(), "task:list");
+    ptrs.push_back(nullptr);
+    int r = cmd_task_list(static_cast<int>(ptrs.size() - 1), ptrs.data(), db);
+    REQUIRE(r == 1);
+}

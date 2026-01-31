@@ -364,6 +364,7 @@ async function loadTask(id) {
             ['Jalon', String(milestoneLabel), ''],
             ['Ordre', t.sort_order != null ? String(t.sort_order) : '—', ''],
             ['Créé le', t.created_at != null ? String(t.created_at) : '—', ''],
+            ['Créé par', String(t.creator || '—'), ''],
             ['Mis à jour le', t.updated_at != null ? String(t.updated_at) : '—', '']
         ];
         for (const [label, val, className] of rows) {

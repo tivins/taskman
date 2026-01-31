@@ -229,15 +229,16 @@ With `text`, the order is: `title`, `description`, `status`, `role`, `creator`, 
 ### `task:list` — List tasks
 
 ```bash
-taskman task:list [--phase <id>] [--status <s>] [--role <r>] [--format json|text]
+taskman task:list [--phase <id>] [--status <s>] [--role <r>] [--blocked-filter blocked|unblocked] [--format json|text]
 ```
 
-| Option     | Description                                          | Default |
-|------------|------------------------------------------------------|---------|
-| `--phase`  | Filter by phase ID                                  | —       |
-| `--status` | Filter by status (`to_do`, `in_progress`, `done`)   | —       |
-| `--role`   | Filter by role                                      | —       |
-| `--format` | `json` (array) or `text` (blocks separated by `---`)| `json`  |
+| Option            | Description                                          | Default |
+|-------------------|------------------------------------------------------|---------|
+| `--phase`         | Filter by phase ID                                  | —       |
+| `--status`        | Filter by status (`to_do`, `in_progress`, `done`)   | —       |
+| `--role`          | Filter by role                                      | —       |
+| `--blocked-filter`| Filter by blocked state: `blocked` (only tasks blocked by a non-done dependency), `unblocked` (only non-blocked tasks) | — |
+| `--format`       | `json` (array) or `text` (blocks separated by `---`)| `json`  |
 
 Sort order: `phase_id`, `sort_order`, `id`.
 
@@ -246,6 +247,7 @@ Examples:
 ```bash
 taskman task:list --phase P2 --status in_progress
 taskman task:list --role documentation-writer --format text
+taskman task:list --blocked-filter unblocked
 ```
 
 ### `task:edit` — Edit a task

@@ -40,29 +40,32 @@ public:
     std::map<std::string, std::optional<std::string>> get_by_id(const std::string& id);
 
     /** Liste les tâches avec filtres optionnels.
-     * Retourne un vecteur de maps représentant les tâches. */
+     * blocked_filter: "blocked" = only tasks blocked by a non-done dependency, "unblocked" = only non-blocked. */
     std::vector<std::map<std::string, std::optional<std::string>>> list(
         const std::optional<std::string>& phase_id = std::nullopt,
         const std::optional<std::string>& status = std::nullopt,
-        const std::optional<std::string>& role = std::nullopt);
+        const std::optional<std::string>& role = std::nullopt,
+        const std::optional<std::string>& blocked_filter = std::nullopt);
 
     /** Liste les tâches avec filtres optionnels et pagination.
-     * Retourne un vecteur de maps représentant les tâches. */
+     * blocked_filter: "blocked" = only blocked tasks, "unblocked" = only non-blocked. */
     std::vector<std::map<std::string, std::optional<std::string>>> list_paginated(
         const std::optional<std::string>& phase_id = std::nullopt,
         const std::optional<std::string>& milestone_id = std::nullopt,
         const std::optional<std::string>& status = std::nullopt,
         const std::optional<std::string>& role = std::nullopt,
+        const std::optional<std::string>& blocked_filter = std::nullopt,
         int limit = 50,
         int offset = 0);
 
     /** Compte les tâches avec filtres optionnels.
-     * Retourne le nombre de tâches correspondant aux filtres. */
+     * blocked_filter: "blocked" | "unblocked". */
     int count(
         const std::optional<std::string>& phase_id = std::nullopt,
         const std::optional<std::string>& milestone_id = std::nullopt,
         const std::optional<std::string>& status = std::nullopt,
-        const std::optional<std::string>& role = std::nullopt);
+        const std::optional<std::string>& role = std::nullopt,
+        const std::optional<std::string>& blocked_filter = std::nullopt);
 
     /** Met à jour une tâche existante.
      * Retourne true en cas de succès, false en cas d'erreur. */

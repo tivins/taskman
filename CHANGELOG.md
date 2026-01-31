@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.32.0] - 2026-01-31
+
+### Added
+
+- **Filtre tâches bloquées** : possibilité de filtrer la liste des tâches par état bloqué (tâche ayant au moins une dépendance non-`done`). CLI : `task:list --blocked-filter blocked|unblocked` ; API web : paramètre `blocked_filter` sur GET /tasks et GET /tasks/count ; MCP : paramètre `blocked-filter` sur `taskman_task_list`. Pas de nouvelle colonne : calcul SQL via `task_deps` et statut des dépendances.
+
+---
+
 ## [0.31.0] - 2026-01-31
 
 ### Added

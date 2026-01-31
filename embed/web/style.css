@@ -109,8 +109,8 @@ li a:hover { text-decoration: underline; }
     padding: 0.75rem 1rem;
     background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 6px;
-    border-left: 3px solid var(--primary);
+    border-radius: 3px;
+    border-left: 2px solid var(--primary);
 }
 .task-note-meta {
     font-size: 0.8125rem;

@@ -56,11 +56,13 @@ public:
     std::map<std::string, std::optional<std::string>> get_task(const std::string& id);
 
     /** Liste les tâches avec filtres optionnels.
+     * blocked_filter: "blocked" = only blocked tasks, "unblocked" = only non-blocked.
      * Retourne un vecteur de maps représentant les tâches. */
     std::vector<std::map<std::string, std::optional<std::string>>> list_tasks(
         const std::optional<std::string>& phase_id = std::nullopt,
         const std::optional<std::string>& status = std::nullopt,
-        const std::optional<std::string>& role = std::nullopt);
+        const std::optional<std::string>& role = std::nullopt,
+        const std::optional<std::string>& blocked_filter = std::nullopt);
 
     /** Met à jour une tâche existante.
      * Effectue la validation des données avant mise à jour.

@@ -46,7 +46,8 @@ std::map<std::string, std::optional<std::string>> TaskRepository::get_by_id(cons
 std::vector<std::map<std::string, std::optional<std::string>>> TaskRepository::list(
     const std::optional<std::string>& phase_id,
     const std::optional<std::string>& status,
-    const std::optional<std::string>& role) {
+    const std::optional<std::string>& role,
+    const std::optional<std::string>& blocked_filter) {
     std::string sql = "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, creator, created_at, updated_at FROM tasks";
     std::vector<std::string> where_parts;
     std::vector<std::optional<std::string>> params;
@@ -62,6 +63,14 @@ std::vector<std::map<std::string, std::optional<std::string>>> TaskRepository::l
     if (role.has_value()) {
         where_parts.push_back("role = ?");
         params.push_back(*role);
+    }
+    if (blocked_filter.has_value()) {
+        const char* sub = "SELECT 1 FROM task_deps d JOIN tasks dep ON dep.id = d.depends_on WHERE d.task_id = tasks.id AND (dep.status IS NULL OR dep.status != 'done')";
+        if (*blocked_filter == "blocked") {
+            where_parts.push_back(std::string("EXISTS (") + sub + ")");
+        } else if (*blocked_filter == "unblocked") {
+            where_parts.push_back(std::string("NOT EXISTS (") + sub + ")");
+        }
     }
     if (!where_parts.empty()) {
         sql += " WHERE ";
@@ -84,6 +93,7 @@ std::vector<std::map<std::string, std::optional<std::string>>> TaskRepository::l
     const std::optional<std::string>& milestone_id,
     const std::optional<std::string>& status,
     const std::optional<std::string>& role,
+    const std::optional<std::string>& blocked_filter,
     int limit,
     int offset) {
     std::string sql = "SELECT id, phase_id, milestone_id, title, description, status, sort_order, role, creator, created_at, updated_at FROM tasks";
@@ -106,6 +116,14 @@ std::vector<std::map<std::string, std::optional<std::string>>> TaskRepository::l
         where_parts.push_back("role = ?");
         params.push_back(*role);
     }
+    if (blocked_filter.has_value()) {
+        const char* sub = "SELECT 1 FROM task_deps d JOIN tasks dep ON dep.id = d.depends_on WHERE d.task_id = tasks.id AND (dep.status IS NULL OR dep.status != 'done')";
+        if (*blocked_filter == "blocked") {
+            where_parts.push_back(std::string("EXISTS (") + sub + ")");
+        } else if (*blocked_filter == "unblocked") {
+            where_parts.push_back(std::string("NOT EXISTS (") + sub + ")");
+        }
+    }
     if (!where_parts.empty()) {
         sql += " WHERE ";
         for (size_t i = 0; i < where_parts.size(); ++i) {
@@ -124,7 +142,8 @@ int TaskRepository::count(
     const std::optional<std::string>& phase_id,
     const std::optional<std::string>& milestone_id,
     const std::optional<std::string>& status,
-    const std::optional<std::string>& role) {
+    const std::optional<std::string>& role,
+    const std::optional<std::string>& blocked_filter) {
     std::string sql = "SELECT COUNT(*) as count FROM tasks";
     std::vector<std::string> where_parts;
     std::vector<std::optional<std::string>> params;
@@ -144,6 +163,14 @@ int TaskRepository::count(
     if (role.has_value()) {
         where_parts.push_back("role = ?");
         params.push_back(*role);
+    }
+    if (blocked_filter.has_value()) {
+        const char* sub = "SELECT 1 FROM task_deps d JOIN tasks dep ON dep.id = d.depends_on WHERE d.task_id = tasks.id AND (dep.status IS NULL OR dep.status != 'done')";
+        if (*blocked_filter == "blocked") {
+            where_parts.push_back(std::string("EXISTS (") + sub + ")");
+        } else if (*blocked_filter == "unblocked") {
+            where_parts.push_back(std::string("NOT EXISTS (") + sub + ")");
+        }
     }
     if (!where_parts.empty()) {
         sql += " WHERE ";
