@@ -15,6 +15,7 @@
 #include <climits>
 #include <string>
 #include <optional>
+#include <vector>
 
 namespace taskman {
 
@@ -108,6 +109,45 @@ void TaskController::register_routes(httplib::Server& svr) {
             return;
         }
         auto rows = note_repo_.list_by_task_id(id);
+        nlohmann::json arr = nlohmann::json::array();
+        for (const auto& row : rows) {
+            nlohmann::json obj;
+            auto get = [&row](const char* k) { return row.count(k) ? row.at(k) : std::nullopt; };
+            obj["id"] = get("id").value_or("");
+            obj["task_id"] = get("task_id").value_or("");
+            obj["content"] = get("content").value_or("");
+            obj["kind"] = get("kind").value_or("");
+            obj["role"] = get("role").value_or("");
+            obj["created_at"] = get("created_at").value_or("");
+            arr.push_back(obj);
+        }
+        res.set_content(arr.dump(), "application/json");
+    });
+
+    // GET /notes?ids=id1,id2,...
+    svr.Get("/notes", [this](const httplib::Request& req, httplib::Response& res) {
+        if (!req.has_param("ids")) {
+            res.status = 400;
+            res.set_content("{\"error\":\"missing ids (comma-separated note IDs)\"}", "application/json");
+            return;
+        }
+        std::string ids_param = req.get_param_value("ids");
+        std::vector<std::string> ids;
+        std::string id;
+        for (char c : ids_param) {
+            if (c == ',' || c == ' ') {
+                if (!id.empty()) {
+                    ids.push_back(id);
+                    id.clear();
+                }
+            } else {
+                id += c;
+            }
+        }
+        if (!id.empty()) {
+            ids.push_back(id);
+        }
+        auto rows = note_repo_.list_by_ids(ids);
         nlohmann::json arr = nlohmann::json::array();
         for (const auto& row : rows) {
             nlohmann::json obj;

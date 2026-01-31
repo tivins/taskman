@@ -4,7 +4,8 @@ User-facing changes: new commands, options, formats, and behavior.
 
 ## [0.30.0] - 2026-01-31
 
-- **task:note:list-by-ids** : récupération d'une liste de notes par liste d'UID (`--ids id1,id2,...`). Permet d'exploiter les `note_ids` de `task:get` en un seul appel. Commande CLI et outil MCP `taskman_task_note_list_by_ids`.
+- **task:note:list-by-ids** : récupération d'une liste de notes par liste d'UID (`--ids id1,id2,...`). Permet d'exploiter les `note_ids` de `task:get` en un seul appel. Commande CLI, outil MCP `taskman_task_note_list_by_ids`, et API web `GET /notes?ids=...`.
+- **Interface web** : nouvel endpoint `GET /notes?ids=...` et documentation (usage_web.md) mise à jour.
 
 ## [0.29.0] - 2026-01-31
 

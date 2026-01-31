@@ -80,6 +80,18 @@ Returns the notes history for a specific task (notes added by the agent during e
 
 **Response:** JSON array of objects with `id`, `task_id`, `content`, `kind`, `role`, `created_at`. Ordered by `created_at`. Returns 404 if the task is not found. The task detail view uses this endpoint to display the "Historique des notes" section.
 
+### GET /notes
+
+Returns notes by a comma-separated list of note IDs (e.g. from `task:get` or `/task/:id` response `note_ids`).
+
+**Query parameters:**
+
+| Parameter | Description                         | Required |
+|-----------|-------------------------------------|----------|
+| `ids`     | Comma-separated note IDs            | Yes      |
+
+**Response:** JSON array of objects with `id`, `task_id`, `content`, `kind`, `role`, `created_at`. Ordered by `created_at`. Non-existent IDs are skipped; empty `ids` returns an empty array. Returns 400 if `ids` is missing.
+
 ### GET /tasks
 
 Returns a paginated list of tasks in JSON format.
@@ -177,7 +189,8 @@ The web interface provides:
 
 - **Task listing** with pagination
 - **Filtering** by phase, milestone, status, and role
-- **Task details** view with dependencies
+- **Task details** view with dependencies and notes history
+- **Notes by IDs** — `GET /notes?ids=...` to fetch multiple notes in one request (e.g. after getting note IDs from a task)
 - **Milestone and phase** browsing
 - **Responsive design** for desktop and mobile
 

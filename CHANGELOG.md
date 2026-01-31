@@ -4,7 +4,8 @@
 
 ### Added
 
-- **task:note:list-by-ids** : récupération d'une liste de notes par liste d'UID (`--ids id1,id2,...`). Permet d'exploiter les `note_ids` obtenus via `task:get` en un seul appel au lieu de N appels `get_note(id)`. Commande CLI, outil MCP `taskman_task_note_list_by_ids`, et API service/repository (`list_notes_by_ids` / `list_by_ids`).
+- **task:note:list-by-ids** : récupération d'une liste de notes par liste d'UID (`--ids id1,id2,...`). Permet d'exploiter les `note_ids` obtenus via `task:get` en un seul appel au lieu de N appels `get_note(id)`. Commande CLI, outil MCP `taskman_task_note_list_by_ids`, API web `GET /notes?ids=...`, et API service/repository (`list_notes_by_ids` / `list_by_ids`).
+- **API web** : endpoint `GET /notes?ids=id1,id2,...` pour récupérer plusieurs notes en une requête. Documentation `docs/usage_web.md` mise à jour (endpoint, section Features).
 
 ---
 
