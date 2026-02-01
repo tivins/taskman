@@ -6,6 +6,7 @@
 
 const LIST_PATH = '/list';
 const OVERVIEW_PATH = '/overview';
+const BOARD_PATH = '/board';
 const TASK_PATH_PREFIX = '/task/';
 
 const LIST_STATE_KEYS = [
@@ -92,12 +93,13 @@ export function setListStateInUrl(state, replace = false) {
 
 /**
  * Retourne la vue courante à partir du path du hash.
- * @returns {'list'|'overview'|'task'|null}
+ * @returns {'list'|'overview'|'board'|'task'|null}
  */
 export function getViewFromUrl() {
     const { path } = parseHash();
     if (path === LIST_PATH || path === '/') return 'list';
     if (path === OVERVIEW_PATH) return 'overview';
+    if (path === BOARD_PATH) return 'board';
     if (path.startsWith(TASK_PATH_PREFIX)) return 'task';
     return null;
 }
@@ -119,6 +121,34 @@ export function setTaskInUrl(id) {
     if (typeof history === 'undefined' || !id) return;
     const hash = '#' + TASK_PATH_PREFIX + encodeURIComponent(id);
     history.pushState(null, '', hash);
+}
+
+/**
+ * Récupère l'état board depuis l'URL (#/board?swimlane=...).
+ * @returns {{ swimlane: string }}
+ */
+export function getBoardStateFromUrl() {
+    const { path, queryParams } = parseHash();
+    if (path !== BOARD_PATH) return { swimlane: '' };
+    const swimlane = queryParams.get('swimlane') || '';
+    if (['phase', 'role', 'milestone'].indexOf(swimlane) === -1) return { swimlane: '' };
+    return { swimlane };
+}
+
+/**
+ * Met l'URL sur la vue board avec état optionnel (swimlane).
+ * @param {{ swimlane?: string }} state
+ * @param {boolean} replace
+ */
+export function setBoardInUrl(state = {}, replace = false) {
+    const params = new URLSearchParams();
+    if (state.swimlane) params.set('swimlane', state.swimlane);
+    const query = params.toString();
+    const hash = '#' + BOARD_PATH + (query ? '?' + query : '');
+    if (typeof history !== 'undefined') {
+        if (replace) history.replaceState(null, '', hash);
+        else history.pushState(null, '', hash);
+    }
 }
 
 /**

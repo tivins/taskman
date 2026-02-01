@@ -27,6 +27,9 @@ let sortOrder = 'desc';
 /** Grouper par : phase | milestone | status | role | '' */
 let groupBy = '';
 
+/** Vue Board (étape 6) : swimlane = '' | 'phase' | 'role' | 'milestone' */
+let boardSwimlane = '';
+
 /** Flag pour éviter de déclencher loadTasks pendant l'application de l'état depuis l'URL (popstate) */
 let applyingStateFromUrl = false;
 
@@ -106,7 +109,12 @@ async function init() {
         if (applyingStateFromUrl) return;
         pagination.goToPage(1);
         syncListStateToUrl();
-        loadTasks();
+        const boardContainer = document.getElementById('board-container');
+        if (boardContainer) {
+            loadBoardTasks(boardContainer);
+        } else {
+            loadTasks();
+        }
     });
 
     pagination.setOnPageChange(() => {
@@ -129,6 +137,12 @@ async function init() {
             setActiveNav('tasks');
             renderMainView();
             loadTasks();
+        } else if (v === 'board') {
+            closePeek();
+            setActiveNav('board');
+            const boardState = urlState.getBoardStateFromUrl();
+            boardSwimlane = boardState.swimlane || '';
+            showBoard();
         } else if (v === 'overview') {
             closePeek();
             setActiveNav('overview');
@@ -143,11 +157,19 @@ async function init() {
         }
     });
 
-    // Shell (header fixe + zone principale) puis vue liste
+    // Restaurer l'état board depuis l'URL si vue board
+    if (view === 'board') {
+        const boardState = urlState.getBoardStateFromUrl();
+        boardSwimlane = boardState.swimlane || '';
+    }
+
+    // Shell (header fixe + zone principale) puis vue liste / board / overview
     ensureAppShell();
-    setActiveNav(view === 'overview' ? 'overview' : 'tasks');
+    setActiveNav(view === 'overview' ? 'overview' : view === 'board' ? 'board' : 'tasks');
     if (view === 'overview') {
         showDashboard();
+    } else if (view === 'board') {
+        showBoard();
     } else {
         renderMainView();
         await loadTasks();
@@ -176,6 +198,7 @@ function ensureAppShell() {
     header.appendChild(el('div', { class: 'app-brand' }, 'Taskman'));
     const nav = el('nav', { class: 'app-nav' });
     nav.appendChild(el('a', { href: '#/list', class: 'app-nav-link app-nav-link-active', 'data-view': 'tasks' }, 'Tâches'));
+    nav.appendChild(el('a', { href: '#/board', class: 'app-nav-link', 'data-view': 'board' }, 'Board'));
     nav.appendChild(el('a', { href: '#/overview', class: 'app-nav-link', 'data-view': 'overview' }, 'Vue d\'ensemble'));
     header.appendChild(nav);
     const headerActions = el('div', { class: 'app-header-actions' });
@@ -236,6 +259,9 @@ function ensureAppShell() {
                 syncListStateToUrl();
                 renderMainView();
                 loadTasks();
+            } else if (view === 'board') {
+                urlState.setBoardInUrl({ swimlane: boardSwimlane });
+                showBoard();
             } else if (view === 'overview') {
                 if (typeof history !== 'undefined') history.pushState(null, '', '#/overview');
                 showDashboard();
@@ -268,6 +294,7 @@ function createSidebar() {
 
     const quickLinks = el('nav', { class: 'app-sidebar-quicklinks' });
     quickLinks.appendChild(el('a', { href: '#/list', class: 'app-sidebar-link', 'data-view': 'tasks' }, 'Tâches'));
+    quickLinks.appendChild(el('a', { href: '#/board', class: 'app-sidebar-link', 'data-view': 'board' }, 'Board'));
     quickLinks.appendChild(el('a', { href: '#/overview', class: 'app-sidebar-link', 'data-view': 'overview' }, 'Vue d\'ensemble'));
     content.appendChild(quickLinks);
 
@@ -287,6 +314,9 @@ function createSidebar() {
                 syncListStateToUrl();
                 renderMainView();
                 loadTasks();
+            } else if (view === 'board') {
+                urlState.setBoardInUrl({ swimlane: boardSwimlane });
+                showBoard();
             } else if (view === 'overview') {
                 if (typeof history !== 'undefined') history.pushState(null, '', '#/overview');
                 showDashboard();
@@ -487,6 +517,222 @@ function showDashboard() {
     main.appendChild(container);
     renderDashboardGrid(container);
     loadDashboardData(container);
+}
+
+/**
+ * Affiche la vue Board (Kanban) — Étape 6 : colonnes = statuts, cartes = tâches (titre, rôle, blocked).
+ * Pas de drag-and-drop pour l'instant.
+ */
+function showBoard() {
+    if (!appMain) ensureAppShell();
+    const main = appMain || app.querySelector('.app-main');
+    if (!main) return;
+    main.innerHTML = '';
+
+    const boardWrap = el('div', { class: 'board-wrap', id: 'board-wrap' });
+
+    // Filtres (réutilise les mêmes filtres que la liste)
+    const filtersContainer = document.createElement('div');
+    filtersContainer.className = 'filters-wrapper';
+    filters.render(filtersContainer);
+    boardWrap.appendChild(filtersContainer);
+
+    const phaseOptions = [].concat(
+        Object.values(phases).map(p => ({ value: p.id, label: `${p.id}: ${p.name || p.id}` }))
+    );
+    filters.updateSelectOptions('phase', phaseOptions);
+    const milestoneOptions = [].concat(
+        Object.values(milestones).map(m => ({ value: m.id, label: `${m.id}: ${m.name || m.id}` }))
+    );
+    filters.updateSelectOptions('milestone', milestoneOptions);
+
+    // Barre d'options board : swimlanes
+    const boardToolbar = el('div', { class: 'board-toolbar' });
+    const swimlaneLabel = el('label', { for: 'board-swimlane' }, 'Swimlanes : ');
+    const swimlaneSelect = el('select', { id: 'board-swimlane', class: 'board-swimlane-select' });
+    swimlaneSelect.appendChild(el('option', { value: '' }, 'Aucun'));
+    swimlaneSelect.appendChild(el('option', { value: 'phase' }, 'Phase'));
+    swimlaneSelect.appendChild(el('option', { value: 'role' }, 'Rôle'));
+    swimlaneSelect.appendChild(el('option', { value: 'milestone' }, 'Jalon'));
+    swimlaneSelect.value = boardSwimlane;
+    swimlaneSelect.addEventListener('change', () => {
+        boardSwimlane = swimlaneSelect.value;
+        urlState.setBoardInUrl({ swimlane: boardSwimlane });
+        const boardContainer = document.getElementById('board-container');
+        if (boardContainer) renderBoardContent(boardContainer);
+    });
+    boardToolbar.appendChild(swimlaneLabel);
+    boardToolbar.appendChild(swimlaneSelect);
+    boardWrap.appendChild(boardToolbar);
+
+    const boardContainer = el('div', { class: 'board-container', id: 'board-container' });
+    boardContainer.innerHTML = '<p class="muted">Chargement…</p>';
+    boardWrap.appendChild(boardContainer);
+
+    main.appendChild(boardWrap);
+    loadBoardTasks(boardContainer);
+}
+
+/**
+ * Charge les tâches pour le board (filtres courants, limite élevée, sans pagination).
+ */
+async function loadBoardTasks(boardContainer) {
+    if (!boardContainer) return;
+    boardContainer.innerHTML = '<p class="muted">Chargement…</p>';
+
+    try {
+        const filterParams = filters.buildQueryParams();
+        filterParams.append('limit', '1000');
+        const [tasksRes, depsRes] = await Promise.all([
+            fetch(`/tasks?${filterParams}`),
+            fetch(`/task_deps?limit=500`)
+        ]);
+
+        if (!tasksRes.ok) {
+            boardContainer.innerHTML = `<p class="error">Erreur ${tasksRes.status}</p>`;
+            return;
+        }
+
+        tasks = await tasksRes.json();
+        if (!Array.isArray(tasks)) tasks = [];
+        taskDeps = depsRes.ok ? await depsRes.json() : [];
+        if (!Array.isArray(taskDeps)) taskDeps = [];
+
+        const filtered = filterTasksBySearch(tasks, searchQuery);
+        if (filtered.length === 0) {
+            boardContainer.innerHTML = '<p class="muted">Aucune tâche à afficher.</p>';
+            return;
+        }
+
+        renderBoardContent(boardContainer, filtered);
+    } catch (e) {
+        boardContainer.innerHTML = `<p class="error">${e.message}</p>`;
+    }
+}
+
+/** Statuts pour les colonnes du board (ordre fixe). */
+const BOARD_STATUSES = [
+    { id: 'to_do', label: 'À faire' },
+    { id: 'in_progress', label: 'En cours' },
+    { id: 'done', label: 'Terminé' }
+];
+
+/**
+ * Rendu du board : colonnes par statut, cartes par tâche (titre, rôle, blocked). Option swimlanes.
+ * @param {HTMLElement} boardContainer
+ * @param {Array<Record<string, unknown>>} taskList - Tâches à afficher (déjà filtrées)
+ */
+function renderBoardContent(boardContainer, taskList) {
+    if (!boardContainer) return;
+    const list = taskList || tasks;
+    if (!Array.isArray(list) || list.length === 0) {
+        boardContainer.innerHTML = '<p class="muted">Aucune tâche à afficher.</p>';
+        return;
+    }
+
+    const idToStatus = new Map(list.map((t) => [t.id, t.status]));
+    const taskIds = new Set(idToStatus.keys());
+    const depsForOurTasks = taskDeps.filter((d) => taskIds.has(d.task_id));
+    const missingDepIds = [...new Set(depsForOurTasks.map((d) => d.depends_on).filter((id) => !idToStatus.has(id)))];
+
+    const isBlocked = (t) => {
+        const deps = depsForOurTasks.filter((d) => d.task_id === t.id);
+        return deps.some((d) => (idToStatus.get(d.depends_on) || '') !== 'done');
+    };
+
+    const doRender = () => renderBoardColumns(boardContainer, list, isBlocked);
+
+    if (missingDepIds.length === 0) {
+        doRender();
+        return;
+    }
+    Promise.all(missingDepIds.map(async (id) => {
+        try {
+            const r = await fetch(`/task/${id}`);
+            if (r.ok) {
+                const j = await r.json();
+                idToStatus.set(id, j.status);
+            }
+        } catch (_) {}
+    })).then(doRender);
+}
+
+/**
+ * Construit le DOM des colonnes (et optionnellement swimlanes).
+ * @param {HTMLElement} container
+ * @param {Array<Record<string, unknown>>} taskList
+ * @param {(t: Record<string, unknown>) => boolean} isBlocked
+ */
+function renderBoardColumns(container, taskList, isBlocked) {
+    container.innerHTML = '';
+    const statusGroups = groupTasksBy(taskList, 'status');
+    const toDo = statusGroups.get('to_do') || statusGroups.get('—') || [];
+    const inProgress = statusGroups.get('in_progress') || [];
+    const done = statusGroups.get('done') || [];
+
+    const swimlaneKey = boardSwimlane === 'phase' ? 'phase_id' : boardSwimlane === 'milestone' ? 'milestone_id' : boardSwimlane === 'role' ? 'role' : null;
+
+    if (swimlaneKey) {
+        const swimlaneGroups = new Map();
+        for (const t of taskList) {
+            const k = (t[swimlaneKey] != null ? String(t[swimlaneKey]) : '') || '—';
+            if (!swimlaneGroups.has(k)) swimlaneGroups.set(k, []);
+            swimlaneGroups.get(k).push(t);
+        }
+        const getSwimlaneLabel = (k) => {
+            if (k === '—' || k === '') return '—';
+            if (boardSwimlane === 'phase') return phases[k]?.name || k;
+            if (boardSwimlane === 'milestone') return milestones[k]?.name || k;
+            return k;
+        };
+        const swimlaneOrder = [...swimlaneGroups.keys()].sort((a, b) => getSwimlaneLabel(a).localeCompare(getSwimlaneLabel(b)));
+        for (const laneKey of swimlaneOrder) {
+            const laneTasks = swimlaneGroups.get(laneKey);
+            const laneLabel = getSwimlaneLabel(laneKey);
+            const laneRow = el('div', { class: 'board-swimlane-row' });
+            laneRow.appendChild(el('div', { class: 'board-swimlane-title' }, escapeHtml(laneLabel)));
+            const cols = el('div', { class: 'board-columns' });
+            for (const st of BOARD_STATUSES) {
+                const colTasks = (laneTasks || []).filter((t) => (t.status || '') === st.id);
+                const col = createBoardColumn(st.label, colTasks, isBlocked);
+                cols.appendChild(col);
+            }
+            laneRow.appendChild(cols);
+            container.appendChild(laneRow);
+        }
+    } else {
+        const cols = el('div', { class: 'board-columns' });
+        cols.appendChild(createBoardColumn('À faire', toDo, isBlocked));
+        cols.appendChild(createBoardColumn('En cours', inProgress, isBlocked));
+        cols.appendChild(createBoardColumn('Terminé', done, isBlocked));
+        container.appendChild(cols);
+    }
+}
+
+/**
+ * Crée une colonne du board avec en-tête et cartes.
+ * @param {string} title - Libellé de la colonne
+ * @param {Array<Record<string, unknown>>} colTasks - Tâches de la colonne
+ * @param {(t: Record<string, unknown>) => boolean} isBlocked
+ * @returns {HTMLElement}
+ */
+function createBoardColumn(title, colTasks, isBlocked) {
+    const col = el('div', { class: 'board-column' });
+    col.appendChild(el('div', { class: 'board-column-header' }, title, ' (', String(colTasks.length), ')'));
+    const cards = el('div', { class: 'board-cards' });
+    for (const t of colTasks) {
+        const card = el('div', { class: 'board-card', 'data-task-id': t.id });
+        const titleEl = el('div', { class: 'board-card-title' }, escapeHtml(t.title || t.id || 'Sans titre'));
+        const meta = el('div', { class: 'board-card-meta' });
+        if (t.role) meta.appendChild(el('span', { class: 'board-card-role' }, escapeHtml(t.role)));
+        if (isBlocked(t)) meta.appendChild(el('span', { class: 'board-card-blocked' }, 'bloqué'));
+        card.appendChild(titleEl);
+        card.appendChild(meta);
+        card.addEventListener('click', () => loadTask(t.id));
+        cards.appendChild(card);
+    }
+    col.appendChild(cards);
+    return col;
 }
 
 /**
