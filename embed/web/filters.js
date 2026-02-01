@@ -4,8 +4,8 @@
  */
 const allOpt = '— All —';
 
-/** 14 rôles du backend (roles.cpp), ordre et valeurs identiques */
-const ROLE_OPTIONS = [
+/** 14 rôles du backend (roles.cpp), ordre et valeurs identiques — exporté pour le dashboard */
+export const ROLE_OPTIONS = [
     { value: 'project-manager', label: 'Project Manager' },
     { value: 'project-designer', label: 'Project Designer' },
     { value: 'software-architect', label: 'Software Architect' },

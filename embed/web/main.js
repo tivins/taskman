@@ -1,5 +1,5 @@
 import { el } from './dom.js';
-import { Filters } from './filters.js';
+import { Filters, ROLE_OPTIONS } from './filters.js';
 import { Pagination } from './pagination.js';
 
 const app = document.getElementById('app');
@@ -36,6 +36,7 @@ async function init() {
 
     // Shell (header fixe + zone principale) puis vue liste
     ensureAppShell();
+    setActiveNav('tasks');
     renderMainView();
     await loadTasks();
 }
@@ -73,9 +74,26 @@ function ensureAppShell() {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const view = link.getAttribute('data-view');
-            if (view === 'tasks') init();
-            // overview: à brancher en étape 3
+            setActiveNav(view);
+            if (view === 'tasks') {
+                renderMainView();
+                loadTasks();
+            } else if (view === 'overview') {
+                showDashboard();
+            }
         });
+    });
+}
+
+/**
+ * Met à jour le lien actif dans la navigation
+ */
+function setActiveNav(view) {
+    const nav = app.querySelector('.app-nav');
+    if (!nav) return;
+    nav.querySelectorAll('.app-nav-link').forEach((link) => {
+        const linkView = link.getAttribute('data-view');
+        link.classList.toggle('app-nav-link-active', linkView === view);
     });
 }
 
@@ -140,63 +158,180 @@ function renderMainView() {
 }
 
 /**
- * Met à jour la vue d'ensemble des phases
+ * Affiche la vue Dashboard (Vue d'ensemble) dans la zone principale.
  */
-async function updateOverview(container) {
-    container.innerHTML = '';
+function showDashboard() {
+    if (!appMain) ensureAppShell();
+    const main = appMain || app.querySelector('.app-main');
+    if (!main) return;
+    main.innerHTML = '';
+    const container = el('div', { class: 'dashboard', id: 'dashboard-container' });
+    main.appendChild(container);
+    renderDashboardGrid(container);
+    loadDashboardData(container);
+}
 
-    // Temporary disabled: overview is not used anymore
-    return;
-    
-    if (Object.keys(phases).length === 0) {
-        container.appendChild(el('p', { class: 'muted' }, 'Aucune phase.'));
-        return;
-    }
-    
-    const phasesGrid = document.createElement('div');
-    phasesGrid.className = 'phases-grid';
-    
-    for (const phase of Object.values(phases)) {
-        const phaseCard = document.createElement('div');
-        phaseCard.className = `phase-card phase-${phase.status || 'to_do'}`;
-        
-        const phaseHeader = document.createElement('div');
-        phaseHeader.className = 'phase-header';
-        phaseHeader.appendChild(el('h3', {}, escapeHtml(phase.name || phase.id)));
-        phaseHeader.appendChild(el('span', { class: `status-badge status-${phase.status || 'to_do'}` }, phase.status || 'to_do'));
-        phaseCard.appendChild(phaseHeader);
-        
-        // Compter les milestones et tâches pour cette phase
-        const phaseMilestones = Object.values(milestones).filter(m => m.phase_id === phase.id);
-        const phaseTasks = tasks.filter(t => t.phase_id === phase.id);
-        const doneTasks = phaseTasks.filter(t => t.status === 'done').length;
-        
-        const stats = document.createElement('div');
-        stats.className = 'phase-stats';
-        stats.appendChild(el('div', {}, `Milestones: ${phaseMilestones.length}`));
-        stats.appendChild(el('div', {}, `Tâches: ${doneTasks}/${phaseTasks.length}`));
-        phaseCard.appendChild(stats);
-        
-        // Afficher les milestones
-        if (phaseMilestones.length > 0) {
-            const milestonesList = document.createElement('div');
-            milestonesList.className = 'milestones-list';
-            phaseMilestones.forEach(m => {
-                const milestoneEl = document.createElement('div');
-                milestoneEl.className = `milestone-item ${m.reached ? 'reached' : ''}`;
-                milestoneEl.appendChild(el('span', {}, escapeHtml(m.name || m.id)));
-                if (m.reached) {
-                    milestoneEl.appendChild(el('span', { class: 'reached-badge' }, '✓'));
-                }
-                milestonesList.appendChild(milestoneEl);
+/**
+ * Crée la grille de widgets du dashboard (structure vide, remplie par loadDashboardData).
+ */
+function renderDashboardGrid(container) {
+    const grid = el('div', { class: 'dashboard-grid' });
+    grid.appendChild(el('div', { class: 'dashboard-widget', id: 'dashboard-widget-status' }, el('h3', {}, 'Tâches par statut'), el('p', { class: 'muted' }, 'Chargement…')));
+    grid.appendChild(el('div', { class: 'dashboard-widget', id: 'dashboard-widget-roles' }, el('h3', {}, 'Tâches par rôle'), el('p', { class: 'muted' }, 'Chargement…')));
+    grid.appendChild(el('div', { class: 'dashboard-widget dashboard-widget-wide', id: 'dashboard-widget-phases' }, el('h3', {}, 'Progression par phase'), el('p', { class: 'muted' }, 'Chargement…')));
+    grid.appendChild(el('div', { class: 'dashboard-widget dashboard-widget-wide', id: 'dashboard-widget-milestones' }, el('h3', {}, 'Milestones'), el('p', { class: 'muted' }, 'Chargement…')));
+    container.appendChild(grid);
+}
+
+/**
+ * Charge toutes les données du dashboard en parallèle puis met à jour chaque widget.
+ */
+async function loadDashboardData(container) {
+    try {
+        const [phasesRes, milestonesRes, countTotalRes, countToDoRes, countInProgressRes, countDoneRes, ...roleCountRes] = await Promise.all([
+            fetch('/phases?limit=100'),
+            fetch('/milestones?limit=100'),
+            fetch('/tasks/count'),
+            fetch('/tasks/count?status=to_do'),
+            fetch('/tasks/count?status=in_progress'),
+            fetch('/tasks/count?status=done'),
+            ...ROLE_OPTIONS.map((r) => fetch(`/tasks/count?role=${encodeURIComponent(r.value)}`))
+        ]);
+
+        const phasesList = phasesRes.ok ? await phasesRes.json() : [];
+        const milestonesList = milestonesRes.ok ? await milestonesRes.json() : [];
+        const total = countTotalRes.ok ? (await countTotalRes.json()).count : 0;
+        const toDo = countToDoRes.ok ? (await countToDoRes.json()).count : 0;
+        const inProgress = countInProgressRes.ok ? (await countInProgressRes.json()).count : 0;
+        const done = countDoneRes.ok ? (await countDoneRes.json()).count : 0;
+        const roleCounts = await Promise.all(roleCountRes.map((r) => (r.ok ? r.json() : { count: 0 })));
+
+        const statusData = { total, to_do: toDo, in_progress: inProgress, done };
+        const rolesData = ROLE_OPTIONS.map((r, i) => ({ value: r.value, label: r.label, count: roleCounts[i]?.count ?? 0 }));
+
+        const phaseIds = (Array.isArray(phasesList) ? phasesList : []).map((p) => p.id);
+        const phaseCountRes = await Promise.all(
+            phaseIds.flatMap((id) => [
+                fetch(`/tasks/count?phase=${encodeURIComponent(id)}`),
+                fetch(`/tasks/count?phase=${encodeURIComponent(id)}&status=done`)
+            ])
+        );
+        const phaseCounts = [];
+        for (let i = 0; i < phaseIds.length; i++) {
+            const totalRes = phaseCountRes[i * 2];
+            const doneRes = phaseCountRes[i * 2 + 1];
+            const phaseTotal = totalRes?.ok ? (await totalRes.json()).count : 0;
+            const phaseDone = doneRes?.ok ? (await doneRes.json()).count : 0;
+            const phase = (Array.isArray(phasesList) ? phasesList : []).find((p) => p.id === phaseIds[i]);
+            phaseCounts.push({
+                id: phaseIds[i],
+                name: phase?.name ?? phaseIds[i],
+                status: phase?.status ?? 'to_do',
+                total: phaseTotal,
+                done: phaseDone
             });
-            phaseCard.appendChild(milestonesList);
         }
-        
-        phasesGrid.appendChild(phaseCard);
+
+        const milestonesData = (Array.isArray(milestonesList) ? milestonesList : []).map((m) => ({
+            id: m.id,
+            name: m.name ?? m.id,
+            phase_id: m.phase_id,
+            reached: !!m.reached
+        }));
+
+        const statusEl = container.querySelector('#dashboard-widget-status');
+        const rolesEl = container.querySelector('#dashboard-widget-roles');
+        const phasesEl = container.querySelector('#dashboard-widget-phases');
+        const milestonesEl = container.querySelector('#dashboard-widget-milestones');
+        if (statusEl) renderStatusWidget(statusEl, statusData);
+        if (rolesEl) renderRolesWidget(rolesEl, rolesData);
+        if (phasesEl) renderPhaseProgressWidget(phasesEl, phaseCounts);
+        if (milestonesEl) renderMilestonesWidget(milestonesEl, milestonesData);
+    } catch (e) {
+        console.error('Dashboard load error:', e);
+        const p = container?.querySelector('.dashboard-grid .muted');
+        if (p) p.textContent = `Erreur: ${e.message}`;
     }
-    
-    container.appendChild(phasesGrid);
+}
+
+/**
+ * Remplit le widget « Tâches par statut » (compteurs + barres).
+ */
+function renderStatusWidget(widget, data) {
+    const content = widget.querySelector('.muted') || widget.appendChild(document.createElement('p'));
+    widget.replaceChildren(
+        el('h3', {}, 'Tâches par statut'),
+        el('div', { class: 'dashboard-status-counters' },
+            el('div', { class: 'dashboard-counter dashboard-counter-to_do' }, el('span', { class: 'dashboard-counter-value' }, String(data.to_do)), el('span', { class: 'dashboard-counter-label' }, 'À faire')),
+            el('div', { class: 'dashboard-counter dashboard-counter-in_progress' }, el('span', { class: 'dashboard-counter-value' }, String(data.in_progress)), el('span', { class: 'dashboard-counter-label' }, 'En cours')),
+            el('div', { class: 'dashboard-counter dashboard-counter-done' }, el('span', { class: 'dashboard-counter-value' }, String(data.done)), el('span', { class: 'dashboard-counter-label' }, 'Terminé'))
+        ),
+        el('div', { class: 'dashboard-status-bars' },
+            el('div', { class: 'dashboard-bar-row' }, el('span', { class: 'dashboard-bar-label' }, 'À faire'), el('div', { class: 'dashboard-bar-track' }, el('div', { class: 'dashboard-bar-fill dashboard-bar-to_do', style: `width:${data.total ? (data.to_do / data.total) * 100 : 0}%` }))),
+            el('div', { class: 'dashboard-bar-row' }, el('span', { class: 'dashboard-bar-label' }, 'En cours'), el('div', { class: 'dashboard-bar-track' }, el('div', { class: 'dashboard-bar-fill dashboard-bar-in_progress', style: `width:${data.total ? (data.in_progress / data.total) * 100 : 0}%` }))),
+            el('div', { class: 'dashboard-bar-row' }, el('span', { class: 'dashboard-bar-label' }, 'Terminé'), el('div', { class: 'dashboard-bar-track' }, el('div', { class: 'dashboard-bar-fill dashboard-bar-done', style: `width:${data.total ? (data.done / data.total) * 100 : 0}%` })))
+        ),
+        el('p', { class: 'dashboard-total muted' }, `Total: ${data.total} tâche${data.total !== 1 ? 's' : ''}`)
+    );
+}
+
+/**
+ * Remplit le widget « Tâches par rôle » (liste de compteurs).
+ */
+function renderRolesWidget(widget, data) {
+    const list = el('ul', { class: 'dashboard-role-list' });
+    for (const r of data.filter((r) => r.count > 0)) {
+        list.appendChild(el('li', {}, el('span', { class: 'dashboard-role-label' }, escapeHtml(r.label)), el('span', { class: 'dashboard-role-count' }, String(r.count))));
+    }
+    widget.replaceChildren(
+        el('h3', {}, 'Tâches par rôle'),
+        list.children.length ? list : el('p', { class: 'muted' }, 'Aucune tâche par rôle.')
+    );
+}
+
+/**
+ * Remplit le widget « Progression par phase » (barres par phase).
+ */
+function renderPhaseProgressWidget(widget, phaseCounts) {
+    const list = document.createElement('div');
+    list.className = 'dashboard-phase-list';
+    for (const p of phaseCounts) {
+        const pct = p.total ? Math.round((p.done / p.total) * 100) : 0;
+        list.appendChild(
+            el('div', { class: 'dashboard-phase-row' },
+                el('div', { class: 'dashboard-phase-info' },
+                    el('span', { class: 'dashboard-phase-name' }, escapeHtml(p.name)),
+                    el('span', { class: 'dashboard-phase-count muted' }, `${p.done}/${p.total}`)
+                ),
+                el('div', { class: 'dashboard-bar-track' }, el('div', { class: `dashboard-bar-fill dashboard-bar-done`, style: `width:${pct}%` }))
+            )
+        );
+    }
+    widget.replaceChildren(
+        el('h3', {}, 'Progression par phase'),
+        phaseCounts.length ? list : el('p', { class: 'muted' }, 'Aucune phase.')
+    );
+}
+
+/**
+ * Remplit le widget « Milestones » (reached / not reached).
+ */
+function renderMilestonesWidget(widget, milestonesData) {
+    const reached = milestonesData.filter((m) => m.reached);
+    const notReached = milestonesData.filter((m) => !m.reached);
+    const list = el('div', { class: 'dashboard-milestones-list' });
+    if (reached.length) {
+        list.appendChild(el('h4', { class: 'dashboard-milestones-subtitle' }, 'Atteints'));
+        reached.forEach((m) => list.appendChild(el('div', { class: 'milestone-item reached' }, el('span', {}, escapeHtml(m.name)), el('span', { class: 'reached-badge' }, '✓'))));
+    }
+    if (notReached.length) {
+        list.appendChild(el('h4', { class: 'dashboard-milestones-subtitle' }, 'Non atteints'));
+        notReached.forEach((m) => list.appendChild(el('div', { class: 'milestone-item' }, el('span', {}, escapeHtml(m.name)))));
+    }
+    widget.replaceChildren(
+        el('h3', {}, 'Milestones'),
+        milestonesData.length ? list : el('p', { class: 'muted' }, 'Aucun milestone.')
+    );
 }
 
 /**
@@ -287,12 +422,6 @@ async function loadTasks() {
         contentDiv.innerHTML = '';
         contentDiv.appendChild(el('h2', {}, 'Tâches'));
         contentDiv.appendChild(table);
-        
-        // Mettre à jour la vue d'ensemble
-        const overviewContent = document.querySelector('.overview-content');
-        if (overviewContent) {
-            updateOverview(overviewContent);
-        }
         
     } catch (e) {
         contentDiv.innerHTML = `<p class="error">${e.message}</p>`;
