@@ -2,6 +2,10 @@
 
 ## [0.34.0] - 2026-02-01
 
+### Changed
+
+- **UI web — Vue tâches : scroll par colonne** : la vue des tâches utilise un layout à hauteur fixe (viewport) avec scroll indépendant pour la sidebar, la zone principale (liste) et le panneau peek. Lorsqu’on scroll la liste et qu’on sélectionne une tâche, le détail reste visible dans le peek sans avoir à remonter la page.
+
 ### Added
 
 - **UI web — Filtre « Terminé / non terminé »** : filtre similaire à « Blocage » pour afficher toutes les tâches, seulement les non terminées, ou seulement les terminées. Paramètre API `done_filter=all|not_done|done` sur GET /tasks et GET /tasks/count. Par défaut les tâches terminées sont cachées (`not_done`). Valeur persistée dans l'URL (`#/list?done_filter=...`).
