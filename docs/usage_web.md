@@ -40,6 +40,7 @@ Serves the main HTML page with embedded assets. The page includes:
 - `style.css` - Stylesheet
 - `filters.js` - Filtering module (type=module)
 - `pagination.js` - Pagination module (type=module)
+- `url-state.js` - URL state for list view (type=module)
 - `main.js` - Main application module (type=module)
 
 ### GET /style.css
@@ -53,6 +54,10 @@ Returns the JavaScript filtering module.
 ### GET /pagination.js
 
 Returns the JavaScript pagination module.
+
+### GET /url-state.js
+
+Returns the URL state module (list view hash parsing and sync).
 
 ### GET /main.js
 

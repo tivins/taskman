@@ -1,6 +1,7 @@
 import { el } from './dom.js';
 import { Filters, ROLE_OPTIONS } from './filters.js';
 import { Pagination } from './pagination.js';
+import * as urlState from './url-state.js';
 
 const app = document.getElementById('app');
 
@@ -17,6 +18,73 @@ let milestones = {};
 let tasks = [];
 let taskDeps = [];
 
+/** État liste (étape 4) : recherche, tri, groupement — persistance URL (ADR-0002) */
+let searchQuery = '';
+/** Colonne de tri : title | status | role | phase | milestone | updated_at */
+let sortBy = 'updated_at';
+/** Direction : asc | desc */
+let sortOrder = 'desc';
+/** Grouper par : phase | milestone | status | role | '' */
+let groupBy = '';
+
+/** Flag pour éviter de déclencher loadTasks pendant l'application de l'état depuis l'URL (popstate) */
+let applyingStateFromUrl = false;
+
+/**
+ * Construit l'état liste actuel (filtres, page, search, sort, group_by) et le reflète dans l'URL (ADR-0002).
+ * @param {boolean} replace - true = replaceState (pas d'entrée historique)
+ */
+function syncListStateToUrl(replace = false) {
+    const state = {
+        ...filters.getFilters(),
+        page: pagination.getCurrentPage(),
+        page_size: pagination.getPageSize(),
+        search: searchQuery || undefined,
+        sort: sortBy !== 'updated_at' ? sortBy : undefined,
+        order: sortOrder !== 'desc' ? sortOrder : undefined,
+        group_by: groupBy || undefined
+    };
+    urlState.setListStateInUrl(state, replace);
+}
+
+/**
+ * Met à jour le champ de recherche du header avec la valeur courante de searchQuery.
+ */
+function updateHeaderSearchInput() {
+    const input = app.querySelector('.app-search-input');
+    if (input) input.value = searchQuery;
+}
+
+/**
+ * Met à jour les selects tri / ordre / groupement avec l'état courant.
+ */
+function updateListOptionsFromState() {
+    const sortSelect = document.getElementById('list-sort');
+    const orderSelect = document.getElementById('list-order');
+    const groupSelect = document.getElementById('list-group-by');
+    if (sortSelect) sortSelect.value = sortBy;
+    if (orderSelect) orderSelect.value = sortOrder;
+    if (groupSelect) groupSelect.value = groupBy;
+}
+
+/**
+ * Applique l'état lu depuis l'URL aux filtres, pagination et état local (search, sort, groupBy).
+ * @param {Record<string, string|number>} state
+ */
+function applyListStateFromUrl(state) {
+    if (state.phase !== undefined) filters.setFilter('phase', String(state.phase));
+    if (state.milestone !== undefined) filters.setFilter('milestone', String(state.milestone));
+    if (state.role !== undefined) filters.setFilter('role', String(state.role));
+    if (state.status !== undefined) filters.setFilter('status', String(state.status));
+    if (state.blocked_filter !== undefined) filters.setFilter('blocked_filter', String(state.blocked_filter));
+    if (state.page !== undefined) pagination.goToPage(Number(state.page));
+    if (state.page_size !== undefined) pagination.setPageSize(Number(state.page_size));
+    if (state.search !== undefined) searchQuery = String(state.search).trim();
+    if (state.sort !== undefined) sortBy = String(state.sort);
+    if (state.order !== undefined) sortOrder = String(state.order) === 'asc' ? 'asc' : 'desc';
+    if (state.group_by !== undefined) groupBy = String(state.group_by);
+}
+
 /**
  * Initialisation de l'application
  */
@@ -25,21 +93,56 @@ async function init() {
     await loadPhasesAndMilestones();
     updateSidebarTree();
 
+    // Restaurer l'état liste depuis l'URL au chargement (ADR-0002)
+    const view = urlState.getViewFromUrl();
+    const listState = urlState.getListStateFromUrl();
+    if (Object.keys(listState).length > 0) {
+        applyListStateFromUrl(listState);
+    }
+    syncListStateToUrl(true);
+
     // Configurer les callbacks
     filters.setOnChange(() => {
+        if (applyingStateFromUrl) return;
         pagination.goToPage(1);
+        syncListStateToUrl();
         loadTasks();
     });
-    
+
     pagination.setOnPageChange(() => {
+        if (applyingStateFromUrl) return;
+        syncListStateToUrl();
         loadTasks();
+    });
+
+    // Navigation back/forward : réappliquer l'état depuis l'URL
+    urlState.onPopState(() => {
+        applyingStateFromUrl = true;
+        const listStateFromUrl = urlState.getListStateFromUrl();
+        applyListStateFromUrl(listStateFromUrl);
+        updateHeaderSearchInput();
+        updateListOptionsFromState();
+        applyingStateFromUrl = false;
+        const v = urlState.getViewFromUrl();
+        if (v === 'list') {
+            setActiveNav('tasks');
+            renderMainView();
+            loadTasks();
+        } else if (v === 'overview') {
+            setActiveNav('overview');
+            showDashboard();
+        }
     });
 
     // Shell (header fixe + zone principale) puis vue liste
     ensureAppShell();
-    setActiveNav('tasks');
-    renderMainView();
-    await loadTasks();
+    setActiveNav(view === 'overview' ? 'overview' : 'tasks');
+    if (view === 'overview') {
+        showDashboard();
+    } else {
+        renderMainView();
+        await loadTasks();
+    }
 }
 
 /** Clé localStorage pour l’état replié de la sidebar */
@@ -59,10 +162,32 @@ function ensureAppShell() {
 
     header.appendChild(el('div', { class: 'app-brand' }, 'Taskman'));
     const nav = el('nav', { class: 'app-nav' });
-    nav.appendChild(el('a', { href: '#', class: 'app-nav-link app-nav-link-active', 'data-view': 'tasks' }, 'Tâches'));
-    nav.appendChild(el('a', { href: '#overview', class: 'app-nav-link', 'data-view': 'overview' }, 'Vue d\'ensemble'));
+    nav.appendChild(el('a', { href: '#/list', class: 'app-nav-link app-nav-link-active', 'data-view': 'tasks' }, 'Tâches'));
+    nav.appendChild(el('a', { href: '#/overview', class: 'app-nav-link', 'data-view': 'overview' }, 'Vue d\'ensemble'));
     header.appendChild(nav);
     const headerActions = el('div', { class: 'app-header-actions' });
+    // Recherche globale (étape 4.1 — ADR-0003 : temporaire côté client tant que l’API n’expose pas search)
+    const searchWrap = el('div', { class: 'app-search-wrap' });
+    const searchInput = el('input', {
+        type: 'search',
+        class: 'app-search-input',
+        placeholder: 'Rechercher (titre, description, ID)…',
+        'aria-label': 'Recherche globale'
+    });
+    searchInput.value = searchQuery;
+    let searchDebounce = null;
+    searchInput.addEventListener('input', () => {
+        if (searchDebounce) clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+            searchQuery = (searchInput.value || '').trim();
+            syncListStateToUrl();
+            pagination.goToPage(1);
+            loadTasks();
+            searchDebounce = null;
+        }, 300);
+    });
+    searchWrap.appendChild(searchInput);
+    headerActions.appendChild(searchWrap);
     header.appendChild(headerActions);
     shell.appendChild(header);
 
@@ -90,9 +215,11 @@ function ensureAppShell() {
             const view = link.getAttribute('data-view');
             setActiveNav(view);
             if (view === 'tasks') {
+                syncListStateToUrl();
                 renderMainView();
                 loadTasks();
             } else if (view === 'overview') {
+                if (typeof history !== 'undefined') history.pushState(null, '', '#/overview');
                 showDashboard();
             }
         });
@@ -122,8 +249,8 @@ function createSidebar() {
     const content = el('div', { class: 'app-sidebar-content' });
 
     const quickLinks = el('nav', { class: 'app-sidebar-quicklinks' });
-    quickLinks.appendChild(el('a', { href: '#', class: 'app-sidebar-link', 'data-view': 'tasks' }, 'Tâches'));
-    quickLinks.appendChild(el('a', { href: '#overview', class: 'app-sidebar-link', 'data-view': 'overview' }, 'Vue d\'ensemble'));
+    quickLinks.appendChild(el('a', { href: '#/list', class: 'app-sidebar-link', 'data-view': 'tasks' }, 'Tâches'));
+    quickLinks.appendChild(el('a', { href: '#/overview', class: 'app-sidebar-link', 'data-view': 'overview' }, 'Vue d\'ensemble'));
     content.appendChild(quickLinks);
 
     const treeTitle = el('h3', { class: 'app-sidebar-tree-title' }, 'Phases & jalons');
@@ -139,9 +266,11 @@ function createSidebar() {
             const view = link.getAttribute('data-view');
             setActiveNav(view);
             if (view === 'tasks') {
+                syncListStateToUrl();
                 renderMainView();
                 loadTasks();
             } else if (view === 'overview') {
+                if (typeof history !== 'undefined') history.pushState(null, '', '#/overview');
                 showDashboard();
             }
         });
@@ -238,7 +367,7 @@ async function loadPhasesAndMilestones() {
 }
 
 /**
- * Affiche la vue principale (liste) avec filtres et pagination dans la zone principale du shell.
+ * Affiche la vue principale (liste) avec filtres, tri, groupement et pagination.
  */
 function renderMainView() {
     if (!appMain) ensureAppShell();
@@ -261,6 +390,61 @@ function renderMainView() {
         Object.values(milestones).map(m => ({ value: m.id, label: `${m.id}: ${m.name || m.id}` }))
     );
     filters.updateSelectOptions('milestone', milestoneOptions);
+
+    // Tri et groupement (étape 4.2, 4.3)
+    const listOptionsDiv = el('div', { class: 'list-options' });
+    const sortLabel = el('label', { for: 'list-sort' }, 'Tri : ');
+    const sortSelect = el('select', { id: 'list-sort', class: 'list-option-select' });
+    const sortColumns = [
+        { value: 'title', label: 'Titre' },
+        { value: 'status', label: 'Statut' },
+        { value: 'role', label: 'Rôle' },
+        { value: 'phase_id', label: 'Phase' },
+        { value: 'milestone_id', label: 'Jalon' },
+        { value: 'updated_at', label: 'Mis à jour' }
+    ];
+    sortColumns.forEach(({ value, label }) => {
+        const opt = el('option', { value }, label);
+        if (value === sortBy) opt.selected = true;
+        sortSelect.appendChild(opt);
+    });
+    sortSelect.addEventListener('change', () => {
+        sortBy = sortSelect.value;
+        syncListStateToUrl();
+        if (tasks.length) renderTasksInContent(tasks);
+    });
+
+    const orderSelect = el('select', { id: 'list-order', class: 'list-option-select' });
+    orderSelect.appendChild(el('option', { value: 'asc' }, 'Ascendant'));
+    orderSelect.appendChild(el('option', { value: 'desc' }, 'Descendant'));
+    orderSelect.value = sortOrder;
+    orderSelect.addEventListener('change', () => {
+        sortOrder = orderSelect.value;
+        syncListStateToUrl();
+        if (tasks.length) renderTasksInContent(tasks);
+    });
+
+    const groupLabel = el('label', { for: 'list-group-by' }, ' Grouper par : ');
+    const groupSelect = el('select', { id: 'list-group-by', class: 'list-option-select' });
+    groupSelect.appendChild(el('option', { value: '' }, '— Aucun —'));
+    groupSelect.appendChild(el('option', { value: 'phase' }, 'Phase'));
+    groupSelect.appendChild(el('option', { value: 'milestone' }, 'Jalon'));
+    groupSelect.appendChild(el('option', { value: 'status' }, 'Statut'));
+    groupSelect.appendChild(el('option', { value: 'role' }, 'Rôle'));
+    groupSelect.value = groupBy;
+    groupSelect.addEventListener('change', () => {
+        groupBy = groupSelect.value;
+        syncListStateToUrl();
+        if (tasks.length) renderTasksInContent(tasks);
+    });
+
+    listOptionsDiv.appendChild(sortLabel);
+    listOptionsDiv.appendChild(sortSelect);
+    listOptionsDiv.appendChild(orderSelect);
+    listOptionsDiv.appendChild(groupLabel);
+    listOptionsDiv.appendChild(groupSelect);
+    updateListOptionsFromState();
+    main.appendChild(listOptionsDiv);
 
     // Zone de contenu pour les tâches (pleine largeur)
     const contentDiv = el('div', { class: 'tasks-content', id: 'tasks-content' });
@@ -484,63 +668,169 @@ async function loadTasks() {
         }
         
         tasks = await tasksRes.json();
-        
+
         // Charger les dépendances
         if (depsRes.ok) {
             taskDeps = await depsRes.json();
         } else {
             taskDeps = [];
         }
-        
+
         // Mettre à jour la pagination
         const paginationContainer = document.getElementById('pagination-container');
         if (paginationContainer) {
             paginationContainer.innerHTML = '';
             const paginationEl = pagination.render(paginationContainer);
-            // Mettre à jour l'affichage de la pagination
             if (paginationEl.updateDisplay) {
                 paginationEl.updateDisplay();
             }
         }
-        
-        // Afficher les tâches
+
+        // Afficher les tâches (filtrage recherche côté client temporaire — ADR-0003)
         if (!Array.isArray(tasks) || tasks.length === 0) {
             contentDiv.innerHTML = '<p class="muted">Aucune tâche trouvée.</p>';
             return;
         }
-        
-        // Charger les statuts des dépendances manquantes
-        const idToStatus = new Map(tasks.map(t => [t.id, t.status]));
-        const taskIds = new Set(idToStatus.keys());
-        const depsForOurTasks = taskDeps.filter(d => taskIds.has(d.task_id));
-        const missingDepIds = [...new Set(depsForOurTasks.map(d => d.depends_on).filter(id => !idToStatus.has(id)))];
-        
-        await Promise.all(missingDepIds.map(async (id) => {
-            try {
-                const r = await fetch(`/task/${id}`);
-                if (r.ok) {
-                    const j = await r.json();
-                    idToStatus.set(id, j.status);
-                }
-            } catch (_) {}
-        }));
-        
-        const isBlocked = (t) => {
-            const taskDeps = depsForOurTasks.filter(d => d.task_id === t.id);
-            return taskDeps.some(d => (idToStatus.get(d.depends_on) || '') !== 'done');
-        };
-        
-        const table = createTaskListTable(tasks, {
-            onTaskClick: (t) => loadTask(t.id),
-            getStatusSuffix: (t) => isBlocked(t)
-        });
-        
-        contentDiv.innerHTML = '';
-        contentDiv.appendChild(el('h2', {}, 'Tâches'));
-        contentDiv.appendChild(table);
-        
+
+        await renderTasksInContent(tasks);
     } catch (e) {
         contentDiv.innerHTML = `<p class="error">${e.message}</p>`;
+    }
+}
+
+/**
+ * Filtre les tâches par recherche (titre, description, ID) — temporaire côté client (ADR-0003).
+ * @param {Array<{ id?: string, title?: string, description?: string }>} taskList
+ * @param {string} query
+ * @returns {typeof taskList}
+ */
+function filterTasksBySearch(taskList, query) {
+    if (!query) return taskList;
+    const q = query.toLowerCase();
+    return taskList.filter((t) => {
+        const title = (t.title || '').toLowerCase();
+        const desc = (t.description || '').toLowerCase();
+        const id = (t.id || '').toLowerCase();
+        return title.includes(q) || desc.includes(q) || id.includes(q);
+    });
+}
+
+/**
+ * Trie les tâches par colonne et ordre (côté client).
+ * @param {Array<Record<string, unknown>>} taskList
+ * @param {string} by - title | status | role | phase | milestone | updated_at
+ * @param {string} order - asc | desc
+ * @returns {typeof taskList}
+ */
+function sortTasks(taskList, by, order) {
+    const mult = order === 'asc' ? 1 : -1;
+    const key = by === 'phase' ? 'phase_id' : by === 'milestone' ? 'milestone_id' : by;
+    return [...taskList].sort((a, b) => {
+        let va = a[key];
+        let vb = b[key];
+        if (by === 'updated_at' || by === 'title') {
+            va = va != null ? String(va) : '';
+            vb = vb != null ? String(vb) : '';
+        } else {
+            va = va != null ? String(va) : '';
+            vb = vb != null ? String(vb) : '';
+        }
+        const cmp = va.localeCompare(vb, undefined, { numeric: by === 'updated_at' });
+        return mult * cmp;
+    });
+}
+
+/**
+ * Groupe les tâches par clé (phase_id, milestone_id, status, role). Retourne Map<string, tâches[]>.
+ * @param {Array<Record<string, unknown>>} taskList
+ * @param {string} groupKey - phase | milestone | status | role
+ * @returns {Map<string, typeof taskList>}
+ */
+function groupTasksBy(taskList, groupKey) {
+    const keyField = groupKey === 'phase' ? 'phase_id' : groupKey === 'milestone' ? 'milestone_id' : groupKey;
+    const map = new Map();
+    for (const t of taskList) {
+        const k = (t[keyField] != null ? String(t[keyField]) : '') || '—';
+        if (!map.has(k)) map.set(k, []);
+        map.get(k).push(t);
+    }
+    return map;
+}
+
+/**
+ * Rendu des tâches dans #tasks-content : filtre recherche, tri, groupement, tableau (avec colonnes triables et sections repliables).
+ * @param {Array<Record<string, unknown>>} taskList - Tâches brutes (page courante)
+ */
+async function renderTasksInContent(taskList) {
+    const contentDiv = document.getElementById('tasks-content');
+    if (!contentDiv) return;
+
+    const filtered = filterTasksBySearch(taskList, searchQuery);
+    const sorted = sortTasks(filtered, sortBy, sortOrder);
+
+    const idToStatus = new Map(taskList.map((t) => [t.id, t.status]));
+    const taskIds = new Set(idToStatus.keys());
+    const depsForOurTasks = taskDeps.filter((d) => taskIds.has(d.task_id));
+    const missingDepIds = [...new Set(depsForOurTasks.map((d) => d.depends_on).filter((id) => !idToStatus.has(id)))];
+    await Promise.all(missingDepIds.map(async (id) => {
+        try {
+            const r = await fetch(`/task/${id}`);
+            if (r.ok) {
+                const j = await r.json();
+                idToStatus.set(id, j.status);
+            }
+        } catch (_) {}
+    }));
+    const isBlocked = (t) => {
+        const deps = depsForOurTasks.filter((d) => d.task_id === t.id);
+        return deps.some((d) => (idToStatus.get(d.depends_on) || '') !== 'done');
+    };
+
+    const opts = { onTaskClick: (t) => loadTask(t.id), getStatusSuffix: isBlocked };
+
+    contentDiv.innerHTML = '';
+    contentDiv.appendChild(el('h2', {}, 'Tâches'));
+    if (searchQuery && taskList.length > 0) {
+        contentDiv.appendChild(el('p', { class: 'muted list-search-hint' }, `Recherche « ${escapeHtml(searchQuery)} » (filtrage côté client — ADR-0003).`));
+    }
+
+    if (sorted.length === 0) {
+        contentDiv.appendChild(el('p', { class: 'muted' }, 'Aucune tâche ne correspond aux critères.'));
+        return;
+    }
+
+    if (groupBy) {
+        const groups = groupTasksBy(sorted, groupBy);
+        const statusLabels = { to_do: 'À faire', in_progress: 'En cours', done: 'Terminé' };
+        const getGroupLabel = (key) => {
+            if (key === '' || key === '—') return '—';
+            if (groupBy === 'phase') return phases[key]?.name || key;
+            if (groupBy === 'milestone') return milestones[key]?.name || key;
+            if (groupBy === 'status') return statusLabels[key] || key;
+            return key;
+        };
+        const sortedKeys = [...groups.keys()].sort((a, b) => getGroupLabel(a).localeCompare(getGroupLabel(b)));
+        for (const key of sortedKeys) {
+            const groupTasks = groups.get(key);
+            const label = getGroupLabel(key);
+            const section = el('div', { class: 'task-group-section' });
+            const header = el('button', { type: 'button', class: 'task-group-header' });
+            header.appendChild(el('span', { class: 'task-group-toggle' }, '▼'));
+            header.appendChild(el('span', { class: 'task-group-label' }, escapeHtml(String(label))));
+            header.appendChild(el('span', { class: 'task-group-count muted' }, ` (${groupTasks.length})`));
+            const body = el('div', { class: 'task-group-body' });
+            body.appendChild(createTaskListTable(groupTasks, { ...opts, sortable: true, currentSort: { by: sortBy, order: sortOrder }, onSort: (by, order) => { sortBy = by; sortOrder = order; updateListOptionsFromState(); syncListStateToUrl(); renderTasksInContent(tasks); } }));
+            section.appendChild(header);
+            section.appendChild(body);
+            header.addEventListener('click', () => {
+                body.classList.toggle('task-group-body--collapsed');
+                header.querySelector('.task-group-toggle').textContent = body.classList.contains('task-group-body--collapsed') ? '▶' : '▼';
+            });
+            contentDiv.appendChild(section);
+        }
+    } else {
+        const table = createTaskListTable(sorted, { ...opts, sortable: true, currentSort: { by: sortBy, order: sortOrder }, onSort: (by, order) => { sortBy = by; sortOrder = order; updateListOptionsFromState(); syncListStateToUrl(); renderTasksInContent(tasks); } });
+        contentDiv.appendChild(table);
     }
 }
 
@@ -709,18 +999,41 @@ function escapeHtml(s) {
     return escapeHTMLElement.innerHTML;
 }
 
+/** Colonnes du tableau liste (clé API / affichage) */
+const LIST_TABLE_COLUMNS = [
+    { key: 'id', label: 'id' },
+    { key: 'title', label: 'title' },
+    { key: 'role', label: 'role' },
+    { key: 'status', label: 'status' },
+    { key: 'milestone', label: 'milestone' },
+    { key: 'phase', label: 'phase' },
+    { key: 'updated_at', label: 'changed' }
+];
+
 /**
- * Reusabel task list
+ * Tableau liste de tâches réutilisable (tri optionnel, colonnes cliquables).
+ * @param {Array<Record<string, unknown>>} tasks
+ * @param {{ onTaskClick: (t: Record<string, unknown>) => void, getStatusSuffix?: (t: Record<string, unknown>) => boolean, sortable?: boolean, currentSort?: { by: string, order: string }, onSort?: (by: string, order: string) => void }} opts
  */
-function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => false }) {
+function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => false, sortable = false, currentSort = {}, onSort = null }) {
     const table = document.createElement('table');
     table.className = 'tasks-table';
     const thead = document.createElement('thead');
-    thead.appendChild(el('tr', {}, ...['id', 'title', 'role', 'status', 'milestone', 'phase', 'changed'].map((h) => {
+    const headerCells = LIST_TABLE_COLUMNS.map((col) => {
         const th = document.createElement('th');
-        th.textContent = h;
+        th.className = 'tasks-table-th';
+        if (sortable && (col.key === 'title' || col.key === 'status' || col.key === 'role' || col.key === 'phase' || col.key === 'milestone' || col.key === 'updated_at')) {
+            const sortKey = col.key === 'phase' ? 'phase_id' : col.key === 'milestone' ? 'milestone_id' : col.key;
+            const isActive = currentSort.by === sortKey;
+            const nextOrder = isActive && currentSort.order === 'asc' ? 'desc' : 'asc';
+            th.appendChild(el('button', { type: 'button', class: `tasks-table-sort ${isActive ? 'tasks-table-sort--active' : ''}` }, col.label, isActive ? (currentSort.order === 'asc' ? ' ↑' : ' ↓') : ''));
+            th.addEventListener('click', () => onSort && onSort(sortKey, nextOrder));
+        } else {
+            th.textContent = col.label;
+        }
         return th;
-    })));
+    });
+    thead.appendChild(el('tr', {}, ...headerCells));
     table.appendChild(thead);
     const tbody = document.createElement('tbody');
     for (const t of tasks) {

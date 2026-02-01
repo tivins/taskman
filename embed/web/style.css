@@ -123,6 +123,30 @@ body {
     min-width: 0;
 }
 
+.app-search-wrap {
+    flex: 1;
+    min-width: 0;
+    max-width: 20rem;
+}
+.app-search-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--text);
+    font-size: 0.9375rem;
+    font-family: inherit;
+}
+.app-search-input::placeholder {
+    color: var(--muted);
+}
+.app-search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--focus-ring);
+}
+
 /* Body = sidebar + main */
 .app-body {
     display: flex;
@@ -368,12 +392,33 @@ li a:hover { text-decoration: underline; }
     width: 100%;
     border-collapse: collapse;
 }
-.tasks-table thead th {
+.tasks-table thead th,
+.tasks-table-th {
     font-weight: 600;
     padding: 0.4em 0.25em;
     border-bottom: 1px solid var(--border);
     background: var(--bg);
     text-align: left;
+}
+.tasks-table-sort {
+    padding: 0.25em 0.35em;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text);
+    font-size: inherit;
+    font-weight: inherit;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s, color 0.2s;
+}
+.tasks-table-sort:hover {
+    background: var(--hover-bg);
+    color: var(--primary);
+}
+.tasks-table-sort--active {
+    color: var(--primary);
 }
 .tasks-table tbody td {
     padding: 0.35em 0.25em;
@@ -787,6 +832,74 @@ li a:hover { text-decoration: underline; }
 .filter-reset:hover {
     background: var(--hover-bg);
     border-color: var(--muted);
+}
+
+/* --- LIST OPTIONS (tri, groupement) --- */
+.list-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem 0;
+}
+.list-options label {
+    font-size: 0.875rem;
+    color: var(--muted);
+}
+.list-option-select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--card);
+    color: var(--text);
+    font-size: 0.875rem;
+    font-family: inherit;
+    cursor: pointer;
+}
+.list-search-hint {
+    font-size: 0.8125rem;
+    margin: -0.5rem 0 0.75rem;
+}
+
+/* --- TASK GROUP SECTIONS (repliables) --- */
+.task-group-section {
+    margin-bottom: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--card);
+}
+.task-group-header {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: var(--header-subtle);
+    color: var(--text);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s;
+}
+.task-group-header:hover {
+    background: var(--hover-bg);
+}
+.task-group-toggle {
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+.task-group-body {
+    overflow: hidden;
+}
+.task-group-body--collapsed {
+    display: none;
+}
+.task-group-body .tasks-table {
+    margin: 0;
 }
 
 /* --- PAGINATION --- */

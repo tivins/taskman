@@ -115,6 +115,19 @@ void WebServer::register_asset_routes(const std::string& assets_dir) {
         res.set_content(PAGINATION_JS, "application/javascript; charset=utf-8");
     });
 
+    // GET /url-state.js
+    svr_.Get("/url-state.js", [assets_dir](const httplib::Request&, httplib::Response& res) {
+        if (!assets_dir.empty()) {
+            std::string content;
+            if (read_file_to_string(asset_path(assets_dir, "url-state.js"), content)) {
+                res.set_header("Cache-Control", "no-store");
+                res.set_content(content, "application/javascript; charset=utf-8");
+                return;
+            }
+        }
+        res.set_content(URL_STATE_JS, "application/javascript; charset=utf-8");
+    });
+
     // GET /main.js
     svr_.Get("/main.js", [assets_dir](const httplib::Request&, httplib::Response& res) {
         if (!assets_dir.empty()) {

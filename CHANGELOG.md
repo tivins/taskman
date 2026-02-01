@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.34.0] - 2026-02-01
+
+### Added
+
+- **UI web — Étape 4 (liste améliorée et navigation)** : recherche globale dans le header (titre, description, ID — filtrage côté client temporaire, ADR-0003) ; tri par colonne (titre, statut, rôle, phase, jalon, mis à jour) avec ordre asc/desc ; groupement par phase, jalon, statut ou rôle avec sections repliables ; persistance de l’état dans l’URL (ADR-0002) : filtres, page, recherche, tri et groupement reflétés dans `#/list?page=...&phase=...&search=...&sort=...&order=...&group_by=...`, restauration au chargement et sur back/forward. Module `embed/web/url-state.js` pour lecture/écriture du hash.
+
+---
+
 ## [0.33.0] - 2026-02-01
 
 ### Added
