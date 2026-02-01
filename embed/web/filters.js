@@ -29,7 +29,8 @@ export class Filters {
             phase: '',
             role: '',
             status: '',
-            blocked_filter: ''
+            blocked_filter: '',
+            done_filter: 'not_done'
         };
         this.onChangeCallback = null;
     }
@@ -109,6 +110,14 @@ export class Filters {
         ]);
         filtersDiv.appendChild(blockedGroup);
 
+        // Filtre Terminé ou non (API: done_filter=done|not_done) — par défaut : cacher les terminées
+        const doneGroup = this.createSelectGroup('done_filter', 'Terminé', [
+            { value: 'all', label: 'Toutes' },
+            { value: 'not_done', label: 'Non terminées' },
+            { value: 'done', label: 'Terminées' }
+        ]);
+        filtersDiv.appendChild(doneGroup);
+
         // Bouton réinitialiser
         const resetBtn = document.createElement('button');
         resetBtn.className = 'filter-reset';
@@ -120,10 +129,15 @@ export class Filters {
                 phase: '',
                 role: '',
                 status: '',
-                blocked_filter: ''
+                blocked_filter: '',
+                done_filter: 'not_done'
             };
             filtersDiv.querySelectorAll('select').forEach(select => {
-                select.value = '';
+                if (select.id === 'filter-done_filter') {
+                    select.value = 'not_done';
+                } else {
+                    select.value = '';
+                }
             });
             if (this.onChangeCallback) {
                 this.onChangeCallback(this.filters);

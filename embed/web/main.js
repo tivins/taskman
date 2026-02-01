@@ -80,6 +80,7 @@ function applyListStateFromUrl(state) {
     if (state.role !== undefined) filters.setFilter('role', String(state.role));
     if (state.status !== undefined) filters.setFilter('status', String(state.status));
     if (state.blocked_filter !== undefined) filters.setFilter('blocked_filter', String(state.blocked_filter));
+    if (state.done_filter !== undefined) filters.setFilter('done_filter', String(state.done_filter));
     if (state.page !== undefined) pagination.goToPage(Number(state.page));
     if (state.page_size !== undefined) pagination.setPageSize(Number(state.page_size));
     if (state.search !== undefined) searchQuery = String(state.search).trim();

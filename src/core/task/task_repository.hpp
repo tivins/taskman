@@ -40,32 +40,37 @@ public:
     std::map<std::string, std::optional<std::string>> get_by_id(const std::string& id);
 
     /** Liste les tâches avec filtres optionnels.
-     * blocked_filter: "blocked" = only tasks blocked by a non-done dependency, "unblocked" = only non-blocked. */
+     * blocked_filter: "blocked" = only tasks blocked by a non-done dependency, "unblocked" = only non-blocked.
+     * done_filter: "done" = only status=done, "not_done" = only status != done, "all" or empty = no filter. */
     std::vector<std::map<std::string, std::optional<std::string>>> list(
         const std::optional<std::string>& phase_id = std::nullopt,
         const std::optional<std::string>& status = std::nullopt,
         const std::optional<std::string>& role = std::nullopt,
-        const std::optional<std::string>& blocked_filter = std::nullopt);
+        const std::optional<std::string>& blocked_filter = std::nullopt,
+        const std::optional<std::string>& done_filter = std::nullopt);
 
     /** Liste les tâches avec filtres optionnels et pagination.
-     * blocked_filter: "blocked" = only blocked tasks, "unblocked" = only non-blocked. */
+     * blocked_filter: "blocked" = only blocked tasks, "unblocked" = only non-blocked.
+     * done_filter: "done" | "not_done" | "all" (or empty). */
     std::vector<std::map<std::string, std::optional<std::string>>> list_paginated(
         const std::optional<std::string>& phase_id = std::nullopt,
         const std::optional<std::string>& milestone_id = std::nullopt,
         const std::optional<std::string>& status = std::nullopt,
         const std::optional<std::string>& role = std::nullopt,
         const std::optional<std::string>& blocked_filter = std::nullopt,
+        const std::optional<std::string>& done_filter = std::nullopt,
         int limit = 50,
         int offset = 0);
 
     /** Compte les tâches avec filtres optionnels.
-     * blocked_filter: "blocked" | "unblocked". */
+     * blocked_filter: "blocked" | "unblocked". done_filter: "done" | "not_done" | "all". */
     int count(
         const std::optional<std::string>& phase_id = std::nullopt,
         const std::optional<std::string>& milestone_id = std::nullopt,
         const std::optional<std::string>& status = std::nullopt,
         const std::optional<std::string>& role = std::nullopt,
-        const std::optional<std::string>& blocked_filter = std::nullopt);
+        const std::optional<std::string>& blocked_filter = std::nullopt,
+        const std::optional<std::string>& done_filter = std::nullopt);
 
     /** Met à jour une tâche existante.
      * Retourne true en cas de succès, false en cas d'erreur. */

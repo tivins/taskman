@@ -170,6 +170,7 @@ void TaskController::register_routes(httplib::Server& svr) {
         std::optional<std::string> status = get_optional_param(req, "status");
         std::optional<std::string> role = get_optional_param(req, "role");
         std::optional<std::string> blocked_filter = get_optional_param(req, "blocked_filter");
+        std::optional<std::string> done_filter = get_optional_param(req, "done_filter");
 
         // Valider le statut
         if (status.has_value() && !TaskService::is_valid_status(*status)) {
@@ -186,7 +187,12 @@ void TaskController::register_routes(httplib::Server& svr) {
             blocked_filter = std::nullopt;
         }
 
-        int count = task_repo_.count(phase, milestone, status, role, blocked_filter);
+        // Valider done_filter (all | not_done | done)
+        if (done_filter.has_value() && *done_filter != "all" && *done_filter != "not_done" && *done_filter != "done") {
+            done_filter = std::nullopt;
+        }
+
+        int count = task_repo_.count(phase, milestone, status, role, blocked_filter, done_filter);
         nlohmann::json obj;
         obj["count"] = count;
         res.set_content(obj.dump(), "application/json");
@@ -203,6 +209,7 @@ void TaskController::register_routes(httplib::Server& svr) {
         std::optional<std::string> status = get_optional_param(req, "status");
         std::optional<std::string> role = get_optional_param(req, "role");
         std::optional<std::string> blocked_filter = get_optional_param(req, "blocked_filter");
+        std::optional<std::string> done_filter = get_optional_param(req, "done_filter");
 
         // Valider le statut
         if (status.has_value() && !TaskService::is_valid_status(*status)) {
@@ -219,7 +226,12 @@ void TaskController::register_routes(httplib::Server& svr) {
             blocked_filter = std::nullopt;
         }
 
-        auto rows = task_repo_.list_paginated(phase, milestone, status, role, blocked_filter, limit, offset);
+        // Valider done_filter (all | not_done | done)
+        if (done_filter.has_value() && *done_filter != "all" && *done_filter != "not_done" && *done_filter != "done") {
+            done_filter = std::nullopt;
+        }
+
+        auto rows = task_repo_.list_paginated(phase, milestone, status, role, blocked_filter, done_filter, limit, offset);
         nlohmann::json arr = nlohmann::json::array();
         for (const auto& row : rows) {
             nlohmann::json obj;

@@ -10,7 +10,7 @@ const BOARD_PATH = '/board';
 const TASK_PATH_PREFIX = '/task/';
 
 const LIST_STATE_KEYS = [
-    'page', 'phase', 'milestone', 'role', 'status', 'blocked_filter',
+    'page', 'phase', 'milestone', 'role', 'status', 'blocked_filter', 'done_filter',
     'search', 'sort', 'order', 'group_by', 'page_size'
 ];
 

@@ -81,7 +81,7 @@ std::vector<std::map<std::string, std::optional<std::string>>> TaskService::list
     const std::optional<std::string>& status,
     const std::optional<std::string>& role,
     const std::optional<std::string>& blocked_filter) {
-    return repository_.list(phase_id, status, role, blocked_filter);
+    return repository_.list(phase_id, status, role, blocked_filter, std::nullopt);
 }
 
 bool TaskService::update_task(const std::string& id,

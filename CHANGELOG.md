@@ -4,6 +4,7 @@
 
 ### Added
 
+- **UI web — Filtre « Terminé / non terminé »** : filtre similaire à « Blocage » pour afficher toutes les tâches, seulement les non terminées, ou seulement les terminées. Paramètre API `done_filter=all|not_done|done` sur GET /tasks et GET /tasks/count. Par défaut les tâches terminées sont cachées (`not_done`). Valeur persistée dans l'URL (`#/list?done_filter=...`).
 - **UI web — Étape 4 (liste améliorée et navigation)** : recherche globale dans le header (titre, description, ID — filtrage côté client temporaire, ADR-0003) ; tri par colonne (titre, statut, rôle, phase, jalon, mis à jour) avec ordre asc/desc ; groupement par phase, jalon, statut ou rôle avec sections repliables ; persistance de l’état dans l’URL (ADR-0002) : filtres, page, recherche, tri et groupement reflétés dans `#/list?page=...&phase=...&search=...&sort=...&order=...&group_by=...`, restauration au chargement et sur back/forward. Module `embed/web/url-state.js` pour lecture/écriture du hash.
 
 ---

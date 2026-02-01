@@ -350,7 +350,6 @@ body {
 .board-column {
     flex: 1;
     min-width: 260px;
-    max-width: 400px;
     display: flex;
     flex-direction: column;
     background: var(--header-subtle);
@@ -433,7 +432,7 @@ body {
 
 /* Panneau détail (peek) — Étape 5, ADR-0002 */
 .app-peek {
-    --peek-width: 420px;
+    --peek-width: 640px;
     width: 0;
     min-width: 0;
     flex-shrink: 0;
