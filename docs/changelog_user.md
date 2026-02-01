@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.33.0] - 2026-02-01
+
+- **Interface web** : barre latérale gauche repliable avec liens rapides (Tâches, Vue d’ensemble) et arborescence des phases et jalons. Clic sur une phase ou un jalon pour filtrer la liste des tâches. État replié mémorisé.
+
 ## [0.32.1] - 2026-02-01
 
 - **Interface web** : filtres alignés sur le backend — 14 rôles dans le filtre « Rôle » ; nouveau filtre « Blocage » (toutes / blockées / non blockées) ; bouton « Réinitialiser » pour remettre tous les filtres à zéro.

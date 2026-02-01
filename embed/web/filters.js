@@ -181,7 +181,7 @@ export class Filters {
         const select = document.getElementById(`filter-${name}`);
         if (!select) return;
 
-        const currentValue = select.value;
+        const currentValue = this.filters[name] || select.value;
         select.innerHTML = '';
         
         const defaultOpt = document.createElement('option');

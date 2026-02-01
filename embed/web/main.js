@@ -23,7 +23,8 @@ let taskDeps = [];
 async function init() {
     // Charger les phases et milestones pour les filtres
     await loadPhasesAndMilestones();
-    
+    updateSidebarTree();
+
     // Configurer les callbacks
     filters.setOnChange(() => {
         pagination.goToPage(1);
@@ -41,8 +42,11 @@ async function init() {
     await loadTasks();
 }
 
+/** Clé localStorage pour l’état replié de la sidebar */
+const SIDEBAR_COLLAPSED_KEY = 'taskman-sidebar-collapsed';
+
 /**
- * Crée le shell commun (header fixe + zone principale) si nécessaire.
+ * Crée le shell commun (header fixe + body avec sidebar + zone principale) si nécessaire.
  * À appeler avant toute vue.
  */
 function ensureAppShell() {
@@ -53,22 +57,32 @@ function ensureAppShell() {
 
     const header = el('div', { class: 'app-header' });
 
-    //<h1><span class="task-">task</span><span class="-man">man</span></h1>
     header.appendChild(el('div', { class: 'app-brand' }, 'Taskman'));
     const nav = el('nav', { class: 'app-nav' });
     nav.appendChild(el('a', { href: '#', class: 'app-nav-link app-nav-link-active', 'data-view': 'tasks' }, 'Tâches'));
     nav.appendChild(el('a', { href: '#overview', class: 'app-nav-link', 'data-view': 'overview' }, 'Vue d\'ensemble'));
     header.appendChild(nav);
     const headerActions = el('div', { class: 'app-header-actions' });
-    // Emplacement pour filtres rapides et recherche (étape 4)
     header.appendChild(headerActions);
     shell.appendChild(header);
 
+    const body = el('div', { class: 'app-body' });
+    const sidebar = createSidebar();
+    body.appendChild(sidebar);
+
     const main = el('div', { class: 'app-main' });
-    shell.appendChild(main);
+    body.appendChild(main);
+    shell.appendChild(body);
 
     app.appendChild(shell);
     appMain = main;
+
+    const collapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
+    if (collapsed) {
+        sidebar.classList.add('app-sidebar--collapsed');
+        const toggleBtn = sidebar.querySelector('.app-sidebar-toggle');
+        if (toggleBtn) toggleBtn.textContent = '▶';
+    }
 
     nav.querySelectorAll('.app-nav-link').forEach((link) => {
         link.addEventListener('click', (e) => {
@@ -83,6 +97,108 @@ function ensureAppShell() {
             }
         });
     });
+}
+
+/**
+ * Crée la sidebar gauche (repliable) : lien replier/déplier, liens rapides, arborescence phases/milestones.
+ */
+function createSidebar() {
+    const sidebar = el('div', { class: 'app-sidebar', id: 'app-sidebar' });
+
+    const toggleBtn = el('button', {
+        type: 'button',
+        class: 'app-sidebar-toggle',
+        'aria-label': 'Replier / Déplier la barre latérale',
+        title: 'Replier / Déplier'
+    }, '◀');
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('app-sidebar--collapsed');
+        const collapsed = sidebar.classList.contains('app-sidebar--collapsed');
+        localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed);
+        toggleBtn.textContent = collapsed ? '▶' : '◀';
+    });
+    sidebar.appendChild(toggleBtn);
+
+    const content = el('div', { class: 'app-sidebar-content' });
+
+    const quickLinks = el('nav', { class: 'app-sidebar-quicklinks' });
+    quickLinks.appendChild(el('a', { href: '#', class: 'app-sidebar-link', 'data-view': 'tasks' }, 'Tâches'));
+    quickLinks.appendChild(el('a', { href: '#overview', class: 'app-sidebar-link', 'data-view': 'overview' }, 'Vue d\'ensemble'));
+    content.appendChild(quickLinks);
+
+    const treeTitle = el('h3', { class: 'app-sidebar-tree-title' }, 'Phases & jalons');
+    content.appendChild(treeTitle);
+    const treeContainer = el('div', { class: 'app-sidebar-tree', id: 'app-sidebar-tree' });
+    content.appendChild(treeContainer);
+
+    sidebar.appendChild(content);
+
+    quickLinks.querySelectorAll('.app-sidebar-link').forEach((link) => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const view = link.getAttribute('data-view');
+            setActiveNav(view);
+            if (view === 'tasks') {
+                renderMainView();
+                loadTasks();
+            } else if (view === 'overview') {
+                showDashboard();
+            }
+        });
+    });
+
+    return sidebar;
+}
+
+/**
+ * Met à jour l’arborescence phases/milestones dans la sidebar (à appeler après chargement des données).
+ */
+function updateSidebarTree() {
+    const treeContainer = document.getElementById('app-sidebar-tree');
+    if (!treeContainer) return;
+
+    treeContainer.innerHTML = '';
+    const phaseList = Object.values(phases);
+    const milestonesByPhase = {};
+    for (const m of Object.values(milestones)) {
+        const pid = m.phase_id || '';
+        if (!milestonesByPhase[pid]) milestonesByPhase[pid] = [];
+        milestonesByPhase[pid].push(m);
+    }
+
+    for (const p of phaseList) {
+        const phaseItem = el('div', { class: 'app-sidebar-tree-phase' });
+        const phaseLink = el('button', { type: 'button', class: 'app-sidebar-tree-phase-btn', 'data-phase-id': p.id }, escapeHtml(p.name || p.id));
+        phaseLink.addEventListener('click', () => {
+            filters.setFilter('phase', p.id);
+            filters.setFilter('milestone', '');
+            setActiveNav('tasks');
+            renderMainView();
+            loadTasks();
+        });
+        phaseItem.appendChild(phaseLink);
+        const ms = milestonesByPhase[p.id] || [];
+        if (ms.length) {
+            const sub = el('div', { class: 'app-sidebar-tree-milestones' });
+            for (const m of ms) {
+                const ml = el('button', { type: 'button', class: 'app-sidebar-tree-milestone-btn', 'data-milestone-id': m.id }, escapeHtml(m.name || m.id));
+                ml.addEventListener('click', () => {
+                    filters.setFilter('phase', p.id);
+                    filters.setFilter('milestone', m.id);
+                    setActiveNav('tasks');
+                    renderMainView();
+                    loadTasks();
+                });
+                sub.appendChild(ml);
+            }
+            phaseItem.appendChild(sub);
+        }
+        treeContainer.appendChild(phaseItem);
+    }
+
+    if (phaseList.length === 0) {
+        treeContainer.appendChild(el('p', { class: 'muted app-sidebar-tree-empty' }, 'Aucune phase.'));
+    }
 }
 
 /**

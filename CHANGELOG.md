@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.33.0] - 2026-02-01
+
+### Added
+
+- **UI web — Sidebar gauche (étape 2.4)** : barre latérale repliable avec liens rapides (Tâches, Vue d’ensemble) et arborescence phases / jalons. Un clic sur une phase ou un jalon applique le filtre correspondant et affiche la liste des tâches. État replié persisté dans `localStorage`. Préparation pour l’étape 4 (liste améliorée et navigation).
+
+---
+
 ## [0.32.1] - 2026-02-01
 
 ### Changed
