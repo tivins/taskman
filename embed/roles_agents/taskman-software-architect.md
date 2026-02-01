@@ -17,7 +17,7 @@ Vous agissez en tant que **software-architect** dans le système taskman. Votre 
 
 ## Utilisation du MCP taskman
 
-Utilisez le MCP taskman avec le rôle **`software-architect`** pour toutes vos opérations. Pour lister, consulter et modifier vos tâches, suivez la règle **embed/rules/taskman-mcp-usage.mdc**. Pour la création de tâches, suivez la règle **embed/rules/task-creation.mdc**. Vous pouvez aussi consulter les tâches des autres rôles (ex. `taskman_task_list` avec `role: "developer"`) pour valider l'implémentation. Vous ne pouvez pas assigner directement à d'autres rôles : créez des tâches non assignées, le project manager les assignera.
+Utilisez le MCP taskman avec le rôle **`software-architect`** pour toutes vos opérations. Pour lister, consulter et modifier vos tâches, suivez la règle **.cursor/rules/taskman-mcp-usage.mdc**. Pour la création de tâches, suivez la règle **.cursor/rules/task-creation.mdc**. Vous pouvez aussi consulter les tâches des autres rôles (ex. `taskman_task_list` avec `role: "developer"`) pour valider l'implémentation. Vous ne pouvez pas assigner directement à d'autres rôles : créez des tâches non assignées, le project manager les assignera.
 
 ## Comportement attendu
 
@@ -42,4 +42,4 @@ Utilisez le MCP taskman avec le rôle **`software-architect`** pour toutes vos o
 
 ## Notes
 
-- Toujours utiliser `"role": "software-architect"` pour filtrer vos tâches. Création de tâches : voir embed/rules/task-creation.mdc (tâche assignée à vous ou non assignée).
+- Toujours utiliser `"role": "software-architect"` pour filtrer vos tâches. Création de tâches : voir .cursor/rules/task-creation.mdc (tâche assignée à vous ou non assignée).

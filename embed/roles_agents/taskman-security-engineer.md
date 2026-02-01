@@ -17,7 +17,7 @@ Vous agissez en tant que **security-engineer** dans le système taskman. Votre r
 
 ## Utilisation du MCP taskman
 
-Utilisez le MCP taskman avec le rôle **`security-engineer`** pour toutes vos opérations. Pour lister, consulter et modifier vos tâches, suivez la règle **embed/rules/taskman-mcp-usage.mdc**. Pour la création de tâches, suivez la règle **embed/rules/task-creation.mdc**.
+Utilisez le MCP taskman avec le rôle **`security-engineer`** pour toutes vos opérations. Pour lister, consulter et modifier vos tâches, suivez la règle **.cursor/rules/taskman-mcp-usage.mdc**. Pour la création de tâches, suivez la règle **.cursor/rules/task-creation.mdc**.
 
 ## Comportement attendu
 
@@ -40,4 +40,4 @@ Utilisez le MCP taskman avec le rôle **`security-engineer`** pour toutes vos op
 
 ## Notes
 
-- Toujours utiliser `"role": "security-engineer"` pour filtrer vos tâches. Création de tâches : voir embed/rules/task-creation.mdc.
+- Toujours utiliser `"role": "security-engineer"` pour filtrer vos tâches. Création de tâches : voir .cursor/rules/task-creation.mdc.

@@ -56,16 +56,16 @@ Pour agir en tant que **developer** :
 Chaque fichier d'agent décrit le **rôle** (nom, responsabilités, comportement, relations) et renvoie aux règles partagées pour la mécanique MCP :
 
 - **Rôle et responsabilités** : Description du rôle dans le projet
-- **Utilisation du MCP taskman** : Référence aux règles **embed/rules/taskman-mcp-usage.mdc** (lister, consulter, modifier les tâches) et **embed/rules/task-creation.mdc** (création de tâches avec creator/role)
+- **Utilisation du MCP taskman** : Référence aux règles **.cursor/rules/taskman-mcp-usage.mdc** (lister, consulter, modifier les tâches) et **.cursor/rules/task-creation.mdc** (création de tâches avec creator/role)
 - **Comportement attendu** : Comment l'agent doit agir
 - **Relations avec les autres rôles** : Comment collaborer
 - **Outils MCP disponibles** : Liste des outils pertinents pour le rôle
 
-Les détails des appels MCP (taskman_task_list, taskman_task_add, etc.) et les règles de création de tâches (CLI et MCP) sont centralisés dans **embed/rules/** pour éviter la duplication et garder une seule source de vérité.
+Les détails des appels MCP (taskman_task_list, taskman_task_add, etc.) et les règles de création de tâches (CLI et MCP) sont centralisés dans **embed/rules/** (source) ; les agents qui utilisent taskman en MCP doivent consulter **.cursor/rules/** (taskman-mcp-usage.mdc, task-creation.mdc) pour y avoir accès.
 
 ## Règles d'assignation des tâches
 
-Voir **embed/rules/task-creation.mdc** pour la règle complète (CLI et MCP). Résumé :
+Voir **.cursor/rules/task-creation.mdc** pour la règle complète (CLI et MCP). Résumé :
 
 - **Project Manager** : Peut assigner des tâches à **tous les rôles** (y compris lui-même)
 - **Autres rôles** : Peuvent créer des tâches soit assignées à leur propre rôle, soit non assignées (sans paramètre `role`) pour validation par le project manager
@@ -75,6 +75,6 @@ Voir **embed/rules/task-creation.mdc** pour la règle complète (CLI et MCP). R�
 ## Notes importantes
 
 - Chaque agent doit **toujours** utiliser le MCP taskman avec son rôle spécifique pour filtrer ses propres tâches
-- Pour l'usage des outils MCP (list, get, edit, statuts), voir **embed/rules/taskman-mcp-usage.mdc**
-- Pour la création de tâches (creator, role, tâche non assignée), voir **embed/rules/task-creation.mdc**
+- Pour l'usage des outils MCP (list, get, edit, statuts), voir **.cursor/rules/taskman-mcp-usage.mdc**
+- Pour la création de tâches (creator, role, tâche non assignée), voir **.cursor/rules/task-creation.mdc**
 - Tous les agents ont accès aux mêmes outils MCP, mais avec des perspectives et permissions différentes

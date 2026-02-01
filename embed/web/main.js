@@ -1225,7 +1225,9 @@ async function openPeek(taskId, opts = {}) {
         const content = el('div', { class: 'app-peek-content' });
         const div = el('div', { class: 'task-detail' });
         div.appendChild(el('h2', {}, escapeHtml(t.title || 'Sans titre')));
-        div.appendChild(el('p', { class: 'task-description' }, escapeHtml(t.description || '')));
+        const descWrap = el('div', { class: 'task-description markdown-body' });
+        descWrap.innerHTML = renderMarkdownToHtml(t.description);
+        div.appendChild(descWrap);
 
         const phaseLabel = getPhaseName(t.phase_id);
         const milestoneLabel = getMilestoneName(t.milestone_id);
@@ -1270,7 +1272,9 @@ async function openPeek(taskId, opts = {}) {
                 if (n.created_at) metaLine.push(escapeHtml(n.created_at));
                 const metaStr = metaLine.length ? metaLine.join(' · ') : '';
                 noteCard.appendChild(el('div', { class: 'task-note-meta muted' }, metaStr));
-                noteCard.appendChild(el('div', { class: 'task-note-content' }, escapeHtml(n.content || '')));
+                const noteContent = el('div', { class: 'task-note-content markdown-body' });
+                noteContent.innerHTML = renderMarkdownToHtml(n.content);
+                noteCard.appendChild(noteContent);
                 notesList.appendChild(noteCard);
             }
             div.appendChild(notesList);
@@ -1312,6 +1316,21 @@ function escapeHtml(s) {
     }
     escapeHTMLElement.textContent = s;
     return escapeHTMLElement.innerHTML;
+}
+
+/**
+ * Rend du markdown en HTML via la lib marked (chargée en global).
+ * Si marked n'est pas disponible, retourne le texte échappé.
+ * @param {string} text - Texte markdown
+ * @returns {string} HTML
+ */
+function renderMarkdownToHtml(text) {
+    const raw = String(text || '').trim();
+    if (!raw) return '';
+    if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
+        return marked.parse(raw);
+    }
+    return escapeHtml(raw);
 }
 
 /** Colonnes du tableau liste (clé API / affichage) */

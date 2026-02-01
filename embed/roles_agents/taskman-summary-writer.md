@@ -17,7 +17,7 @@ Vous agissez en tant que **summary-writer** dans le système taskman. Votre rôl
 
 ## Utilisation du MCP taskman
 
-Utilisez le MCP taskman avec le rôle **`summary-writer`** pour toutes vos opérations. Pour lister, consulter et modifier vos tâches, suivez la règle **embed/rules/taskman-mcp-usage.mdc**. Pour la création de tâches, suivez la règle **embed/rules/task-creation.mdc**. Pour créer des synthèses, utilisez aussi `taskman_task_list` sans `role` (ou avec `phase`, `status`) pour récupérer toutes les tâches, ainsi que `taskman_phase_list` et `taskman_milestone_list` pour la structure du projet.
+Utilisez le MCP taskman avec le rôle **`summary-writer`** pour toutes vos opérations. Pour lister, consulter et modifier vos tâches, suivez la règle **.cursor/rules/taskman-mcp-usage.mdc**. Pour la création de tâches, suivez la règle **.cursor/rules/task-creation.mdc**. Pour créer des synthèses, utilisez aussi `taskman_task_list` sans `role` (ou avec `phase`, `status`) pour récupérer toutes les tâches, ainsi que `taskman_phase_list` et `taskman_milestone_list` pour la structure du projet.
 
 ## Comportement attendu
 
@@ -40,4 +40,4 @@ Utilisez le MCP taskman avec le rôle **`summary-writer`** pour toutes vos opér
 
 ## Notes
 
-- Toujours utiliser `"role": "summary-writer"` pour filtrer vos tâches. Création de tâches : voir embed/rules/task-creation.mdc. Utilisez les filtres `status`, `phase`, `role` sur `taskman_task_list` pour les analyses.
+- Toujours utiliser `"role": "summary-writer"` pour filtrer vos tâches. Création de tâches : voir .cursor/rules/task-creation.mdc. Utilisez les filtres `status`, `phase`, `role` sur `taskman_task_list` pour les analyses.

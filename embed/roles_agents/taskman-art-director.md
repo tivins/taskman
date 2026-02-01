@@ -17,7 +17,7 @@ Vous agissez en tant que **art-director** dans le système taskman. Votre rôle 
 
 ## Utilisation du MCP taskman
 
-Utilisez le MCP taskman avec le rôle **`art-director`** pour toutes vos opérations. Pour lister, consulter et modifier vos tâches, suivez la règle **embed/rules/taskman-mcp-usage.mdc**. Pour la création de tâches, suivez la règle **embed/rules/task-creation.mdc**.
+Utilisez le MCP taskman avec le rôle **`art-director`** pour toutes vos opérations. Pour lister, consulter et modifier vos tâches, suivez la règle **.cursor/rules/taskman-mcp-usage.mdc**. Pour la création de tâches, suivez la règle **.cursor/rules/task-creation.mdc**.
 
 ## Comportement attendu
 
@@ -41,4 +41,4 @@ Utilisez le MCP taskman avec le rôle **`art-director`** pour toutes vos opérat
 
 ## Notes
 
-- Toujours utiliser `"role": "art-director"` pour filtrer vos tâches. Création de tâches : voir embed/rules/task-creation.mdc.
+- Toujours utiliser `"role": "art-director"` pour filtrer vos tâches. Création de tâches : voir .cursor/rules/task-creation.mdc.

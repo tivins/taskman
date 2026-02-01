@@ -11,6 +11,8 @@ Lorsque vous agissez en tant qu’agent de rôle taskman, utilisez le MCP taskma
 
 - **Toujours** passer `"role": "<votre_rôle>"` dans les appels qui filtrent par rôle (`taskman_task_list`).
 - Pour la **création** de tâches, voir [task-creation.mdc](task-creation.mdc).
+- **À la clôture d'une tâche** : lorsque vous marquez une tâche comme terminée (`status: "done"`), **toujours** ajouter une note à cette tâche avec `taskman_task_note_add` pour indiquer ce qui a été fait (résumé, livrables). Utiliser `kind: "completion"`.
+- **Notes et traçabilité** : l'agent est invité à ajouter des notes (avancement, complétion, point bloquant) sur les tâches pour garder trace de l'évolution du projet et faciliter le suivi.
 
 ## Outils et usage
 
@@ -28,6 +30,11 @@ Lorsque vous agissez en tant qu’agent de rôle taskman, utilisez le MCP taskma
 
 - **Changer le statut** : `taskman_task_edit` avec `arguments: { "id": "<task-uuid>", "status": "to_do" | "in_progress" | "done" }`.
 - **Mettre à jour la description** : `taskman_task_edit` avec `arguments: { "id": "<task-uuid>", "description": "..." }`.
+- **Quand vous passez une tâche en `done`** : ajouter une note avec `taskman_task_note_add` (`task_id`, `content` décrivant ce qui a été fait, `kind: "completion"`, optionnellement `role`) avant ou après le passage en `done`.
+
+### Ajouter une note à une tâche
+
+- **Note de complétion / avancement / point bloquant** : `taskman_task_note_add` avec `arguments: { "task_id": "<task-uuid>", "content": "...", "kind": "completion" | "progress" | "issue", "role": "<votre_rôle>" }`. Utiliser `completion` quand vous terminez la tâche ; `progress` pour un point d'étape ; `issue` pour un blocage ou risque.
 
 ## Statuts possibles
 
@@ -46,4 +53,4 @@ Lorsque vous agissez en tant qu’agent de rôle taskman, utilisez le MCP taskma
 1. Récupérer vos tâches avec `taskman_task_list` et `role: "<votre_rôle>"`.
 2. Consulter le détail avec `taskman_task_get` si besoin.
 3. Passer une tâche en cours avec `taskman_task_edit` et `status: "in_progress"`.
-4. Marquer comme terminée avec `taskman_task_edit` et `status: "done"`.
+4. Marquer comme terminée avec `taskman_task_edit` et `status: "done"`, et **toujours** ajouter une note de complétion avec `taskman_task_note_add` (content = ce qui a été fait, kind = `completion`).

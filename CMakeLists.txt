@@ -84,6 +84,7 @@ add_custom_command(
     --js ${CMAKE_SOURCE_DIR}/embed/web/pagination.js
     --js ${CMAKE_SOURCE_DIR}/embed/web/url-state.js
     --js ${CMAKE_SOURCE_DIR}/embed/web/main.js
+    --js ${CMAKE_SOURCE_DIR}/embed/web/marked.umd.js
     -o "${WEB_ASSETS_HEADER}"
   DEPENDS ${CMAKE_SOURCE_DIR}/scripts/embed_assets.py
           ${CMAKE_SOURCE_DIR}/embed/web/style.css
@@ -92,7 +93,8 @@ add_custom_command(
           ${CMAKE_SOURCE_DIR}/embed/web/pagination.js
           ${CMAKE_SOURCE_DIR}/embed/web/url-state.js
           ${CMAKE_SOURCE_DIR}/embed/web/main.js
-  COMMENT "Embedding web assets (style.css, dom.js, filters.js, pagination.js, url-state.js, main.js) into header"
+          ${CMAKE_SOURCE_DIR}/embed/web/marked.umd.js
+  COMMENT "Embedding web assets (style.css, dom.js, filters.js, pagination.js, url-state.js, main.js, marked.umd.js) into header"
 )
 
 # -----------------------------------------------------------------------------

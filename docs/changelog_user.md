@@ -2,6 +2,10 @@
 
 User-facing changes: new commands, options, formats, and behavior.
 
+## [0.35.0] - 2026-02-01
+
+- **Interface web** : la description des tâches et le contenu des notes sont affichés en Markdown (titres, listes, code, liens, etc.) dans le détail de la tâche et l’historique des notes.
+
 ## [0.33.0] - 2026-02-01
 
 - **Interface web** : barre latérale gauche repliable avec liens rapides (Tâches, Vue d’ensemble) et arborescence des phases et jalons. Clic sur une phase ou un jalon pour filtrer la liste des tâches. État replié mémorisé.

@@ -27,6 +27,13 @@ Les valeurs possibles pour `--creator` (et `--role`) sont notamment :
 - En tant que chef de projet :  
   `task:add --title "Valider le périmètre" --phase P1 --creator project-manager`
 
+## Clôture de tâche
+
+Lorsque vous **terminez une tâche** (statut `done`), **toujours ajouter une note** à cette tâche pour indiquer ce qui a été fait (résumé de réalisation, livrables, points bloquants levés, etc.). Objectif : traçabilité et historique exploitable.
+
+- **CLI** : `task:note:add <task-id> --content "..." --kind completion [--role <votre_rôle>]`
+- **MCP** : `taskman_task_note_add` avec `task_id`, `content` (résumé de ce qui a été fait), `kind: "completion"` et éventuellement `role`.
+
 ## Rappel
 
 - **`--role`** : rôle assigné à la tâche (qui doit la faire).

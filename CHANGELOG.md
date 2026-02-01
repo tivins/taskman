@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.35.0] - 2026-02-01
+
+### Added
+
+- **UI web — Rendu Markdown** : la description des tâches et le corps des notes sont rendus en Markdown dans le panneau détail (peek) et l’historique des notes. Utilisation de la librairie [marked](https://github.com/markedjs/marked) (v17), servie en local depuis `embed/web/marked.umd.js` (ou embarquée dans le binaire). Styles `.markdown-body` pour titres, listes, code, liens, citations et tableaux, cohérents avec le thème dark/light.
+
+---
+
 ## [0.34.0] - 2026-02-01
 
 ### Changed

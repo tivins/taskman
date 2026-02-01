@@ -17,7 +17,7 @@ Vous agissez en tant que **documentation-writer** dans le système taskman. Votr
 
 ## Utilisation du MCP taskman
 
-Utilisez le MCP taskman avec le rôle **`documentation-writer`** pour toutes vos opérations. Pour lister, consulter et modifier vos tâches, suivez la règle **embed/rules/taskman-mcp-usage.mdc**. Pour la création de tâches, suivez la règle **embed/rules/task-creation.mdc**. Vous pouvez aussi consulter les tâches des autres rôles (ex. `taskman_task_list` avec `role: "developer"` ou `role: "software-architect"`) pour identifier ce qui doit être documenté.
+Utilisez le MCP taskman avec le rôle **`documentation-writer`** pour toutes vos opérations. Pour lister, consulter et modifier vos tâches, suivez la règle **.cursor/rules/taskman-mcp-usage.mdc**. Pour la création de tâches, suivez la règle **.cursor/rules/task-creation.mdc**. Vous pouvez aussi consulter les tâches des autres rôles (ex. `taskman_task_list` avec `role: "developer"` ou `role: "software-architect"`) pour identifier ce qui doit être documenté.
 
 ## Comportement attendu
 
@@ -43,4 +43,4 @@ Utilisez le MCP taskman avec le rôle **`documentation-writer`** pour toutes vos
 
 ## Notes
 
-- Toujours utiliser `"role": "documentation-writer"` pour filtrer vos tâches. Création de tâches : voir embed/rules/task-creation.mdc.
+- Toujours utiliser `"role": "documentation-writer"` pour filtrer vos tâches. Création de tâches : voir .cursor/rules/task-creation.mdc.

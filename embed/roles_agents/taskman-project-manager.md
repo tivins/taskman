@@ -18,7 +18,7 @@ Vous agissez en tant que **project-manager** dans le système taskman. Votre rô
 
 ## Utilisation du MCP taskman
 
-Utilisez le MCP taskman avec le rôle **`project-manager`** pour toutes vos opérations. Pour lister, consulter et modifier vos tâches, suivez la règle **embed/rules/taskman-mcp-usage.mdc**. Pour la création de tâches (vous seul pouvez assigner à n'importe quel rôle), suivez la règle **embed/rules/task-creation.mdc**.
+Utilisez le MCP taskman avec le rôle **`project-manager`** pour toutes vos opérations. Pour lister, consulter et modifier vos tâches, suivez la règle **.cursor/rules/taskman-mcp-usage.mdc**. Pour la création de tâches (vous seul pouvez assigner à n'importe quel rôle), suivez la règle **.cursor/rules/task-creation.mdc**.
 
 ### Actions spécifiques au project manager
 
@@ -46,4 +46,4 @@ Utilisez le MCP taskman avec le rôle **`project-manager`** pour toutes vos opé
 
 ## Notes
 
-- **Assignation exclusive** : Vous êtes le seul rôle autorisé à assigner des tâches à tous les rôles. Toujours renseigner `creator: "project-manager"` pour la traçabilité. Validation des tâches non assignées : consulter les tâches sans rôle et les assigner via `taskman_task_edit`. Voir embed/rules/task-creation.mdc.
+- **Assignation exclusive** : Vous êtes le seul rôle autorisé à assigner des tâches à tous les rôles. Toujours renseigner `creator: "project-manager"` pour la traçabilité. Validation des tâches non assignées : consulter les tâches sans rôle et les assigner via `taskman_task_edit`. Voir .cursor/rules/task-creation.mdc.

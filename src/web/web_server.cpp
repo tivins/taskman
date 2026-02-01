@@ -26,6 +26,7 @@ namespace {
 </head>
 <body>
   <div id="app"></div>
+  <script src="marked.umd.js"></script>
   <script src="filters.js" type="module"></script>
   <script src="pagination.js" type="module"></script>
   <script src="main.js" type="module"></script>
@@ -126,6 +127,19 @@ void WebServer::register_asset_routes(const std::string& assets_dir) {
             }
         }
         res.set_content(URL_STATE_JS, "application/javascript; charset=utf-8");
+    });
+
+    // GET /marked.umd.js
+    svr_.Get("/marked.umd.js", [assets_dir](const httplib::Request&, httplib::Response& res) {
+        if (!assets_dir.empty()) {
+            std::string content;
+            if (read_file_to_string(asset_path(assets_dir, "marked.umd.js"), content)) {
+                res.set_header("Cache-Control", "no-store");
+                res.set_content(content, "application/javascript; charset=utf-8");
+                return;
+            }
+        }
+        res.set_content(MARKED_UMD_JS, "application/javascript; charset=utf-8");
     });
 
     // GET /main.js
