@@ -33,3 +33,57 @@ Les valeurs possibles pour `--creator` (et `--role`) sont notamment :
 - **`--creator`** : rôle de celui qui crée la tâche (traçabilité).
 
 Les deux peuvent être identiques ou différents selon le cas.
+
+---
+
+## Création de tâches via MCP (taskman_task_add)
+
+Lorsque vous créez des tâches via le MCP taskman (`taskman_task_add`), **toujours indiquer le créateur** avec l’argument `creator` en utilisant **votre nom de rôle**.
+
+### Règle MCP
+
+- **Outil** : `taskman_task_add`
+- **Arguments obligatoires** : `title`, `phase`, **`creator`** (votre rôle).
+- **`creator`** : doit être le rôle sous lequel vous agissez (ex. `developer`, `qa-engineer`, `documentation-writer`). Même liste de rôles valides que ci-dessus.
+- **`role`** (optionnel) : rôle assigné à la tâche (qui doit la faire). Si omis, la tâche est non assignée (validation par le project manager).
+
+### Qui peut assigner à qui
+
+- **Project Manager** : peut passer `role` à **n’importe quel rôle** (y compris lui-même). C’est le seul rôle autorisé à assigner des tâches à tous les rôles.
+- **Autres rôles** : peuvent soit passer `role` égal à **leur propre rôle** (tâche pour soi), soit **omettre `role`** (tâche non assignée, le project manager validera et assignera).
+
+### Exemple MCP — tâche assignée à votre rôle
+
+```json
+{
+  "name": "taskman_task_add",
+  "arguments": {
+    "title": "<titre>",
+    "phase": "<phase_id>",
+    "role": "<votre_rôle>",
+    "creator": "<votre_rôle>",
+    "description": "<optionnel>"
+  }
+}
+```
+
+### Exemple MCP — tâche non assignée (hors project manager)
+
+Ne pas inclure `role`. Le project manager consultera les tâches sans rôle, les validera et les assignera.
+
+```json
+{
+  "name": "taskman_task_add",
+  "arguments": {
+    "title": "<titre>",
+    "phase": "<phase_id>",
+    "creator": "<votre_rôle>",
+    "description": "<optionnel>"
+  }
+}
+```
+
+### Rappel MCP
+
+- **`role`** : rôle assigné à la tâche (qui doit la faire). Optionnel pour les non–project-managers (tâche non assignée).
+- **`creator`** : rôle de celui qui crée la tâche (traçabilité). Toujours requis.

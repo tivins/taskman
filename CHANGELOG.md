@@ -4,6 +4,7 @@
 
 ### Changed
 
+- **Documentation — Rôles agents et règles** : les fichiers de rôle (`embed/roles_agents/`) décrivent désormais uniquement le comportement et le nom de rôle ; la création de tâches (CLI et MCP) et l’usage MCP générique sont centralisés dans `embed/rules/task-creation.mdc` et `embed/rules/taskman-mcp-usage.mdc`. README des rôles mis à jour.
 - **UI web — Vue tâches : scroll par colonne** : la vue des tâches utilise un layout à hauteur fixe (viewport) avec scroll indépendant pour la sidebar, la zone principale (liste) et le panneau peek. Lorsqu’on scroll la liste et qu’on sélectionne une tâche, le détail reste visible dans le peek sans avoir à remonter la page.
 
 ### Added

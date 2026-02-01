@@ -1,0 +1,49 @@
+---
+description: Utiliser le MCP taskman avec son rôle pour lister, consulter et modifier les tâches
+alwaysApply: false
+---
+
+# Usage MCP taskman (tâches)
+
+Lorsque vous agissez en tant qu’agent de rôle taskman, utilisez le MCP taskman avec **votre nom de rôle** pour toutes les opérations sur les tâches. Le rôle est indiqué dans le fichier d’agent (ex. `developer`, `qa-engineer`).
+
+## Règle
+
+- **Toujours** passer `"role": "<votre_rôle>"` dans les appels qui filtrent par rôle (`taskman_task_list`).
+- Pour la **création** de tâches, voir [task-creation.mdc](task-creation.mdc).
+
+## Outils et usage
+
+### Lister vos tâches
+
+- **Toutes vos tâches** : `taskman_task_list` avec `arguments: { "role": "<votre_rôle>", "format": "json" }`.
+- **Par statut** : ajouter `"status": "to_do"` ou `"in_progress"` ou `"done"`.
+- **Par phase** : ajouter `"phase": "<phase_id>"` (ex. `"P2"`).
+
+### Consulter une tâche
+
+- **Détail d’une tâche** : `taskman_task_get` avec `arguments: { "id": "<task-uuid>", "format": "json" }`.
+
+### Modifier une tâche
+
+- **Changer le statut** : `taskman_task_edit` avec `arguments: { "id": "<task-uuid>", "status": "to_do" | "in_progress" | "done" }`.
+- **Mettre à jour la description** : `taskman_task_edit` avec `arguments: { "id": "<task-uuid>", "description": "..." }`.
+
+## Statuts possibles
+
+- `to_do` : à faire
+- `in_progress` : en cours
+- `done` : terminée
+
+## Autres outils utiles
+
+- `taskman_phase_list` : lister les phases du projet
+- `taskman_milestone_list` : lister les jalons et critères
+- `taskman_task_dep_add`, `taskman_task_dep_remove` : gérer les dépendances entre tâches (si pertinent pour votre rôle)
+
+## Workflow typique
+
+1. Récupérer vos tâches avec `taskman_task_list` et `role: "<votre_rôle>"`.
+2. Consulter le détail avec `taskman_task_get` si besoin.
+3. Passer une tâche en cours avec `taskman_task_edit` et `status: "in_progress"`.
+4. Marquer comme terminée avec `taskman_task_edit` et `status: "done"`.
