@@ -20,7 +20,7 @@ let taskDeps = [];
 
 /** État liste (étape 4) : recherche, tri, groupement — persistance URL (ADR-0002) */
 let searchQuery = '';
-/** Colonne de tri : title | status | role | phase | milestone | updated_at */
+/** Colonne de tri : title | status | role | phase | milestone | sort_order | updated_at */
 let sortBy = 'updated_at';
 /** Direction : asc | desc */
 let sortOrder = 'desc';
@@ -450,6 +450,7 @@ function renderMainView() {
         { value: 'role', label: 'Rôle' },
         { value: 'phase_id', label: 'Phase' },
         { value: 'milestone_id', label: 'Jalon' },
+        { value: 'sort_order', label: 'Ordre' },
         { value: 'updated_at', label: 'Mis à jour' }
     ];
     sortColumns.forEach(({ value, label }) => {
@@ -983,7 +984,7 @@ function filterTasksBySearch(taskList, query) {
 /**
  * Trie les tâches par colonne et ordre (côté client).
  * @param {Array<Record<string, unknown>>} taskList
- * @param {string} by - title | status | role | phase | milestone | updated_at
+ * @param {string} by - title | status | role | phase | milestone | sort_order | updated_at
  * @param {string} order - asc | desc
  * @returns {typeof taskList}
  */
@@ -993,6 +994,12 @@ function sortTasks(taskList, by, order) {
     return [...taskList].sort((a, b) => {
         let va = a[key];
         let vb = b[key];
+        if (by === 'sort_order') {
+            const na = va != null && va !== '' ? Number(va) : Infinity;
+            const nb = vb != null && vb !== '' ? Number(vb) : Infinity;
+            const cmp = na - nb;
+            return mult * cmp;
+        }
         if (by === 'updated_at' || by === 'title') {
             va = va != null ? String(va) : '';
             vb = vb != null ? String(vb) : '';
@@ -1313,6 +1320,7 @@ const LIST_TABLE_COLUMNS = [
     { key: 'title', label: 'title' },
     { key: 'role', label: 'role' },
     { key: 'status', label: 'status' },
+    { key: 'sort_order', label: 'Ordre' },
     { key: 'milestone', label: 'milestone' },
     { key: 'phase', label: 'phase' },
     { key: 'updated_at', label: 'changed' }
@@ -1330,7 +1338,7 @@ function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => false
     const headerCells = LIST_TABLE_COLUMNS.map((col) => {
         const th = document.createElement('th');
         th.className = 'tasks-table-th';
-        if (sortable && (col.key === 'title' || col.key === 'status' || col.key === 'role' || col.key === 'phase' || col.key === 'milestone' || col.key === 'updated_at')) {
+        if (sortable && (col.key === 'title' || col.key === 'status' || col.key === 'role' || col.key === 'phase' || col.key === 'milestone' || col.key === 'sort_order' || col.key === 'updated_at')) {
             const sortKey = col.key === 'phase' ? 'phase_id' : col.key === 'milestone' ? 'milestone_id' : col.key;
             const isActive = currentSort.by === sortKey;
             const nextOrder = isActive && currentSort.order === 'asc' ? 'desc' : 'asc';
@@ -1362,6 +1370,7 @@ function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => false
 
         const milestoneName = (milestones[t.milestone_id]?.name ?? t.milestone_id ?? '');
         const phaseName = (phases[t.phase_id]?.name ?? t.phase_id ?? '');
+        const sortOrderVal = t.sort_order != null && t.sort_order !== '' ? String(t.sort_order) : '—';
         const tr = el('tr', { 'data-task-id': t.id , class: label },
             el('td', { class: 'monospace uuid' }, escapeHtml(String(t.id ?? '').substring(0, 8))),
             el('td', {}, el('a', { href: '#' }, escapeHtml(t.title || t.id || 'untitled'))),
@@ -1369,6 +1378,7 @@ function createTaskListTable(tasks, { onTaskClick, getStatusSuffix = () => false
             el('td', {},
                 el('span', { class: label }, label)
             ),
+            el('td', { class: 'tasks-table-sort-order' }, escapeHtml(sortOrderVal)),
             el('td', {}, escapeHtml(milestoneName)),
             el('td', {}, escapeHtml(phaseName)),
             el('td', {class: 'muted'}, escapeHtml(timeAgo))

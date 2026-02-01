@@ -664,6 +664,7 @@ li a:hover { text-decoration: underline; }
 }
 .tasks-table td a { color: var(--primary); text-decoration: none; }
 .tasks-table td a:hover { text-decoration: underline; }
+.tasks-table td.tasks-table-sort-order { text-align: right; }
 
 
 /* --- MODAL --- */
