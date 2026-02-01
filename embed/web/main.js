@@ -115,7 +115,7 @@ async function init() {
         loadTasks();
     });
 
-    // Navigation back/forward : réappliquer l'état depuis l'URL
+    // Navigation back/forward : réappliquer l'état depuis l'URL (ADR-0002)
     urlState.onPopState(() => {
         applyingStateFromUrl = true;
         const listStateFromUrl = urlState.getListStateFromUrl();
@@ -125,12 +125,21 @@ async function init() {
         applyingStateFromUrl = false;
         const v = urlState.getViewFromUrl();
         if (v === 'list') {
+            closePeek();
             setActiveNav('tasks');
             renderMainView();
             loadTasks();
         } else if (v === 'overview') {
+            closePeek();
             setActiveNav('overview');
             showDashboard();
+        } else if (v === 'task') {
+            setActiveNav('tasks');
+            renderMainView();
+            loadTasks().then(() => {
+                const taskId = urlState.getTaskIdFromUrl();
+                if (taskId) openPeek(taskId, { fromUrl: true });
+            });
         }
     });
 
@@ -142,6 +151,10 @@ async function init() {
     } else {
         renderMainView();
         await loadTasks();
+        if (view === 'task') {
+            const taskId = urlState.getTaskIdFromUrl();
+            if (taskId) openPeek(taskId, { fromUrl: true });
+        }
     }
 }
 
@@ -197,6 +210,11 @@ function ensureAppShell() {
 
     const main = el('div', { class: 'app-main' });
     body.appendChild(main);
+
+    const peek = el('div', { class: 'app-peek', id: 'app-peek', 'aria-label': 'Détail de la tâche' });
+    peek.appendChild(el('div', { class: 'app-peek-inner' }));
+    body.appendChild(peek);
+
     shell.appendChild(body);
 
     app.appendChild(shell);
@@ -846,21 +864,42 @@ function getPhaseName(id) {
 }
 
 /**
- * Charge les détails d'une tâche dans la zone principale (shell conservé).
+ * Ferme le panneau peek (Étape 5 — ADR-0002). Si l'URL est #/task/:id, la remplace par l'état liste courant.
  */
-async function loadTask(id) {
-    const main = appMain || app.querySelector('.app-main');
-    if (!main) return;
-    main.innerHTML = '';
+function closePeek() {
+    const peek = document.getElementById('app-peek');
+    if (peek) {
+        peek.classList.remove('app-peek--open');
+        const inner = peek.querySelector('.app-peek-inner');
+        if (inner) inner.innerHTML = '';
+    }
+    if (urlState.getViewFromUrl() === 'task') {
+        syncListStateToUrl(true);
+    }
+}
+
+/**
+ * Ouvre le panneau latéral droit (peek) avec le détail de la tâche (Étape 5 — ADR-0002).
+ * @param {string} taskId - ID de la tâche
+ * @param {{ fromUrl?: boolean }} opts - fromUrl: true si ouverture depuis la route #/task/:id (deep link)
+ */
+async function openPeek(taskId, opts = {}) {
+    const peek = document.getElementById('app-peek');
+    const peekInner = peek?.querySelector('.app-peek-inner');
+    if (!peek || !peekInner) return;
+
+    peekInner.innerHTML = '<p class="muted">Chargement…</p>';
+    peek.classList.add('app-peek--open');
+
     try {
         const [taskRes, depsRes, allDepsRes, notesRes] = await Promise.all([
-            fetch(`/task/${id}`),
-            fetch(`/task/${id}/deps`),
+            fetch(`/task/${taskId}`),
+            fetch(`/task/${taskId}/deps`),
             fetch(`/task_deps?limit=500`),
-            fetch(`/task/${id}/notes`)
+            fetch(`/task/${taskId}/notes`)
         ]);
         if (!taskRes.ok) {
-            main.innerHTML = taskRes.status === 404 ? '<p class="error">Tâche introuvable.</p>' : `<p class="error">Erreur ${taskRes.status}</p>`;
+            peekInner.innerHTML = taskRes.status === 404 ? '<p class="error">Tâche introuvable.</p>' : `<p class="error">Erreur ${taskRes.status}</p>`;
             return;
         }
         const t = await taskRes.json();
@@ -873,7 +912,7 @@ async function loadTask(id) {
         let allDeps = [];
         try { if (allDepsRes.ok) allDeps = await allDepsRes.json(); } catch (_) {}
         allDeps = Array.isArray(allDeps) ? allDeps : [];
-        const childIds = allDeps.filter((d) => d.depends_on === id).map((d) => d.task_id);
+        const childIds = allDeps.filter((d) => d.depends_on === taskId).map((d) => d.task_id);
 
         let taskNotes = [];
         try { if (notesRes.ok) taskNotes = await notesRes.json(); } catch (_) {}
@@ -896,30 +935,52 @@ async function loadTask(id) {
             })
         ]);
 
-        const div = document.createElement('div');
-        div.className = 'task-detail';
-
-        const back = el('p', {}, el('a', { href: '#', id: 'back' , class: 'btn ghost'}, '← Back'));
-        back.querySelector('#back').addEventListener('click', (e) => { e.preventDefault(); init(); });
-        div.appendChild(back);
-
-        const head = el('div', {class:"", style:"max-width:40em;margin:3rem;font-size:125%"},
-            el('h2', {}, escapeHtml(t.title || 'Sans titre')),
-            el('p', { class: 'task-description' }, escapeHtml(t.description))
-        );
-        div.appendChild(head);
-
         const isBlocked = parentTasks.length > 0 && parentTasks.some((p) => p && p.status !== 'done');
-        const meta = document.createElement('table');
-        meta.className = 'task-meta';
+
+        const phaseId = t.phase_id || '';
+        const milestoneId = t.milestone_id || '';
+        const listPhase = phaseId ? `#/list?phase=${encodeURIComponent(phaseId)}` : '#/list';
+        const listMilestone = milestoneId ? `${listPhase}&milestone=${encodeURIComponent(milestoneId)}` : listPhase;
+
+        const breadcrumb = el('nav', { class: 'app-peek-breadcrumb', 'aria-label': 'Fil d\'Ariane' });
+        if (phaseId) {
+            const phaseName = (phases[phaseId]?.name ?? phaseId);
+            breadcrumb.appendChild(el('a', { href: listPhase }, escapeHtml(phaseName)));
+            breadcrumb.appendChild(el('span', { class: 'app-peek-breadcrumb-sep' }, ' › '));
+        }
+        if (milestoneId) {
+            const milestoneName = (milestones[milestoneId]?.name ?? milestoneId);
+            breadcrumb.appendChild(el('a', { href: listMilestone }, escapeHtml(milestoneName)));
+            breadcrumb.appendChild(el('span', { class: 'app-peek-breadcrumb-sep' }, ' › '));
+        }
+        breadcrumb.appendChild(document.createTextNode(t.title || t.id || 'Sans titre'));
+
+        const closeBtn = el('button', { type: 'button', class: 'app-peek-close', 'aria-label': 'Fermer le détail' }, '×');
+        closeBtn.addEventListener('click', () => closePeek());
+
+        const openInUrlBtn = el('button', { type: 'button', class: 'app-peek-open-url' }, 'Ouvrir dans l\'URL');
+        openInUrlBtn.addEventListener('click', () => urlState.setTaskInUrl(taskId));
+
+        const header = el('div', { class: 'app-peek-header' });
+        header.appendChild(breadcrumb);
+        const actions = el('div', { class: 'app-peek-actions' });
+        actions.appendChild(openInUrlBtn);
+        actions.appendChild(closeBtn);
+        header.appendChild(actions);
+
+        const content = el('div', { class: 'app-peek-content' });
+        const div = el('div', { class: 'task-detail' });
+        div.appendChild(el('h2', {}, escapeHtml(t.title || 'Sans titre')));
+        div.appendChild(el('p', { class: 'task-description' }, escapeHtml(t.description || '')));
+
         const phaseLabel = getPhaseName(t.phase_id);
         const milestoneLabel = getMilestoneName(t.milestone_id);
+        const meta = document.createElement('table');
+        meta.className = 'task-meta';
         const rows = [
-            // ['Subject', escapeHtml(t.title || 'Sans titre'), 'row-title'],
-            // ['Description', escapeHtml(t.description || 'Everything is in the title.'), 'row-description'],
             ['ID', String(t.id || '—'), 'uuid monospace'],
             ['Statut', null, ''],
-            ['Rôle', String(t.role || '— THIS TASK IS NOT ASSIGNED —'), (t.role || '' ) ? '' : 'error'],
+            ['Rôle', String(t.role || '—'), (t.role || '') ? '' : 'error'],
             ['Phase', String(phaseLabel), ''],
             ['Jalon', String(milestoneLabel), ''],
             ['Ordre', t.sort_order != null ? String(t.sort_order) : '—', ''],
@@ -933,23 +994,14 @@ async function loadTask(id) {
             if (label === 'Statut') {
                 valueTd = el('td', {}, t.status || '—');
                 if (isBlocked) valueTd.appendChild(el('span', { class: 'blocked' }, ' (blocked)'));
-            }
-            // else if (label === 'Subject') {
-            //     valueTd = el('td', {}, el('div',{style:'width:40em;font-size:150%'},val));
-            // }
-            // else if (label === 'Description') {
-            //     valueTd = el('td', {}, el('div',{style:''},val));
-            // }
-            else {
-                valueTd = el('td', {class:className}, escapeHtml(val));
+            } else {
+                valueTd = el('td', { class: className }, escapeHtml(val));
             }
             meta.appendChild(el('tr', {}, labelTd, valueTd));
         }
+        div.appendChild(el('div', { class: 'card' }, meta));
 
-
-        div.appendChild(el('div', {class: 'card'}, meta));
-
-        div.appendChild(el('h3', {style:"margin:2rem 0 0;"}, 'Historique des notes'));
+        div.appendChild(el('h3', {}, 'Historique des notes'));
         if (taskNotes.length === 0) {
             div.appendChild(el('p', { class: 'muted' }, 'Aucune note pour cette tâche.'));
         } else {
@@ -970,24 +1022,33 @@ async function loadTask(id) {
             div.appendChild(notesList);
         }
 
-        div.appendChild(el('h3', {style:"margin:2rem 0 0;"}, 'Tâches parentes (dont dépend cette tâche)'));
+        div.appendChild(el('h3', {}, 'Tâches parentes'));
         if (parentTasks.length === 0) {
             div.appendChild(el('p', { class: 'muted' }, 'Aucune tâche.'));
         } else {
-            div.appendChild(createTaskListTable(parentTasks, { onTaskClick: (task) => loadTask(task.id) }));
+            div.appendChild(createTaskListTable(parentTasks, { onTaskClick: (task) => openPeek(task.id) }));
         }
-
-        div.appendChild(el('h3', {style:"margin:2rem 0 0;"}, 'Tâches enfants (qui dépendent de cette tâche)'));
+        div.appendChild(el('h3', {}, 'Tâches enfants'));
         if (childTasks.length === 0) {
             div.appendChild(el('p', { class: 'muted' }, 'Aucune tâche.'));
         } else {
-            div.appendChild(createTaskListTable(childTasks, { onTaskClick: (task) => loadTask(task.id) }));
+            div.appendChild(createTaskListTable(childTasks, { onTaskClick: (task) => openPeek(task.id) }));
         }
 
-        main.appendChild(div);
+        content.appendChild(div);
+        peekInner.innerHTML = '';
+        peekInner.appendChild(header);
+        peekInner.appendChild(content);
     } catch (e) {
-        main.innerHTML = `<p class="error">${e.message}</p>`;
+        peekInner.innerHTML = `<p class="error">${e.message}</p>`;
     }
+}
+
+/**
+ * Charge les détails d'une tâche : ouvre le panneau peek (Étape 5 — ADR-0002).
+ */
+function loadTask(id) {
+    openPeek(id);
 }
 
 let escapeHTMLElement = null;

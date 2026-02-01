@@ -311,6 +311,108 @@ body {
     max-width: none;
 }
 
+/* Panneau détail (peek) — Étape 5, ADR-0002 */
+.app-peek {
+    --peek-width: 420px;
+    width: 0;
+    min-width: 0;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-left: none;
+    background: var(--card);
+    display: flex;
+    flex-direction: column;
+    transition: min-width 0.25s ease, width 0.25s ease;
+}
+.app-peek.app-peek--open {
+    width: var(--peek-width);
+    min-width: var(--peek-width);
+    border-left: 1px solid var(--border);
+}
+.app-peek-inner {
+    width: var(--peek-width);
+    min-width: var(--peek-width);
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+.app-peek-header {
+    flex-shrink: 0;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.app-peek-breadcrumb {
+    font-size: 0.8125rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    min-width: 0;
+}
+.app-peek-breadcrumb a {
+    color: var(--primary);
+    text-decoration: none;
+}
+.app-peek-breadcrumb a:hover {
+    text-decoration: underline;
+}
+.app-peek-breadcrumb-sep {
+    color: var(--muted-2);
+}
+.app-peek-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.app-peek-close {
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--card);
+    color: var(--text);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.app-peek-close:hover {
+    background: var(--hover-bg);
+}
+.app-peek-open-url {
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.app-peek-open-url:hover {
+    background: var(--primary);
+    color: var(--bg);
+}
+.app-peek-content {
+    flex: 1;
+    padding: 1rem;
+    min-height: 0;
+}
+.app-peek-content .task-detail {
+    margin-top: 0;
+}
+.app-peek-content .task-detail h2 {
+    font-size: 1.125rem;
+}
+.app-peek-content .task-detail h3 {
+    font-size: 0.9375rem;
+    margin-top: 0.75rem;
+}
+
 h1 { 
     margin: 0 0 1rem 0; 
     border-bottom:1px solid var(--border);

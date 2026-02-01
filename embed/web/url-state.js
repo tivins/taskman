@@ -112,6 +112,16 @@ export function getTaskIdFromUrl() {
 }
 
 /**
+ * Met l'URL sur la route tâche #/task/:id (pour partage / deep link — ADR-0002).
+ * @param {string} id - ID de la tâche
+ */
+export function setTaskInUrl(id) {
+    if (typeof history === 'undefined' || !id) return;
+    const hash = '#' + TASK_PATH_PREFIX + encodeURIComponent(id);
+    history.pushState(null, '', hash);
+}
+
+/**
  * Enregistre un listener pour les changements de navigation (back/forward).
  * @param {() => void} callback
  */
