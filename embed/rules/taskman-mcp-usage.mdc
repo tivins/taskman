@@ -13,6 +13,7 @@ Lorsque vous agissez en tant qu’agent de rôle taskman, utilisez le MCP taskma
 - Pour la **création** de tâches, voir [task-creation.mdc](task-creation.mdc).
 - **À la clôture d'une tâche** : lorsque vous marquez une tâche comme terminée (`status: "done"`), **toujours** ajouter une note à cette tâche avec `taskman_task_note_add` pour indiquer ce qui a été fait (résumé, livrables). Utiliser `kind: "completion"`.
 - **Notes et traçabilité** : l'agent est invité à ajouter des notes (avancement, complétion, point bloquant) sur les tâches pour garder trace de l'évolution du projet et faciliter le suivi.
+- **Tâche en cours** : il est recommandé d'ajouter régulièrement des notes sur la tâche en cours (`status: "in_progress"`) pour documenter les avancements, les problèmes rencontrés et les solutions apportées, afin de documenter le projet et faciliter la reprise ou la revue.
 
 ## Outils et usage
 
@@ -35,6 +36,7 @@ Lorsque vous agissez en tant qu’agent de rôle taskman, utilisez le MCP taskma
 ### Ajouter une note à une tâche
 
 - **Note de complétion / avancement / point bloquant** : `taskman_task_note_add` avec `arguments: { "task_id": "<task-uuid>", "content": "...", "kind": "completion" | "progress" | "issue", "role": "<votre_rôle>" }`. Utiliser `completion` quand vous terminez la tâche ; `progress` pour un point d'étape ; `issue` pour un blocage ou risque.
+- **Recommandation** : sur la tâche en cours, ajouter des notes pour les avancements (`progress`), les problèmes rencontrés et les solutions (`issue` puis résolution, ou `progress` avec le détail), afin de documenter le projet.
 
 ## Statuts possibles
 
